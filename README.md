@@ -1,7 +1,7 @@
 # luckypig-consulting
 ## Python version: 3.10
-## basic rules/guidelines for developers
-### mergin to main branch
+## Rules/guidelines for developers
+### Mergin to main branch
 Before merging to main, always merge to beta. If merge to beta is successful, then merge beta to main. This is to protect the main branch.
 ### Naming convention for branches
 name-year-month-date-version
