@@ -1,4 +1,4 @@
-# luckypig-consulting
+# LuckyPig Consulting
 ## Python version: 3.10
 ## Rules/guidelines for developers
 ### Mergin to main branch
