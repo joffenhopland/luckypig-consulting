@@ -17,41 +17,47 @@
 
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-3">
-
+      <div class="col-md-3 p-0">
         {% block menu %}
-        <div class="offcanvas offcanvas-start show" data-bs-backdrop="false" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel">
-          <div class="offcanvas-header">
-            <h1>Luckypig app</h1>
-          </div>
-          <div class="offcanvas-body">
-            <div class="list-group list-group-flush">
-              <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                <span>(icon)</span>
-                <span class="ms-2">Lær</span>
-              </a>
-              <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                <span>(icon)</span>
-                <span class="ms-2">Ledertavle</span>
-              </a>
-              <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                <span>(icon)</span>
-                <span class="ms-2">Grupper</span>
-              </a>
-              <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                <span>(icon)</span>
-                <span class="ms-2">Profil</span>
-              </a>
-              <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                <span>(icon)</span>
-                <span class="ms-2">Logg ut</span>
-              </a>
+        <div class="container m-2">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card" style="border: none">
+                <div class="card-header bg-transparent" style="border: none">
+                  <h1>Luckypig app</h1>
+                </div>
+                <div class="card-body" style="border: none">
+                  <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
+                      <span>(icon)</span>
+                      <span class="ms-2">Lær</span>
+                    </a>
+                    <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
+                      <span>(icon)</span>
+                      <span class="ms-2">Ledertavle</span>
+                    </a>
+                    <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
+                      <span>(icon)</span>
+                      <span class="ms-2">Grupper</span>
+                    </a>
+                    <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
+                      <span>(icon)</span>
+                      <span class="ms-2">Profil</span>
+                    </a>
+                    <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
+                      <span>(icon)</span>
+                      <span class="ms-2">Logg ut</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        
         {% endblock %}
       </div>
-      <div class="col-md-9">
+      <div class="col-md-9 p-0">
         <div>
           {% block nav %}
           <nav class="navbar navbar-expand-lg bg-body-tertiary">
