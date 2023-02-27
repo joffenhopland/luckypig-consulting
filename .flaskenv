@@ -1,1 +1,1 @@
-FLASK_APP=__init__.py
+FLASK_APP=main.py

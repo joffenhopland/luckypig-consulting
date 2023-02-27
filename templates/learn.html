@@ -4,6 +4,7 @@
 {{ super() }}
 {% endblock %}
 {% block content %}
+<div class="px-5 py-5">
 <div><h2>Lær</h2></div>
 <div class="mx-3">
     <div class="card my-3">
@@ -23,6 +24,19 @@
       <div class="card-body">
         <div class="row">
           <div class="col-8">
+            <h5 class="card-title">Sølv</h5>
+            <p class="card-text">Du må oppnå bronse for å gå videre til sølv.</p>
+          </div>
+          <div class="col-4 d-flex justify-content-end">
+            <button type="button" class="btn btn-primary">Låst</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card my-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-8">
             <h5 class="card-title">Gull</h5>
             <p class="card-text">Du må oppnå sølv for å gå videre til gull.</p>
           </div>
@@ -33,6 +47,7 @@
       </div>
     </div>
   </div>
+</div>
   
   
 {% endblock %}

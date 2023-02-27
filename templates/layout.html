@@ -29,24 +29,20 @@
                 <div class="card-body" style="border: none">
                   <div class="list-group list-group-flush">
                     <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                      <span>(icon)</span>
-                      <span class="ms-2">Lær</span>
+
+                      <span class="ms-2"><img src="{{ url_for('static', filename = 'assets/school_FILL0_wght400_GRAD0_opsz48.svg') }}" class="d-inline-block"> Lær</span>
                     </a>
                     <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                      <span>(icon)</span>
-                      <span class="ms-2">Ledertavle</span>
+                      <span class="ms-2"><img src="{{ url_for('static', filename = 'assets/leaderboard_FILL0_wght400_GRAD0_opsz48.svg') }}" class="d-inline-block"> Ledertavle</span>
                     </a>
                     <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                      <span>(icon)</span>
-                      <span class="ms-2">Grupper</span>
+                      <span class="ms-2"><img src="{{ url_for('static', filename = 'assets/groups_FILL0_wght400_GRAD0_opsz48.svg') }}" class="d-inline-block"> Grupper</span>
                     </a>
                     <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                      <span>(icon)</span>
-                      <span class="ms-2">Profil</span>
+                      <span class="ms-2"><img src="{{ url_for('static', filename = 'assets/person_FILL0_wght400_GRAD0_opsz48.svg') }}" class="d-inline-block"> Profil</span>
                     </a>
                     <a href="#" class="list-group-item d-flex align-items-center list-group-item-action">
-                      <span>(icon)</span>
-                      <span class="ms-2">Logg ut</span>
+                      <span class="ms-2"><img src="{{ url_for('static', filename = 'assets/logout_FILL0_wght400_GRAD0_opsz48.svg.svg') }}" class="d-inline-block"> Logg ut</span>
                     </a>
                   </div>
                 </div>
@@ -63,24 +59,24 @@
           <nav class="navbar navbar-expand-lg bg-body-tertiary">
             <div class="container-fluid d-flex justify-content-around align-items-center">
               <div class="d-flex align-items-center">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Kokk
-                </a>
-                <li class="nav-item dropdown">
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Kokk
+                  </button>
                   <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="#">Bilmekaniker</a></li>
                     <li><a class="dropdown-item" href="#">Finans</a></li>
                   </ul>
-                </li>
+                </div>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 d-flex">
                   <li class="nav-item">
-                    <div class="nav-link">(icon) Sølv</siv>
+                    <div class="nav-link"><img src="{{ url_for('static', filename = 'assets/vecteezy_silver_medal.svg') }}" class="d-inline-block">Sølv</div>
                   </li>
                   <li class="nav-item">
-                    <div class="nav-link" href="#">(icon) 460</div>
+                    <div class="nav-link"><img src="{{ url_for('static', filename = 'assets/vecteezy_elements_star.svg') }}" class="d-inline-block">460</div>
                   </li>
                   <li class="nav-item">
-                    <div class="nav-link" href="#">(icon) 4</div>
+                    <div class="nav-link"><img src="{{ url_for('static', filename = 'assets/vecteezy_fire.svg') }}" class="d-inline-block">4</div>
                   </li>
                 </ul>
               </div>
@@ -89,7 +85,7 @@
           
           {% endblock %}
         </div>
-        <div>{% block content %}{% endblock %}</div>
+        <div class="bg-primary-subtle">{% block content %}{% endblock %}</div>
       </div>
     </div>
   </div>
