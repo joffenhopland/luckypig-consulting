@@ -14,8 +14,12 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 bcrypt = Bcrypt(app)
 
-app.config['MAIL_SERVER'] = 'smtpserver.uit.no'
+app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'apikey'
+app.config['MAIL_PASSWORD'] = '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'
+app.config['MAIL_DEFAULT_SENDER'] = "kpe144@uit.no"
 
 app.secret_key = secrets.token_urlsafe(16)
 
@@ -46,7 +50,7 @@ def register():
         database.newUser(new_user)
         mail = Mail(app)
         msg = Message("Verify account",
-                      sender='csk044@uit.no', recipients=[email])
+                      sender='kpe144@uit.no', recipients=[email])
         msg.body = "Welcome as a user to our website. Please verify your account to get access to all services on our website."
         msg.html = f'<b> Confirm email </b> <a href="http://127.0.0.1:5000/verified/{verificationId}"> CONFIRM </a>'
         with app.app_context():
