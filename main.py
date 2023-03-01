@@ -48,7 +48,7 @@ def register():
         msg = Message("Verify account",
                       sender='csk044@uit.no', recipients=[email])
         msg.body = "Welcome as a user to our website. Please verify your account to get access to all services on our website."
-        msg.html = f'<b> Confirm email </b> <a href="http://127.0.0.1:5000/verified/{verificationId}"> CONFIRM </a>'
+        msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(url_for(verify(verificationId)))
         with app.app_context():
             mail.send(msg)
             flash(f"Success! You are verified, please log in", "success")
