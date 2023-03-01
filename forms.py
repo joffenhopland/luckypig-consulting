@@ -7,7 +7,7 @@ import re
 
 
 class RegistrerForm(FlaskForm):
-    
+
     def validate_password (form, field):
         password = field.data
 
