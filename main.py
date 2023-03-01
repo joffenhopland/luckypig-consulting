@@ -48,7 +48,7 @@ def register():
         msg = Message("Verify account",
                       sender='csk044@uit.no', recipients=[email])
         msg.body = "Welcome as a user to our website. Please verify your account to get access to all services on our website."
-        msg.html = f'<b> Confirm email </b> <a href="http://127.0.0.1:5000/verify/{verificationId}"> CONFIRM </a>'
+        msg.html = f'<b> Confirm email </b> <a href="http://127.0.0.1:5000/verified/{verificationId}"> CONFIRM </a>'
         with app.app_context():
             mail.send(msg)
         return render_template('register_landing_page.html')
@@ -57,7 +57,7 @@ def register():
 
 @ app.route('/register-landing-page', methods=["GET", "POST"])
 def register_landing_page():
-    return render_template('register_landing_page')
+    return render_template('register_landing_page.html')
 
 
 @ app.route('/verified/<code>')
@@ -65,7 +65,7 @@ def verify(code):
     database = db()
     if database.verify(code) == True:
         flash(f"Success! You are verified, please log in", "success")
-        return redirect(url_for("login"))
+        return render_template('register_landing_page.html')
     else:
         flash(f'Verification failed...', "danger")
         return render_template('mainPage.html')
