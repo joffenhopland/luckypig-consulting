@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import Length, EqualTo, DataRequired, Email, ValidationError
+from flask import flash
 import re
 
 
@@ -12,15 +13,15 @@ class RegistrerForm(FlaskForm):
         password = field.data
 
         if len(password) < 8:
-            raise ValidationError("The password must contain at least 8 characters")
-        if not re.search(r'[A-Z]', password):
-            raise ValidationError( "The password must contain at least one uppercase letter")
-        if not re.search(r'[a-z]', password):
-            raise ValidationError("The password must contain at least one lowercase letter")
-        if not re.search(r'[0-9]', password):
-            raise ValidationError("The password must contain at least one digit")
-        if not re.search(r'[@$!%*?&.]', password):
-            raise ValidationError("The password must contain at least one special character")
+            flash(f"The password must contain at least 8 characters", "danger")
+        elif not re.search(r'[A-Z]', password):
+            flash( "The password must contain at least one uppercase letter", "danger")
+        elif not re.search(r'[a-z]', password):
+            flash("The password must contain at least one lowercase letter", "danger")
+        elif not re.search(r'[0-9]', password):
+            flash("The password must contain at least one digit", "danger")
+        elif not re.search(r'[@$!%*?&.]', password):
+            flash("The password must contain at least one special character", "danger")
 
 
     firstname = StringField(label="First name:", validators=[
