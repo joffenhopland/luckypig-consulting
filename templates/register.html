@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}Register{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class=flashes>
+  {% for category, message in messages %}
+  <li class="{{ category }}">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+<div class="doc-first">
+  <h1> Create an account </h1>
+  <p> We are so happy that you want to join us!!</p>
+</div>
+<div class="container-form">
+  <form class="forms docform" method="POST">
+    {{ form.csrf_token }}
+    {{ form.firstname.label(class="text-control") }} <br>
+    {{ form.firstname(class="form-input", placeholder="First name") }}
+    <br>
+    {{ form.lastname.label(class="text-control") }} <br>
+    {{ form.lastname(class="form-input", placeholder="Last name") }}
+    <br>
+    {{ form.username.label(class="text-control") }} <br>
+    {{ form.username(class="form-input", placeholder="Username") }}
+    <br>
+    {{ form.email.label(class="text-control") }} <br>
+    {{ form.email(class="form-input", placeholder="Email") }}
+    <br>
+    {{ form.password1.label(class="text-control") }} <br>
+    {{ form.password1(class="form-input", placeholder="Password") }}
+    {% for error in form.password1.errors %}
+    <span>{{ error }}</span>
+    {% endfor %}
+    <br>
+    {{ form.password2.label(class="text-control") }} <br>
+    {{ form.password2(class="form-input", placeholder="Repeat password") }}
+    {% for error in form.password2.errors %}
+    <span>{{ error }}</span>
+    {% endfor %}
+    <br>
+    <div class="button-place">
+      {{ form.submit(class="submit-form", placeholder="Register account") }}
+    </div>
+  </form>
+</div>
+{% endblock %}
