@@ -7,12 +7,12 @@ from flask_mail import Mail, Message
 from database import db
 from forms import RegistrerForm
 from flask_wtf.csrf import CSRFProtect
-from flask_bcrypt import Bcrypt
+#from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
-bcrypt = Bcrypt(app)
+#bcrypt = Bcrypt(app)
 
 app.config['MAIL_SERVER'] = 'smtpserver.uit.no'
 app.config['MAIL_PORT'] = 587
@@ -69,9 +69,6 @@ def verify(code):
     else:
         flash(f'Verification failed...', "danger")
         return render_template('mainPage.html')
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

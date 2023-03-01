@@ -33,7 +33,7 @@
             <div class="login my-3">
               <div class="login-body">
                   <div class="justify-content-center">
-                    <a href="http://127.0.0.1:5000/learn">
+                    <a href="{{ url_for('learn') }}">
                     <button type="button" class="btn btn-primary">Logge inn</button>
                     </a>
                   </div>
@@ -42,7 +42,9 @@
             <div class="login my-3">
               <div class="login-body">
                     <div class="justify-content-center">
+                      <a href="{{ url_for('register') }}">
                         <button type="button" class="btn btn-primary">Registrer</button>
+                      </a>
                     </div>
               </div>
             </div>
