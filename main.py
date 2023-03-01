@@ -7,12 +7,12 @@ from flask_mail import Mail, Message
 from database import db
 from forms import RegistrerForm
 from flask_wtf.csrf import CSRFProtect
-#from flask_bcrypt import Bcrypt
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
-#bcrypt = Bcrypt(app)
+bcrypt = Bcrypt(app)
 
 app.config['MAIL_SERVER'] = 'smtpserver.uit.no'
 app.config['MAIL_PORT'] = 587
