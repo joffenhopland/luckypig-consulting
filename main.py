@@ -94,7 +94,7 @@ def login() -> 'html':
         if not emailconfirmed:
             return render_template('confirmemail.html')
 
-        if userlogin.canLogIn(email, form.password.data):
+        if userlogin.canLogIn(email, form.password.data,bcrypt):
             session["logged in"] = True
             user = userlogin.getUser(email)
 
@@ -137,7 +137,7 @@ def forgetpassword() -> 'html':
 
                 if password1 == password2:
                     password1 = form.password1.data
-                    password_hash = generate_password_hash(password1)
+                    password_hash = bcrypt.generate_password_hash(password1)
                     usr.updateUserPassword(email, password_hash)
                     return redirect(url_for('login.html'))
 
@@ -161,12 +161,11 @@ def updatepassword() -> 'html':
 
     if form.validate_on_submit():
         oldpassword = form.oldpassword.data
-        if userUpdatePW.canLogIn(email, oldpassword):
+        if userUpdatePW.canLogIn(email, oldpassword,bcrypt):
             password1=form.password1.data
             password2=form.password2.data
             if password1==password2:
-                #password_hash = generate_password_hash(password1)--------------------------------------------to be changed to hash password!!!!
-                password_hash = password1
+                password_hash = bcrypt.generate_password_hash(password1)
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Password updated!"
                 return render_template('message_landing_page.html', message=message)

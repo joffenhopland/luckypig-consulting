@@ -71,16 +71,15 @@ class UserLogin:
         except mysql.connector.Error as err:
             print(err)
             
-    def isCorrectPassword(self, email, password):
+    def isCorrectPassword(self, email, password,bcrypt):
         user = self.getUser(email)
         if user:
-            return user.password_hash == password
-            #return check_password_hash(user.password_hash, password)--------------------------------------------to be changed to hash password!!!!
+            return bcrypt.check_password_hash(user.password_hash, password)  
         return False 
 
-    def canLogIn(self, email, password):
+    def canLogIn(self, email, password,bcrypt):
 
-        if self.isUser(email) and self.isCorrectPassword(email, password) and self.emailConfirmed(email):
+        if self.isUser(email) and self.isCorrectPassword(email, password,bcrypt) and self.emailConfirmed(email):
             return True
 
         return False
