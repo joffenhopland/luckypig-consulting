@@ -88,10 +88,11 @@ def login() -> 'html':
                                    message="There is no user registered with the email {}, please try again or register".format(
                                        email), form=form)
 
-        # emailconfirmed = userlogin.emailConfirmed(email)
+        emailconfirmed = userlogin.emailConfirmed(email)
+        emailconfirmed=0
 
-        # if not emailconfirmed:
-        #    return redirect(url_for('confirmemail', email=email))
+        if not emailconfirmed:
+            return render_template('confirmemail.html')
 
         if userlogin.canLogIn(email, form.password.data):
             print("login!")
