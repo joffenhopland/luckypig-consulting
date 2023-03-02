@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block head %}
+{{ super() }}
+ <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class=flashes>
+  {% for category, message in messages %}
+  <li class="{{ category }}">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<div class="container register-page">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-8 col-lg-6">
+      <div class="card shadow-lg">
+        <div class="card-body">
+          <div class="text-center">
+            <h1 class="mb-3">{{title}}</h1>
+            </div>
+
+            <form action="{{url_for('updateuser')}}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {{form.hidden_tag()}}
+                {{form.firstname.label}}<br>
+                {{form.firstname(class_="wt search") }}
+                <br>
+                <br>
+                {{form.lastname.label}}<br>
+                {{form.lastname(class_="wt search") }}
+                <br>
+                <br>
+                {{form.username.label}}<br>
+                {{form.username(class_="wt search") }}
+                <br>
+                <br>
+                <div class="button-place">
+                    {{ form.update(class="submit-form") }}
+                  </div>
+    
+            </form>
+    
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+{% endblock %}
