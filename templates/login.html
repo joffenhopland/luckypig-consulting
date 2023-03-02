@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block title %}Log in{% endblock %}
+
+{% block head %}
+{{ super() }}
+ <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class=flashes>
+  {% for category, message in messages %}
+  <li class="{{ category }}">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<div class="container register-page">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-8 col-lg-6">
+      <div class="card shadow-lg">
+        <div class="card-body">
+          <div class="text-center">
+            <h1 class="mb-3">Log in</h1>
+            <p> Please log in</p>
+            </div>
+
+            <form action="{{url_for('login')}}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {{form.hidden_tag()}}
+                {{form.email.label}}<br>
+                {{form.email(class_="wt") }}
+                <br>
+                <br>
+                {{form.password.label}}<br>
+                {{form.password(class_="wt") }}
+                <br>
+                <br>
+                <div class="button-place">
+                {{form.login(class_="submit-form")}}
+                </div>
+            </form>
+
+            <form action="{{url_for('forgetpassword')}}" method="POST">
+                <a href="/forgetPassword"><div class="submit-form">Forget password?</button></a>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+{% endblock %}
