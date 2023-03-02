@@ -89,7 +89,6 @@ def login() -> 'html':
                                        email), form=form)
 
         emailconfirmed = userlogin.emailConfirmed(email)
-        emailconfirmed=0
 
         if not emailconfirmed:
             return render_template('confirmemail.html')
