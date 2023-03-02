@@ -4,6 +4,7 @@ from mysql.connector import errorcode
 from mysqlx import Result
 from User import User
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_bcrypt import Bcrypt
 
 class UserLogin:
     
