@@ -32,38 +32,38 @@
       <div class="card shadow-lg">
         <div class="card-body">
           <div class="text-center">
-            <h1 class="mb-3">Create an account</h1>
-            <p> We are so happy that you want to join us!!</p>
+            <h1 class="mb-3">Opprett en bruker</h1>
+            <p> Vi er glad for at du vil benytte deg av språkkurset!</p>
             </div>
 
           <form class="forms docform" method="POST">
             {{ form.csrf_token }}
             {{ form.firstname.label(class="text-control") }} <br>
-            {{ form.firstname(class="form-input", placeholder="First name") }}
+            {{ form.firstname(class="form-input", placeholder="Fornavn") }}
             <br>
             {{ form.lastname.label(class="text-control") }} <br>
-            {{ form.lastname(class="form-input", placeholder="Last name") }}
+            {{ form.lastname(class="form-input", placeholder="Etternavn") }}
             <br>
             {{ form.username.label(class="text-control") }} <br>
-            {{ form.username(class="form-input", placeholder="Username") }}
+            {{ form.username(class="form-input", placeholder="Brukernavn") }}
             <br>
             {{ form.email.label(class="text-control") }} <br>
-            {{ form.email(class="form-input", placeholder="Email") }}
+            {{ form.email(class="form-input", placeholder="Epost") }}
             <br>
             {{ form.password1.label(class="text-control") }} <br>
-            {{ form.password1(class="form-input", placeholder="Password") }}
+            {{ form.password1(class="form-input", placeholder="Passord") }}
             {% for error in form.password1.errors %}
             <span>{{ error }}</span>
             {% endfor %}
             <br>
             {{ form.password2.label(class="text-control") }} <br>
-            {{ form.password2(class="form-input", placeholder="Repeat password") }}
+            {{ form.password2(class="form-input", placeholder="Gjenta passord") }}
             {% for error in form.password2.errors %}
             <span>{{ error }}</span>
             {% endfor %}
             <br>
             <div class="button-place">
-              {{ form.submit(class="submit-form", placeholder="Register account") }}
+              {{ form.submit(class="submit-form", placeholder="Registrer konto") }}
             </div>
           </form>
          </div>

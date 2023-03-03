@@ -30,18 +30,18 @@
             <h1 class="mb-3">{{title}}</h1>
             </div>
             <br>
-            <h5>First name: {{user.firstname}}</h5>
-            <h5>Last name:  {{user.lastname}}</h5>
-            <h5>Last name:  {{user.username}}</h5>
-            <h5>Email:      {{user.email}}</h5>
+            <h5>Fornavn: {{user.firstname}}</h5>
+            <h5>Etternavn:  {{user.lastname}}</h5>
+            <h5>Brukernavn:  {{user.username}}</h5>
+            <h5>Epost:      {{user.email}}</h5>
 
             <form action="{{url_for('updateuser')}}" method="GET">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="button-place" type="login">Edit info</button>
+                <button class="button-place" type="login">Redigere</button>
             </form>
             <form action="{{url_for('updatepassword')}}" method="GET">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="button-place" type="login">Change password</button>
+                <button class="button-place" type="login">Endre passord</button>
             </form>
         </div>
     </div>

@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 
-  <title>{% block title %} Logg inn {% endblock %}</title>
+  <title>{% block title %} Logge inn {% endblock %}</title>
   {% endblock %}
 </head>
 <body>
@@ -33,8 +33,8 @@
       <div class="card shadow-lg">
         <div class="card-body">
           <div class="text-center">
-            <h1 class="mb-3">Log in</h1>
-            <p> Please log in</p>
+            <h1 class="mb-3">Logge inn</h1>
+            <p> Vennligst logge inn</p>
             </div>
 
             <form action="{{url_for('login')}}" method="POST">
@@ -54,7 +54,7 @@
             </form>
 
             <form action="{{url_for('forgetpassword')}}" method="GET">
-                <a href="/forgetpassword"><div class="submit-form">Forget password?</div></a>
+                <a href="/forgetpassword"><div class="submit-form">Glemt passord?</div></a>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
             </form>
