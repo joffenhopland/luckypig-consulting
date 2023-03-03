@@ -21,8 +21,17 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 bcrypt = Bcrypt(app)
 
-app.config['MAIL_SERVER'] = 'smtpserver.uit.no'
-app.config['MAIL_PORT'] = 587
+mail_settings = {
+    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_PORT": 465,
+    "MAIL_USE_TLS": False,
+    "MAIL_USE_SSL": True,
+    "MAIL_USERNAME": 'luckypig2023@gmail.com',
+    "MAIL_PASSWORD":'iskbnfrukwlvwjfk'
+}
+
+app.config.update(mail_settings)
+mail = Mail(app)
 
 app.secret_key = secrets.token_urlsafe(16)
 
@@ -87,7 +96,7 @@ def login() -> 'html':
         print()
         session["email"] = form.email.data
         email = session["email"]
-        userlogin = db()
+        userlogin = UserLogin()
 
         if not userlogin.isUser(email):
             return render_template('login.html', title='Log in',
@@ -127,30 +136,49 @@ def forgetpassword() -> 'html':
         database = db()
         usr = database.getUser(email)
 
-        if usr and form.validate_on_submit():
+        if not usr:
+            flash(f'We have no user registered with this email...', "danger")
+            return render_template('mainPage.html')
+
+        elif usr and form.validate_on_submit():
             verificationId = str(uuid.uuid4())
             database.updateUuid(email,verificationId)
             mail = Mail(app)
-            url = url_for("resetpassword") + "?uuid=" + verificationId
+            verification_link = url_for('verifyResetPassword', code=verificationId, token=app.secret_key, _external=True)
 
             msg = Message("Verification code: ",
-                          sender='csk044@uit.no', recipients=[email])
+                          sender=app.config.get("MAIL_USERNAME"), recipients=[email])
             msg.body = "Welcome as a user to our website. Please clik the link to reset your password ."
-            msg.html = f'<b> Reset password </b>' + '<a href="{}"> RESET </a>'.format(url)
+            msg.html = f'<b> Reset password </b>' + '<a href="{}"> RESET </a>'.format(verification_link)
             with app.app_context():
                 mail.send(msg)
                 print(msg) #todo remove
-                return render_template('resetmailsendt.html', form=form)
+                message = "Please follow the link we have just sent you to reset your password"
+                return render_template('message_landing_page.html',message=message)
     if request.method == "GET":
         return render_template('forgetpassword.html', form=form)
+    
+@ app.route('/verifyResetPassword/<code>')
+def verifyResetPassword(code):
+    database = db()
+    if database.verify(code) == True:
+        form = resetPasswordForm()
+        form.verificationId.data = code
+        flash(f"Success! You are verified, please choose your password", "success")
+        return render_template('resetpassword.html',form=form)
+    else:
+        flash(f'Verification failed...', "danger")
+        return render_template('mainPage.html')   
+
 
 
 @app.route('/resetpassword', methods=["GET", "POST"])
 def resetpassword() -> 'html':
-    uuid = request.args.get('uuid')
+    form = resetPasswordForm()
+    uuid = form.verificationId.data
     database = db()
     user = database.getUserByUUID(uuid)
-    form = resetPasswordForm()
+    
 
     if not user:
         return render_template('resetpasswordfailed.html')
@@ -167,7 +195,7 @@ def resetpassword() -> 'html':
                 password = form.password1.data
                 password_hash = bcrypt.generate_password_hash(password)
                 userUpdatePW.resetPassword(uuid, password_hash)
-
+                flash(f"Success! Your password has been reset, please log in", "success")
                 return redirect(url_for('login'))
 
             elif password1 != password2:

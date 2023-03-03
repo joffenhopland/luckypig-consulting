@@ -115,7 +115,7 @@ class db:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             sql1 = '''UPDATE user
-            SET password = (%s) WHERE email = (%s)'''
+            SET password = (%s) WHERE verificationId = (%s)'''
             oppdater = (password,email)
             cursor.execute(sql1, oppdater)
             conn.commit()

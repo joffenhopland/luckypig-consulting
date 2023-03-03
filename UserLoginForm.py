@@ -1,4 +1,4 @@
-from wtforms import StringField, SubmitField, EmailField, PasswordField
+from wtforms import StringField, SubmitField, EmailField, PasswordField, HiddenField
 from wtforms.validators import DataRequired, Email
 from flask_wtf import FlaskForm
 
@@ -22,6 +22,7 @@ class forgetPasswordForm(FlaskForm):
     submit = SubmitField("Submit")
 
 class resetPasswordForm(FlaskForm):
+    verificationId = HiddenField(validators=[DataRequired()])
     password1 = PasswordField("New password", validators=[DataRequired()])
     password2 = PasswordField("Confirm new password", validators=[DataRequired()])
 
