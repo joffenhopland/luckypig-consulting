@@ -64,8 +64,9 @@ def register():
         msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(verification_link)
         with app.app_context():
             mail.send(msg)
-            flash(f"Success! You are verified, please log in", "success")
-        return redirect(url_for('register_landing_page'))
+            flash(f"Success! Your account is verified. Please log in", "success")
+        # return redirect(url_for('register_landing_page'))
+        return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
 
@@ -79,7 +80,7 @@ def register_landing_page():
 def verify(code):
     database = db()
     if database.verify(code) == True:
-        flash(f"Success! You are verified, please log in", "success")
+        flash(f"Success! You are verified. Please log in", "success")
         return redirect(url_for('login'))
     else:
         flash(f'Verification failed...', "danger")
