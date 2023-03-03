@@ -56,10 +56,10 @@ class forgetPasswordForm(FlaskForm):
 
 class resetPasswordForm(FlaskForm):
     verificationId = HiddenField(validators=[DataRequired()])
-    password1 = PasswordField("New password", validators=[DataRequired()])
-    password2 = PasswordField("Confirm new password", validators=[DataRequired()])
+    password1 = PasswordField("Nytt passord", validators=[DataRequired()])
+    password2 = PasswordField("Bekrefte nytt passord", validators=[DataRequired()])
 
-    submit = SubmitField("RESET")
+    submit = SubmitField("Endre passord")
 
 
 class UpdateUserForm(FlaskForm):

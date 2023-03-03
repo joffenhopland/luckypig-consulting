@@ -65,8 +65,7 @@ def register():
         with app.app_context():
             mail.send(msg)
             flash(f"Vellykket! Din konto er verifisert. Vennligst logge inn.", "success")
-        # return redirect(url_for('register_landing_page'))
-        return redirect(url_for('login'))
+            return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
 
@@ -98,7 +97,7 @@ def login() -> 'html':
         userlogin = UserLogin()
 
         if not userlogin.isUser(email):
-            flash(f'Det er ingen brukere som er registrert med denne eposten "{email}". Vennligst prøv igjen eller registrer ny bruker', "danger")
+            flash(f'Det er ingen bruker som er registrert med denne eposten "{email}". Vennligst prøv igjen eller registrer ny bruker', "danger")
             return render_template('login.html', title='Logge inn',
                                    form=form)
 
@@ -134,7 +133,7 @@ def forgetpassword() -> 'html':
         usr = database.getUser(email)
 
         if not usr:
-            flash(f'Det er ingen brukere som er registrert med denne eposten. Vennligst prøv igjen eller registrer ny bruker', "danger")
+            flash(f'Det er ingen bruker som er registrert med denne eposten. Vennligst prøv igjen eller registrer ny bruker', "danger")
             return render_template('mainPage.html')
 
         elif usr and form.validate_on_submit():
