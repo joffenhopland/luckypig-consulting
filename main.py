@@ -1,20 +1,16 @@
 import os
 import secrets
-import smtplib
-import string
 import uuid
-from random import random
 
 from flask import Flask,flash,request,redirect,render_template, url_for,session
 from flask_mail import Mail, Message
-
-from User import User
-from database import db
-from forms import RegistrerForm
 from flask_wtf.csrf import CSRFProtect
-from flask_bcrypt import Bcrypt, generate_password_hash
+from flask_bcrypt import Bcrypt
+
+from database import db
 from UserLogin import UserLogin
-from UserLoginForm import LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm
+from User import User
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -126,8 +122,7 @@ def login() -> 'html':
                                    message="The email or password you wrote was wrong. Try again", form=form)
 
     else:
-        return render_template('login.html', title='Log in', form=form)
-
+        return render_template('login.html', title='Log in', form=form, message="Login failed")
 
 
 @app.route('/forgetpassword', methods=["GET", "POST"])
@@ -166,7 +161,7 @@ def verifyResetPassword(code):
     if database.verify(code) == True:
         form = resetPasswordForm()
         form.verificationId.data = code
-        flash(f"Success! You are verified, please choose your password", "success")
+        flash(f"Success!", "success")
         return render_template('resetpassword.html',form=form)
     else:
         flash(f'Verification failed...', "danger")
@@ -183,10 +178,10 @@ def resetpassword() -> 'html':
     
 
     if not user:
-        return render_template('resetpasswordfailed.html')
+        return render_template('message_landing_page.html', message="Invalid reset link")
     if request.method == "GET":
         message = "Please reset your password"
-        return render_template('resetpassword.html', form=form, message= message)
+        return render_template('resetpassword.html', form=form, message=message)
     else:
         password1 = form.password1.data
         password2 = form.password2.data
@@ -211,7 +206,7 @@ def resetpassword() -> 'html':
 def updatepassword() -> 'html':
     userUpdatePW = UserLogin()
     email = session["email"]
-    user = userUpdatePW.getUser(email)   
+    user = User(*userUpdatePW.getUserByEmail(email))
     form = UpdatePasswordForm()
     message=""
 
@@ -238,14 +233,14 @@ def updatepassword() -> 'html':
 def viewuser() -> 'html':
     userView = UserLogin()
     email = session["email"]
-    user = userView.getUser(email)   
+    user = User(*userView.getUserByEmail(email))
     return render_template('viewuser.html',user=user, title="User details")
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
     userUpdate = UserLogin()
     email = session["email"]
-    user = userUpdate.getUser(email)   
+    user = User(*userUpdate.getUserByEmail(email))
     firstname=user.firstname
     lastname=user.lastname
     username = user.username
@@ -258,7 +253,6 @@ def updateuser() -> 'html':
         username = form.username.data
         email = session["email"]
         userUpdate.updateUser(firstname,lastname,username, email)
-        user = userUpdate.getUser(email)   
         session["username"] = username
         message = "User info updated!"
         return render_template('message_landing_page.html', message=message)

@@ -34,12 +34,21 @@ class UserLogin:
     def getAllUsers(self):
         return self.users
 
+    def getUserByEmail(self, email):
+        try:
+            self.conn = mysql.connector.connect(**self.dbconfig)
+            self.cursor = self.conn.cursor()
+            self.cursor.execute("SELECT * FROM user WHERE email=(%s)", (email,))
+            result = self.cursor.fetchone()
+            return result
+
+        except mysql.connector.Error as err:
+            print(err)
+
     def isUser(self, email):
-        for user in self.users:
-            if email == user.email:
-                return True
+        if self.getUserByEmail(email):
+            return True
         return False
-    
 
     def updateUser(self, firstname, lastname,username, email):
 
