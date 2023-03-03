@@ -1,15 +1,20 @@
 import os
 import secrets
+import smtplib
+import string
 import uuid
+from random import random
 
 from flask import Flask,flash,request,redirect,render_template, url_for,session
 from flask_mail import Mail, Message
+
+from User import User
 from database import db
 from forms import RegistrerForm
 from flask_wtf.csrf import CSRFProtect
-from flask_bcrypt import Bcrypt
+from flask_bcrypt import Bcrypt, generate_password_hash
 from UserLogin import UserLogin
-from UserLoginForm import LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm
+from UserLoginForm import LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -82,7 +87,7 @@ def login() -> 'html':
         print()
         session["email"] = form.email.data
         email = session["email"]
-        userlogin = UserLogin()
+        userlogin = db()
 
         if not userlogin.isUser(email):
             return render_template('login.html', title='Log in',
@@ -114,41 +119,62 @@ def login() -> 'html':
         return render_template('login.html', title='Log in', form=form)
 
 
+
 @app.route('/forgetpassword', methods=["GET", "POST"])
 def forgetpassword() -> 'html':
     form = forgetPasswordForm()
+    if request.method == "POST":
+        email: object = form.email.data
+        database = db()
+        usr = database.getUser(email)
 
+        if usr and form.validate_on_submit():
+            verificationId = str(uuid.uuid4())
+            database.updateUuid(email,verificationId)
+            mail = Mail(app)
+            url = url_for("resetpassword") + "?uuid=" + verificationId
+
+            msg = Message("Verification code: ",
+                          sender='csk044@uit.no', recipients=[email])
+            msg.body = "Welcome as a user to our website. Please clik the link to reset your password ."
+            msg.html = f'<b> Reset password </b>' + '<a href="{}"> RESET </a>'.format(url)
+            with app.app_context():
+                mail.send(msg)
+                print(msg) #todo remove
+                return render_template('resetmailsendt.html', form=form)
     if request.method == "GET":
         return render_template('forgetpassword.html', form=form)
 
+
+@app.route('/resetpassword', methods=["GET", "POST"])
+def resetpassword() -> 'html':
+    uuid = request.args.get('uuid')
+    database = db()
+    user = database.getUserByUUID(uuid)
+    form = resetPasswordForm()
+
+    if not user:
+        return render_template('resetpasswordfailed.html')
+    if request.method == "GET":
+        message = "Please reset your password"
+        return render_template('resetpassword.html', form=form, message= message)
     else:
-        try:
-            with UserLogin() as db:
-                email: object = form.email.data
-                usr = db.getUser(email)
+        password1 = form.password1.data
+        password2 = form.password2.data
 
-        except AttributeError:
-            message = "There was a problem with the database connection. Please try again later."
-            return render_template('forgetpassword.html', form=form, message=message)
+        if form.validate_on_submit():
+            if password1 == password2:
+                userUpdatePW = db()
+                password = form.password1.data
+                password_hash = generate_password_hash(password)
+                userUpdatePW.resetPassword(uuid, password_hash)
 
-        if usr:
-            if request.method == "POST" and form.validate():
-                password1 = form.password1.data
-                password2 = form.password1.data
+                return redirect(url_for('login'))
 
-                if password1 == password2:
-                    password1 = form.password1.data
-                    password_hash = generate_password_hash(password1)
-                    usr.updateUserPassword(email, password_hash)
-                    return redirect(url_for('login.html'))
+            elif password1 != password2:
+                message = "The two new passwords you wrote do not match. Try again"
+                return render_template('resetpassword.html', form=form, message=message)
 
-                else:
-                    message = "The two new passwords you wrote do not match. Try again"
-                    return render_template('forgetpassword.html', form=form, message=message, email=form.email.data)
-
-        else:
-            message = "You are not a user yet. Please sign up!"
-            render_template('sign_up.html', title="Sign up", form=form, message=message)
 
 
 
@@ -226,3 +252,4 @@ def logout() -> 'html':
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+

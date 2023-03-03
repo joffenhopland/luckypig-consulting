@@ -19,10 +19,14 @@ class LoginForm(FlaskForm):
 
 class forgetPasswordForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Submit")
+
+class resetPasswordForm(FlaskForm):
     password1 = PasswordField("New password", validators=[DataRequired()])
     password2 = PasswordField("Confirm new password", validators=[DataRequired()])
 
-    sumit = SubmitField("Sumit")
+    submit = SubmitField("RESET")
+
 
 class UpdateUserForm(FlaskForm):
     firstname = StringField("First name", validators=[DataRequired()])

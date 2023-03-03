@@ -1,7 +1,6 @@
 from hashlib import new
 import mysql.connector
 from mysql.connector import errorcode
-from mysqlx import Result
 from User import User
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -114,4 +113,19 @@ class UserLogin:
         if user.emailVerified:
             return True
         return False
+
+    def updateUuid(self,email, uuid):
+
+        try:
+            insert_statment = (
+                "UPDATE user SET uuid=%s,  WHERE email=%s")
+            data = (uuid,email)
+
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor(prepared=True)
+            cursor.execute(insert_statment, data)
+            conn.commit()
+
+        except mysql.connector.Error as err:
+            print(err)
 

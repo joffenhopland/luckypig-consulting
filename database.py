@@ -94,3 +94,43 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
+
+
+    def updateUuid(self, email, uuid):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE user
+            SET verificationId = (%s) WHERE email = (%s)'''
+            oppdater = (uuid,email)
+            cursor.execute(sql1, oppdater)
+            conn.commit()
+            conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+
+    def resetPassword(self, email, password):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE user
+            SET password = (%s) WHERE email = (%s)'''
+            oppdater = (password,email)
+            cursor.execute(sql1, oppdater)
+            conn.commit()
+            conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+
+    def getUserByUUID(self, uuid):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM user WHERE verificationId=(%s)", (uuid,))
+            result = cursor.fetchone()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
