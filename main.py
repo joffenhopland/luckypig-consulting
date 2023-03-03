@@ -62,19 +62,21 @@ def register():
         database.newUser(new_user)
         mail = Mail(app)
         msg = Message("Verify account",
-                      sender='csk044@uit.no', recipients=[email])
+                      sender=app.config.get("MAIL_USERNAME"), recipients=[email])
         msg.body = "Welcome as a user to our website. Please verify your account to get access to all services on our website."
-        msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(url_for(verify(verificationId)))
+        verification_link = url_for('verify', code=verificationId, token=app.secret_key, _external=True)
+        msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(verification_link)
         with app.app_context():
             mail.send(msg)
             flash(f"Success! You are verified, please log in", "success")
-        return render_template('register_landing_page.html')
+        return redirect(url_for('register_landing_page'))
     return render_template('register.html', form=form)
 
 
 @ app.route('/register-landing-page', methods=["GET", "POST"])
 def register_landing_page():
-    return render_template('register_landing_page.html')
+    message = "Thank you for registering! Please check your email to verify your account"
+    return render_template('message_landing_page.html', message=message)
 
 
 @ app.route('/verified/<code>')
@@ -82,7 +84,7 @@ def verify(code):
     database = db()
     if database.verify(code) == True:
         flash(f"Success! You are verified, please log in", "success")
-        return render_template('mainPage.html')
+        return redirect(url_for('login'))
     else:
         flash(f'Verification failed...', "danger")
         return render_template('mainPage.html')
