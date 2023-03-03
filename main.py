@@ -100,8 +100,7 @@ def login() -> 'html':
         if not userlogin.isUser(email):
             flash(f'There is no user registered with the email {email}. Please try again or register', "danger")
             return render_template('login.html', title='Log in',
-                                   message="There is no user registered with the email {}, please try again or register".format(
-                                       email), form=form)
+                                   form=form)
 
         emailconfirmed = userlogin.emailConfirmed(email)
 
@@ -120,12 +119,10 @@ def login() -> 'html':
 
         else:
             flash(f'The email or password you wrote was wrong. Try again', "danger")
-            return render_template('login.html', title='Log in',
-                                   message="The email or password you wrote was wrong. Try again", form=form)
+            return render_template('login.html', title='Log in', form=form)
 
     else:
-        flash(f'Login failed', "danger")
-        return render_template('login.html', title='Log in', form=form, message="Login failed")
+        return render_template('login.html', title='Log in', form=form)
 
 
 @app.route('/forgetpassword', methods=["GET", "POST"])
@@ -200,6 +197,7 @@ def resetpassword() -> 'html':
 
             elif password1 != password2:
                 message = "The two new passwords you wrote do not match. Try again"
+                flash(f'The two new passwords you wrote do not match. Try again', "danger")
                 return render_template('resetpassword.html', form=form, message=message)
 
 
@@ -222,10 +220,13 @@ def updatepassword() -> 'html':
                 password_hash = bcrypt.generate_password_hash(password1)
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Password updated!"
+                flash(f"Password updated!", "success")
                 return render_template('message_landing_page.html', message=message)
             else:
+                flash(f'The two new passwords you wrote do not match. Try again', "danger")
                 message += "The two new passwords you wrote do not match. Try again"
         else:
+            flash(f'Your old password was not correct. Please try again', "danger")
             message += "Your old password was not correct. Please try again"
 
         return render_template('updatepassword.html',user=user, title="Update password",message=message, form=form)
@@ -258,6 +259,7 @@ def updateuser() -> 'html':
         userUpdate.updateUser(firstname,lastname,username, email)
         session["username"] = username
         message = "User info updated!"
+        flash(f'User info updated!', "success")
         return render_template('message_landing_page.html', message=message)
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="User details", form=form, message=message)
@@ -272,6 +274,7 @@ def logout() -> 'html':
     session.pop("access", None)
     session.pop("idUser", None)
     session.pop("role", None)
+    flash(f'You are logged out!', "info")
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
