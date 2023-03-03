@@ -99,16 +99,15 @@ def login() -> 'html':
         if not emailconfirmed:
             return render_template('confirmemail.html')
 
-        if userlogin.canLogIn(email, form.password.data):
-            print("login!")
-
+        if userlogin.canLogIn(email, form.password.data,bcrypt):
             session["logged in"] = True
             user = userlogin.getUser(email)
 
             session["username"] = user.username
             session["idUser"] = user.user_id
             session["role"] = user.role
-            return render_template('login_landing_page.html', user=user)
+            message = "You are logged in!"
+            return render_template('message_landing_page.html', message=message)
 
         else:
 
@@ -166,7 +165,7 @@ def resetpassword() -> 'html':
             if password1 == password2:
                 userUpdatePW = db()
                 password = form.password1.data
-                password_hash = generate_password_hash(password)
+                password_hash = bcrypt.generate_password_hash(password)
                 userUpdatePW.resetPassword(uuid, password_hash)
 
                 return redirect(url_for('login'))
@@ -188,15 +187,14 @@ def updatepassword() -> 'html':
 
     if form.validate_on_submit():
         oldpassword = form.oldpassword.data
-        if userUpdatePW.canLogIn(email, oldpassword):
+        if userUpdatePW.canLogIn(email, oldpassword,bcrypt):
             password1=form.password1.data
             password2=form.password2.data
             if password1==password2:
-                #password_hash = generate_password_hash(password1)--------------------------------------------to be changed to hash password!!!!
-                password_hash = password1
+                password_hash = bcrypt.generate_password_hash(password1)
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Password updated!"
-                return render_template('info_updated_landing_page.html', message=message)
+                return render_template('message_landing_page.html', message=message)
             else:
                 message += "The two new passwords you wrote do not match. Try again"
         else:
@@ -233,8 +231,7 @@ def updateuser() -> 'html':
         user = userUpdate.getUser(email)   
         session["username"] = username
         message = "User info updated!"
-        print(user.firstname)
-        return render_template('info_updated_landing_page.html', title="Update user details", message=message)
+        return render_template('message_landing_page.html', message=message)
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="User details", form=form, message=message)
 
