@@ -97,6 +97,7 @@ def login() -> 'html':
         userlogin = UserLogin()
 
         if not userlogin.isUser(email):
+            flash(f'There is no user registered with the email {email}. Please try again or register', "danger")
             return render_template('login.html', title='Log in',
                                    message="There is no user registered with the email {}, please try again or register".format(
                                        email), form=form)
@@ -113,15 +114,16 @@ def login() -> 'html':
             session["username"] = user.username
             session["idUser"] = user.user_id
             session["role"] = user.role
-            message = "You are logged in!"
-            return render_template('message_landing_page.html', message=message)
+            flash(f'You are logged in!', "success")
+            return render_template('learn.html')
 
         else:
-
+            flash(f'The email or password you wrote was wrong. Try again', "danger")
             return render_template('login.html', title='Log in',
                                    message="The email or password you wrote was wrong. Try again", form=form)
 
     else:
+        flash(f'Login failed', "danger")
         return render_template('login.html', title='Log in', form=form, message="Login failed")
 
 
