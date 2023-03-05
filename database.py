@@ -63,12 +63,12 @@ class db:
             cursor.execute(
                 "SELECT email from user where email=(%s)", (email,))
             result = cursor.fetchone()
+            if result == None:
+                return False
+            else:
+                return result[0]
         except mysql.connector.Error as err:
             print(err)
-        if result == None:
-            return False
-        else:
-            return result[0]
 
     #Gets all information about an user. For logging in.
     def getUser(self, email):
