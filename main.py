@@ -39,6 +39,22 @@ def home():
 def learn():
     return render_template("learn.html")
 
+@app.route("/multiple-choice", methods=['GET', 'POST'])
+def multiple_choice():
+    # making question and answer choices just for testing
+    question = "Jeg lager mat."
+    choices = ["I love food", "I made food", "I am making food", "Food is nice"]
+    if request.method == 'POST':
+        answer = request.form['answer']
+        if answer == "I am making food":
+            message = "Correct!"
+            flash(f'Correct!', "success")
+            return render_template('multiple_choice.html', question=question, choices=choices)
+        else:
+            message = "Wrong!"
+            flash(f'Wrong!', "danger")
+            return render_template('multiple_choice.html', question=question, choices=choices)
+    return render_template('multiple_choice.html', question=question, choices=choices)
 @ app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegistrerForm(request.form)
