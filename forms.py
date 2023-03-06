@@ -6,22 +6,6 @@ import re
 
 
 class RegistrerForm(FlaskForm):
-
-    def validate_password (form, field):
-        password = field.data
-
-        if len(password) < 8:
-            flash(f"Passordet må inneholde minst 8 tegn.", "danger")
-        elif not re.search(r'[A-Z]', password):
-            flash( "Passordet må inneholde minst en stor bokstav", "danger")
-        elif not re.search(r'[a-z]', password):
-            flash("Passordet må inneholde minst en liten bokstav", "danger")
-        elif not re.search(r'[0-9]', password):
-            flash("Passordet må inneholde minst et tall", "danger")
-        elif not re.search(r'[@$!%*?&.]', password):
-            flash("Passordet må inneholde minst et spesialtegn", "danger")
-
-
     firstname = StringField(label="Fornavn:", validators=[
                           Length(min=2, max=50), DataRequired()])
     lastname = StringField(label="Etternavn:", validators=[
@@ -30,10 +14,29 @@ class RegistrerForm(FlaskForm):
                             Length(min=6, max=50), DataRequired()])
     email = StringField(label="Epost:", validators=[Email(), DataRequired()])
     password1 = PasswordField(label="Passord:", validators=[
-                              DataRequired(), validate_password])
+                              DataRequired()])
     password2 = PasswordField(label="Gjenta passord:", validators=[EqualTo(
         "password1", message="Begge passordene må være identiske."), DataRequired()])
     submit = SubmitField(label="Registrere en bruker")
+
+def validate_password (password):
+        if len(password) < 8:
+            flash(f"Passordet må inneholde minst 8 tegn.", "danger")
+            return 0
+        elif not re.search(r'[A-Z]', password):
+            flash( "Passordet må inneholde minst en stor bokstav", "danger")
+            return 0
+        elif not re.search(r'[a-z]', password):
+            flash("Passordet må inneholde minst en liten bokstav", "danger")
+            return 0
+        elif not re.search(r'[0-9]', password):
+            flash("Passordet må inneholde minst et tall", "danger")
+            return 0
+        elif not re.search(r'[@$!%*?&.]', password):
+            flash("Passordet må inneholde minst et spesialtegn", "danger")
+            return 0
+        else:
+            return 1
 
 """
 class UpdatePasswordForm(FlaskForm):

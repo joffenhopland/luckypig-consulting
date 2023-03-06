@@ -70,6 +70,20 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def usernameCheck(self, username):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT username from user where username=(%s)", (username,))
+            result = cursor.fetchone()
+            if result == None:
+                return False
+            else:
+                return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
     #Gets all information about an user. For logging in.
     def getUser(self, email):
         try:

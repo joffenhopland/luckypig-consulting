@@ -9,7 +9,7 @@ from flask_bcrypt import Bcrypt
 
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
 
 app = Flask(__name__)
@@ -46,7 +46,11 @@ def register():
     if form.validate_on_submit and database.attemptedUser(form.email.data):
         flash("Epost-adressen er allerede registrert. Vennligst bruk en annen epost-adresse.", "danger")
         return render_template('register.html', form=form)
-    if form.validate_on_submit() and database.attemptedUser(form.email.data) == False:
+    elif form.validate_on_submit and database.usernameCheck(form.username.data):
+        flash("Brukernavnet er allerede registrert. Vennligst bruk et annet brukernavn", "danger")
+        return render_template('register.html', form=form)
+    elif form.validate_on_submit() and database.attemptedUser(form.email.data) == False \
+        and validate_password(form.password1.data) == 1 and database.usernameCheck(form.username.data) == False:
         firstname = form.firstname.data
         lastname = form.lastname.data
         username = form.username.data
@@ -64,7 +68,6 @@ def register():
         msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(verification_link)
         with app.app_context():
             mail.send(msg)
-            flash(f"Vellykket! Din konto er verifisert. Vennligst logge inn.", "success")
             return redirect(url_for('register_landing_page'))
     return render_template('register.html', form=form)
 
@@ -144,7 +147,7 @@ def forgetpassword() -> 'html':
 
             msg = Message("Verifiserings kode: ",
                           sender=app.config.get("MAIL_USERNAME"), recipients=[email])
-            msg.body = "Velkommen som bruker til språkkurset. Vennligst trykk på linken for å tilbakestill passordet ditt."
+            msg.body = "Vennligst trykk på linken for å tilbakestill passordet ditt."
             msg.html = f'<b> Reset password </b>' + '<a href="{}"> RESET </a>'.format(verification_link)
             with app.app_context():
                 mail.send(msg)
@@ -160,7 +163,6 @@ def verifyResetPassword(code):
     if database.verify(code) == True:
         form = resetPasswordForm()
         form.verificationId.data = code
-        flash(f"Vellykket!", "success")
         return render_template('resetpassword.html',form=form)
     else:
         flash(f'Verifiseringen feilet...', "danger")
@@ -185,7 +187,7 @@ def resetpassword() -> 'html':
         password1 = form.password1.data
         password2 = form.password2.data
 
-        if form.validate_on_submit():
+        if form.validate_on_submit() and validate_password(password1) == 1:
             if password1 == password2:
                 userUpdatePW = db()
                 password = form.password1.data
@@ -214,7 +216,7 @@ def updatepassword() -> 'html':
         if userUpdatePW.canLogIn(email, oldpassword,bcrypt):
             password1=form.password1.data
             password2=form.password2.data
-            if password1==password2:
+            if password1==password2 and validate_password(password1) == 1:
                 password_hash = bcrypt.generate_password_hash(password1)
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Passordet er oppdatert!"
@@ -256,8 +258,8 @@ def updateuser() -> 'html':
         email = session["email"]
         userUpdate.updateUser(firstname,lastname,username, email)
         session["username"] = username
-        message = "Brukerinformasjonen er oppdatert!"
         flash(f'Brukerinformasjonen er oppdatert!', "success")
+        user = User(*userUpdate.getUserByEmail(email))
         return render_template('viewuser.html',user=user, title="Brukerinformasjon")
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
