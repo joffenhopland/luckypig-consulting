@@ -7,7 +7,7 @@ class db:
         dbconfig = {'host': '34.121.34.57',
                     'user': 'luckypig2023',
                     'password': 'LuckypigProject#1',
-                    'database': 'luckypig database', }
+                    'database': 'Luckypig database', }
         self.configuration = dbconfig
 
 
