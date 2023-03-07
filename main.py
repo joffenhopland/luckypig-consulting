@@ -56,6 +56,28 @@ def multiple_choice():
             flash(f'Wrong!', "danger")
             return render_template('multiple_choice.html', question=question, choices=choices)
     return render_template('multiple_choice.html', question=question, choices=choices)
+
+
+@app.route('/drag_and_drop', methods=["GET", 'POST'])
+def drag_and_drop() -> 'html':
+    question = "Jeg like eple."
+    dragdrop = [{"id": 2, "text": "apple"}, {"id": 1, "text": "I"}, {"id": 3, "text": "like"}]
+
+    if request.method == 'POST':
+        answer = int(request.form['answer'])
+        correct_answer = [q["id"] for q in dragdrop]
+
+        if answer == correct_answer:
+            flash(f'Correct!', "success")
+
+        else:
+            flash(f'Wrong!', "danger")
+
+
+    return render_template('drag_and_drop.html', dragdrop= dragdrop,question=question)
+
+
+
 @ app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegistrerForm(request.form)
@@ -281,17 +303,7 @@ def updateuser() -> 'html':
         return render_template('viewuser.html',user=user, title="Brukerinformasjon")
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
-@app.route('/drag_and_drop_index', methods=["GET"])
-def drag_and_drop_index() -> 'html':
-    dragdrop = [{"id": 1, "text": "Apple"}, {"id": 2, "text": "I"}, {"id": 3, "text": "like"}]
-    return render_template('drag_and_drop_index.html', dragdrop=dragdrop)
 
-@app.route('/updateList', methods=['POST'])
-def updateList():
-    order = request.form['order']
-    order = json.loads(order)
-
-    return 'Oppdatert rekkefølge mottatt'
 
 @app.route('/logout', methods=["GET", "POST"])
 def logout() -> 'html':
