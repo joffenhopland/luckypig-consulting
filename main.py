@@ -72,9 +72,10 @@ def register():
         username = form.username.data
         email = form.email.data
         password = bcrypt.generate_password_hash(form.password1.data)
+        role = 1
         verificationId = str(uuid.uuid4())
 
-        new_user = (firstname, lastname, username, email, password, verificationId)
+        new_user = (firstname, lastname, username, email, password, role, verificationId)
         database.newUser(new_user)
         mail = Mail(app)
         msg = Message("Verifisere konto",
