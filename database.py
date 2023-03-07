@@ -6,7 +6,7 @@ class db:
         dbconfig = {'host': '34.121.34.57',
                     'user': 'luckypig2023',
                     'password': 'LuckypigProject#1',
-                    'database': 'LuckyPig1', }
+                    'database': 'Luckypig database', }
         self.configuration = dbconfig
 
     def __enter__(self):
@@ -19,8 +19,8 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO user (first_name, last_name, username, email, password, verificationId)
-                VALUES (%s, %s, %s, %s, %s, %s)'''
+            sql1 = '''INSERT INTO user (first_name, last_name, username, email, password, role, verificationId)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)'''
             cursor.execute(sql1, user)
             conn.commit()
             conn.close()

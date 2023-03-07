@@ -1,0 +1,8 @@
+.selected {
+    background-color: #0d6efd;
+    color: white;
+  }
+
+  .border-question-alert {
+    border-radius: 0;
+  }
