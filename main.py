@@ -43,35 +43,34 @@ def learn():
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
     #get the exercise from the database: to be tested when the exercises are filled in the database
-    '''exerciseId = 1              #to be changed when the course is running
-    exercise = MultipleChoiceExercise()
-    exercise.getExerciseByID(exerciseId)
-    question = exercise.question
-    choices = exercise.choices
-    right_answer = exercise.answer'''
+
     # making question and answer choices just for testing
     question = "Jeg lager mat."
     choices = ["I love food", "I made food", "I am making food", "Food is nice"]
+    exerciseId =1
     if request.method == 'POST':
+        exerciseId = request.form['exerciseId']              #to be changed when the course is running
+        #exercise = MultipleChoiceExercise()
+        #exercise.getExerciseByID(exerciseId)
+        #question = exercise.question
+        #choices = exercise.choices
+        #right_answer = exercise.answer
         answer = request.form['answer']
         if answer == "I am making food":
             message = "Correct!"
             flash(f'Correct!', "success")
             '''#need to update user score
             exercise.number_succeed += 1
-            exercise.number_asked += 1
-            exercise.updateExercise()
             #need to get a new exercise number from course
             #jeg tror html trenger exerciseId som hidden field i form'''
-            return render_template('multiple_choice.html', question=question, choices=choices) #trenger vi den? Er det ikke nok med render på linje 71?
         else:
             message = "Wrong!"
             flash(f'Wrong!', "danger")
-            '''exercise.number_asked += 1
-            exercise.updateExercise()
-            # need to get a new exercise number from course'''
-            return render_template('multiple_choice.html', question=question, choices=choices) #trenger vi den? Er det ikke nok med render på linje 71?
-    return render_template('multiple_choice.html', question=question, choices=choices)
+        '''exercise.number_asked += 1
+        exercise.updateExercise()'''
+        return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
+    # need to get a new exercise number from course and get the new exercise
+    return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
 @ app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegistrerForm(request.form)
