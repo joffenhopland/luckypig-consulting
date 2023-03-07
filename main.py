@@ -11,6 +11,7 @@ from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
+from classes import MultipleChoiceExercise
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -41,6 +42,13 @@ def learn():
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
+    #get the exercise from the database: to be tested when the exercises are filled in the database
+    '''exerciseId = 1              #to be changed when the course is running
+    exercise = MultipleChoiceExercise()
+    exercise.getExerciseByID(exerciseId)
+    question = exercise.question
+    choices = exercise.choices
+    right_answer = exercise.answer'''
     # making question and answer choices just for testing
     question = "Jeg lager mat."
     choices = ["I love food", "I made food", "I am making food", "Food is nice"]
@@ -49,11 +57,20 @@ def multiple_choice():
         if answer == "I am making food":
             message = "Correct!"
             flash(f'Correct!', "success")
-            return render_template('multiple_choice.html', question=question, choices=choices)
+            '''#need to update user score
+            exercise.number_succeed += 1
+            exercise.number_asked += 1
+            exercise.updateExercise()
+            #need to get a new exercise number from course
+            #jeg tror html trenger exerciseId som hidden field i form'''
+            return render_template('multiple_choice.html', question=question, choices=choices) #trenger vi den? Er det ikke nok med render på linje 71?
         else:
             message = "Wrong!"
             flash(f'Wrong!', "danger")
-            return render_template('multiple_choice.html', question=question, choices=choices)
+            '''exercise.number_asked += 1
+            exercise.updateExercise()
+            # need to get a new exercise number from course'''
+            return render_template('multiple_choice.html', question=question, choices=choices) #trenger vi den? Er det ikke nok med render på linje 71?
     return render_template('multiple_choice.html', question=question, choices=choices)
 @ app.route('/register', methods=["GET", "POST"])
 def register():
@@ -72,9 +89,10 @@ def register():
         username = form.username.data
         email = form.email.data
         password = bcrypt.generate_password_hash(form.password1.data)
+        role = 1
         verificationId = str(uuid.uuid4())
 
-        new_user = (firstname, lastname, username, email, password, verificationId)
+        new_user = (firstname, lastname, username, email, password, role, verificationId)
         database.newUser(new_user)
         mail = Mail(app)
         msg = Message("Verifisere konto",
@@ -295,4 +313,5 @@ def logout() -> 'html':
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int("3000"))
+
 

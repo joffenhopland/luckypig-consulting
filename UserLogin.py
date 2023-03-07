@@ -11,7 +11,7 @@ class UserLogin:
         self.dbconfig = {'host': '34.121.34.57',
                         'user': 'luckypig2023',
                         'password': 'LuckypigProject#1',
-                        'database': 'LuckyPig1',}
+                        'database': 'Luckypig database',}
         self.conn = mysql.connector.connect(**self.dbconfig)
         self.cursor = self.conn.cursor(prepared=True)
         self.users = []
