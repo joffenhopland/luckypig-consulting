@@ -11,6 +11,7 @@ from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
+import json
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -263,8 +264,17 @@ def updateuser() -> 'html':
         return render_template('viewuser.html',user=user, title="Brukerinformasjon")
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
+@app.route('/drag_and_drop_index', methods=["GET"])
+def drag_and_drop_index() -> 'html':
+    dragdrop = [{"id": 1, "text": "Apple"}, {"id": 2, "text": "I"}, {"id": 3, "text": "like"}]
+    return render_template('drag_and_drop_index.html', dragdrop=dragdrop)
 
+@app.route('/updateList', methods=['POST'])
+def updateList():
+    order = request.form['order']
+    order = json.loads(order)
 
+    return 'Oppdatert rekkefølge mottatt'
 
 @app.route('/logout', methods=["GET", "POST"])
 def logout() -> 'html':
