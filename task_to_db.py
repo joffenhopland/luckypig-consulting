@@ -19,7 +19,7 @@ class db:
     def read_file(self):
         import pandas as pd
         data = pd.read_csv("questions.csv")
-        data1 = data.iloc["choice"][0]
+        data1 = data.iloc[0]
         print(data1)
     
 
