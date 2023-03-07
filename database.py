@@ -148,3 +148,63 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
+
+    def getExerciseByIdandType(self, exerciseID, type):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            if type == 1:
+                cursor.execute(
+                    "SELECT * FROM drop_down WHERE exerciseID=(%s)", (exerciseID,))
+            elif type == 3:
+                cursor.execute(
+                    "SELECT * FROM multiple_choice WHERE exerciseID=(%s)", (exerciseID,))
+            elif type == 5:
+                cursor.execute(
+                    "SELECT * FROM drag_and_drop WHERE exerciseID=(%s)", (exerciseID,))
+            result = cursor.fetchone()
+            print(result)
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def getOptionsByExerciseIdandType(self, exerciseID, type):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            if type == 1:
+                cursor.execute(
+                    "SELECT choice FROM drop_down WHERE exerciseID=(%s)", (exerciseID,))
+            elif type == 3:
+                cursor.execute(
+                    "SELECT choice FROM multiple_choice_choice WHERE exerciseID=(%s)", (exerciseID,))
+            elif type == 5:
+                cursor.execute(
+                    "SELECT choice FROM drag_and_drop WHERE exerciseID=(%s)", (exerciseID,))
+
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def updateExerciseByExerciseIdandType(self, exerciseID, type, number_asked,number_succeed):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            if type == 1:
+                sql1 = '''UPDATE drop_down 
+                 SET number_asked = (%s), number_succeed = (%s) WHERE exerciseID = (%s)'''
+            elif type == 3:
+                sql1 = '''UPDATE multiple_choice_choice 
+                  SET number_asked = (%s), number_succeed = (%s) WHERE exerciseID = (%s)'''
+            elif type == 5:
+                sql1 = '''UPDATE drag_and_drop 
+                                  SET number_asked = (%s), number_succeed = (%s) WHERE exerciseID = (%s)'''
+            oppdater = (number_asked, number_succeed, exerciseID)
+            cursor.execute(sql1, oppdater)
+            conn.commit()
+            conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+
