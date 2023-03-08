@@ -163,7 +163,7 @@ class db:
                 cursor.execute(
                     "SELECT * FROM drag_and_drop WHERE exerciseID=(%s)", (exerciseID,))
             result = cursor.fetchone()
-            print(result)
+            print(f'getExerciseByIdandType: {result}')
             return result
         except mysql.connector.Error as err:
             print(err)
@@ -211,3 +211,14 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+        
+    def getCourseStatus(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM course_status WHERE courseId=(%s)", (courseId,))
+            result = cursor.fetchone()
+            return result
+        except mysql.connector.Error as err:
+            print(err)

@@ -88,41 +88,49 @@ def multiple_choice():
     #get the exercise from the database: to be tested when the exercises are filled in the database
 
     # making question and answer choices just for testing
-    question = "Jeg lager mat."
-    choices = ["I love food", "I made food", "I am making food", "Food is nice"]
-    exerciseId =3002
+    # question = "Jeg lager mat."
+    # choices = ["I love food", "I made food", "I am making food", "Food is nice"]
+    exerciseId = 3003
     if request.method == 'POST':
         exerciseId = request.form['exerciseId']              #to be changed when the course is running
         exercise = MultipleChoiceExercise(exerciseId)
         exercise.getExercise()
+        print(f'exercise: {exercise}')
         question = exercise.question
+        print(f'question: {question}')
         choices = exercise.choices
+        print(f'choices: {choices}')
         right_answer = exercise.answer
         answer = request.form['answer']
         #if answer == "I am making food":
         if answer == right_answer:
-            message = "Correct!"
             flash(f'Correct!', "success")
             exercise.number_succeed += 1
-            #need to update user score
+            exercise.score
+            # need to update user score
+            # get current score from course_status
+            # add exercise.score to the current score
+            # write new score to active_course
 
         else:
-            message = "Wrong!"
             flash(f'Wrong!', "danger")
         exercise.number_asked += 1
         exercise.updateExercise()
         return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
     # need to get a new exercise number from course and get the new exercise
     exerciseId
+    print(f'exerciseId: {exerciseId}')
     exercise = MultipleChoiceExercise(exerciseId)
     exercise.getExercise()
+    print(f'exercise: {exercise.exerciseID}')
     question = exercise.question
+    print(f'question: {question}')
     choices = exercise.choices
-    print(exerciseId)
-
+    print(f'choices: {choices}')
     return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
-@ app.route('/register', methods=["GET", "POST"])
 
+
+@ app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegistrerForm(request.form)
     database = db()

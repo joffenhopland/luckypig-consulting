@@ -32,5 +32,17 @@ class MultipleChoiceExercise:
 
     def updateExercise(self):
         database = db()
-        database.updateExerciseByExerciseIdandType(self.exerciseID,self.type,str(self.number_asked),str(self.number_succeed))
+        database.updateExerciseByExerciseIdandType(self.exerciseID, self.type, str(self.number_asked), str(self.number_succeed))
 
+
+class ActiveCourse:
+    def __init__(self, statusId, level, points, themeId, number_exercises, number_login_week, last_login, languageId, courseId):
+        self.statusId = statusId
+        self.level = level
+        self.points = points
+        self.themeId = themeId
+        self.number_exercises = number_exercises
+        self.number_login_week = number_login_week
+        self.last_login = last_login
+        self.languageId = languageId
+        self.courseId = courseId
