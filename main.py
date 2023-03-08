@@ -2,7 +2,7 @@ import os
 import secrets
 import uuid
 
-from flask import Flask,flash,request,redirect,render_template, url_for,session
+from flask import Flask,flash,request,redirect,render_template, url_for,session, Markup
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
@@ -98,8 +98,26 @@ def multiple_choice():
     print(exerciseId)
 
     return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
-@ app.route('/register', methods=["GET", "POST"])
 
+@app.route('/drop_down', methods=['GET', 'POST'])
+def dropdown_exercise():
+    options = ['Spatula', 'Whisk', 'Tongs', 'Spoon']
+    text = 'For mixing ingredients, the best utensil to use is a { blank }. And some more text here'
+    blank_placeholder = '{ blank }'
+    if blank_placeholder in text:
+        # identify the position of the placeholder
+        placeholder_index = text.find(blank_placeholder)
+    if request.method == 'POST':
+        selected_option = request.form['dropdown']
+        if selected_option == 'Whisk':
+            result = 'Correct! The best utensil to use when mixing ingredients is a whisk.'
+        else:
+            result = 'Sorry, that is not the best utensil for mixing ingredients. Try again.'
+        return render_template('drop_down.html', options=options, text=text, placeholder_index=placeholder_index, result=result)
+    else:
+        return render_template('drop_down.html', options=options, placeholder_index=placeholder_index, text=text)
+
+@ app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegistrerForm(request.form)
     database = db()

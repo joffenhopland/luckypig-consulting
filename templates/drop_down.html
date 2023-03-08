@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dropdown Exercise</title>
+</head>
+  <body>
+<form>
+    {{ text[:placeholder_index] }}  <!-- render the text before the placeholder -->
+    <select name="blank_choice">
+        {% for option in options %}
+        <option value="{{ option }}">{{ option }}</option>
+        {% endfor %}
+    </select>
+    {{ text[placeholder_index:]|replace('{ blank }', '') }}  <!-- render the text after the placeholder -->
+    <br>
+    <br>
+    <input type="submit" value="Submit">
+</form>
+    {% if result %}
+    <p>{{ result }}</p>
+    {% endif %}
+  </body>
+</html>
+
