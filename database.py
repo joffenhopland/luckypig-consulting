@@ -174,16 +174,19 @@ class db:
             cursor = conn.cursor()
             if type == 1:
                 cursor.execute(
-                    "SELECT choice FROM drop_down WHERE exerciseID=(%s)", (exerciseID,))
+                    "SELECT choice FROM drop_down WHERE dropId=(%s)", (exerciseID,))
             elif type == 3:
                 cursor.execute(
-                    "SELECT choice FROM multiple_choice_choice WHERE exerciseID=(%s)", (exerciseID,))
+                    "SELECT choice FROM multiple_choice_choice WHERE multipleId=(%s)", (exerciseID,))
             elif type == 5:
                 cursor.execute(
-                    "SELECT choice FROM drag_and_drop WHERE exerciseID=(%s)", (exerciseID,))
+                    "SELECT choice FROM drag_and_drop WHERE dragId=(%s)", (exerciseID,))
 
             result = cursor.fetchall()
-            return result
+            options = []
+            for option in result:
+                options.append(option[0])
+            return options
         except mysql.connector.Error as err:
             print(err)
 
@@ -195,7 +198,7 @@ class db:
                 sql1 = '''UPDATE drop_down 
                  SET number_asked = (%s), number_succeed = (%s) WHERE exerciseID = (%s)'''
             elif type == 3:
-                sql1 = '''UPDATE multiple_choice_choice 
+                sql1 = '''UPDATE multiple_choice 
                   SET number_asked = (%s), number_succeed = (%s) WHERE exerciseID = (%s)'''
             elif type == 5:
                 sql1 = '''UPDATE drag_and_drop 

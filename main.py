@@ -47,29 +47,36 @@ def multiple_choice():
     # making question and answer choices just for testing
     question = "Jeg lager mat."
     choices = ["I love food", "I made food", "I am making food", "Food is nice"]
-    exerciseId =1
+    exerciseId =3002
     if request.method == 'POST':
         exerciseId = request.form['exerciseId']              #to be changed when the course is running
-        #exercise = MultipleChoiceExercise()
-        #exercise.getExerciseByID(exerciseId)
-        #question = exercise.question
-        #choices = exercise.choices
-        #right_answer = exercise.answer
+        exercise = MultipleChoiceExercise(exerciseId)
+        exercise.getExercise()
+        question = exercise.question
+        choices = exercise.choices
+        right_answer = exercise.answer
         answer = request.form['answer']
-        if answer == "I am making food":
+        #if answer == "I am making food":
+        if answer == right_answer:
             message = "Correct!"
             flash(f'Correct!', "success")
-            '''#need to update user score
             exercise.number_succeed += 1
-            #need to get a new exercise number from course
-            #jeg tror html trenger exerciseId som hidden field i form'''
+            #need to update user score
+
         else:
             message = "Wrong!"
             flash(f'Wrong!', "danger")
-        '''exercise.number_asked += 1
-        exercise.updateExercise()'''
+        exercise.number_asked += 1
+        exercise.updateExercise()
         return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
     # need to get a new exercise number from course and get the new exercise
+    exerciseId
+    exercise = MultipleChoiceExercise(exerciseId)
+    exercise.getExercise()
+    question = exercise.question
+    choices = exercise.choices
+    print(exerciseId)
+
     return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
 @ app.route('/register', methods=["GET", "POST"])
 def register():
