@@ -20,6 +20,9 @@ class db:
         data = pd.read_csv("new_questions.csv", delimiter=";", encoding= 'unicode_escape')
         for i in range(len(data)):
             line = data.iloc[i].tolist()
+            line[1] = int(line[1])
+            line[2] = int(line[2])
+            line[5] = int(line[5])
             question = line[1:6]
             choice = line[6:]
             if line[0] == 1:
@@ -33,20 +36,21 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO drop_down (level, themeId, question, answere, score)
+            sql1 = '''INSERT INTO drop_down (level, themeId, question, answer, score)
                 VALUES (%s, %s, %s, %s, %s)'''
             cursor.execute(sql1, question)
             conn.commit()
-            id = cursor.execute("SELECT IDENT_CURRENT('drop_down')")
             conn.close()
         except mysql.connector.Error as err:
             print(err)
 
         for choices in choice:
-            val = (choices, id)
             try:
                 conn = mysql.connector.connect(**self.configuration)
                 cursor = conn.cursor()
+                cursor.execute("SELECT max(exerciseId) from drop_down")
+                result = cursor.fetchone()
+                val = (choices, int(result[0]))
                 sql1 = '''INSERT INTO drop_down_choice (choice, dropId)
                     VALUES (%s, %s)'''
                 cursor.execute(sql1, val)
@@ -60,20 +64,21 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO multiple_choice (level, themeId, question, answere, score)
+            sql1 = '''INSERT INTO multiple_choice (level, themeId, question, answer, score)
                 VALUES (%s, %s, %s, %s, %s)'''
             cursor.execute(sql1, question)
             conn.commit()
-            id = cursor.execute("SELECT IDENT_CURRENT('multiple_choice')")
             conn.close()
         except mysql.connector.Error as err:
             print(err)
 
         for choices in choice:
-            val = (choices, id)
             try:
                 conn = mysql.connector.connect(**self.configuration)
                 cursor = conn.cursor()
+                cursor.execute("SELECT max(exerciseId) from multiple_choice")
+                result = cursor.fetchone()
+                val = (choices, int(result[0]))
                 sql1 = '''INSERT INTO multiple_choice_choice (choice, multipleId)
                     VALUES (%s, %s)'''
                 cursor.execute(sql1, val)
@@ -86,21 +91,22 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO drag_and_drop (level, themeId, question, answere, score)
+            sql1 = '''INSERT INTO drag_and_drop (level, themeId, question, answer, score)
                 VALUES (%s, %s, %s, %s, %s)'''
             cursor.execute(sql1, question)
             conn.commit()
-            id = cursor.execute("SELECT IDENT_CURRENT('drag_and_drop')")
             conn.close()
         except mysql.connector.Error as err:
             print(err)
 
         for choices in choice:
-            val = (choices, id)
             try:
                 conn = mysql.connector.connect(**self.configuration)
                 cursor = conn.cursor()
-                sql1 = '''INSERT INTO drag_choice (choice, dragId)
+                cursor.execute("SELECT max(exerciseId) from drag_and_drop")
+                result = cursor.fetchone()
+                val = (choices, int(result[0]))
+                sql1 = '''INSERT INTO drag_choices (choice, dragId)
                     VALUES (%s, %s)'''
                 cursor.execute(sql1, val)
                 conn.commit()
@@ -109,9 +115,7 @@ class db:
                 print(err)
     
 
-def main():
-    database = db()
-    database.read_file()
-main()
-
-    
+#def main():
+#    database = db()
+#    database.read_file()
+#main()

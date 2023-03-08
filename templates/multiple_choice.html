@@ -61,6 +61,7 @@
                   </div>
                 {% endfor %}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="exerciseId" value="{{ exerciseId }}">
                 <div class="d-flex justify-content-around">
                     <button type="button" class="btn btn-outline-secondary">Skip</button>
                     <button id="submit-btn" type="submit" class="btn btn-primary" disabled>Check</button>

@@ -12,6 +12,7 @@ from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
 import json
+from classes import MultipleChoiceExercise
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -40,24 +41,97 @@ def home():
 def learn():
     return render_template("learn.html")
 
+@app.route("/new-course", methods=['GET', 'POST'])
+#Her opprettes et nytt kurs for en bruker og course_status.
+def new_course():
+    ''' Kanskje vi bør flytte denne logikken inn i course ruten?
+        Første gang en bruker starter et kurs så blir det opprettet ett nytt kurs,
+        viss ikke så fortsetter man på kurset man allerede har startet'''
+    theme = request #from url
+    language = request #from url
+    database = db()
+    database.initiate_course(session["idUser"])
+    courseId = database.get_courseId()
+    database.new_course_status(theme, language, courseId)
+    status = 1
+    return redirect(url_for('course', status))
+
+@app.route("/course", methods=['GET', 'POST'])
+def course():
+    database = db()
+    questions = [1] #get from url
+
+    #Hvis det kommer inn en liste med spørsmål
+    if questions:
+        id = questions[0] #finne første tall (her finner jeg kun hele tallet)
+
+        if id == 1:
+            return redirect(url_for("multiple_choice", questions = questions))
+        elif id == 3:
+            return redirect(url_for("drop_down", questions = questions))
+        elif id == 5:
+            return redirect(url_for("drag_and_drop", questions = questions))
+
+    #Hvis det er første gang brukeren kommer inn eller kommer inn i kurset igjen
+    else:
+        questions = database.get_new_questions(session["idUser"])
+        id = questions[0] #finne første tall (her finner jeg kun hele tallet)
+
+        if id == 1:
+            return redirect(url_for("multiple_choice", questions = questions))
+        elif id == 3:
+            return redirect(url_for("drop_down", questions = questions))
+        elif id == 5:
+            return redirect(url_for("drag_and_drop", questions = questions))
+
+
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
+    #Her må dere ta i mot listen og pop ut (hente ut og fjern) oppgaveId
+
+    #get the exercise from the database: to be tested when the exercises are filled in the database
+
     # making question and answer choices just for testing
-    question = "Jeg lager mat."
-    choices = ["I love food", "I made food", "I am making food", "Food is nice"]
+    # question = "Jeg lager mat."
+    # choices = ["I love food", "I made food", "I am making food", "Food is nice"]
+    exerciseId = 3003
     if request.method == 'POST':
+        exerciseId = request.form['exerciseId']              #to be changed when the course is running
+        exercise = MultipleChoiceExercise(exerciseId)
+        exercise.getExercise()
+        print(f'exercise: {exercise}')
+        question = exercise.question
+        print(f'question: {question}')
+        choices = exercise.choices
+        print(f'choices: {choices}')
+        right_answer = exercise.answer
         answer = request.form['answer']
-        if answer == "I am making food":
-            message = "Correct!"
+        #if answer == "I am making food":
+        if answer == right_answer:
             flash(f'Correct!', "success")
-            return render_template('multiple_choice.html', question=question, choices=choices)
+            exercise.number_succeed += 1
+            exercise.score
+            # need to update user score
+            # get current score from course_status
+            # add exercise.score to the current score
+            # write new score to active_course
+
         else:
-            message = "Wrong!"
             flash(f'Wrong!', "danger")
-            return render_template('multiple_choice.html', question=question, choices=choices)
-    return render_template('multiple_choice.html', question=question, choices=choices)
-
-
+        exercise.number_asked += 1
+        exercise.updateExercise()
+        return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
+    # need to get a new exercise number from course and get the new exercise
+    exerciseId
+    print(f'exerciseId: {exerciseId}')
+    exercise = MultipleChoiceExercise(exerciseId)
+    exercise.getExercise()
+    print(f'exercise: {exercise.exerciseID}')
+    question = exercise.question
+    print(f'question: {question}')
+    choices = exercise.choices
+    print(f'choices: {choices}')
+    return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
 
 @app.route('/drag_and_drop', methods=["GET", 'POST'])
 def drag_and_drop() -> 'html':
@@ -82,7 +156,6 @@ def drag_and_drop() -> 'html':
         return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question)
 
     return render_template('drag_and_drop.html', dragdrop=dragdrop, question=question)
-
 
 
 @ app.route('/register', methods=["GET", "POST"])
@@ -325,4 +398,5 @@ def logout() -> 'html':
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int("3000"))
+
 
