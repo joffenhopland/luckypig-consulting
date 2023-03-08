@@ -40,8 +40,28 @@ def home():
 def learn():
     return render_template("learn.html")
 
+@app.route("/course", methods=['GET', 'POST'])
+def course():
+    return
+    #Når brukeren trykker på "start språkkurs" eller "fortsett" så skjer følgende:
+    
+    #Hvis brukeren starter et nytt språkkurs:
+        #Opprett et nytt activecourse med brukers id som FK
+        #Sett opp en ny course-status med (level, themeId, språk (norsk = 1), courseId som FK)
+        #Hent ut x-antall oppgaveId´er hvor level = user.level og theme = user.theme og sett dem i en liste
+        #sjekk oppgaveId fra første element listen og sjekk om det er dropdown, multiple choice eller drag and drop
+        #send følgende til oppgave-stien den tilhører:
+            #listen med alle oppgavene blir sendt til riktig oppgavetype
+
+    #Hvis brukeren fortsetter et språkkurs:
+
+    #Hvis det kommer inn en liste med oppgaver:
+    
+
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
+    #Her må dere ta i mot listen og pop ut (hente ut og fjern) oppgaveId
+    
     #get the exercise from the database: to be tested when the exercises are filled in the database
 
     # making question and answer choices just for testing
@@ -79,6 +99,7 @@ def multiple_choice():
 
     return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
 @ app.route('/register', methods=["GET", "POST"])
+
 def register():
     form = RegistrerForm(request.form)
     database = db()
