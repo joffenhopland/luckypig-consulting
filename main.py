@@ -40,22 +40,45 @@ def home():
 def learn():
     return render_template("learn.html")
 
+@app.route("/new-course", methods=['GET', 'POST'])
+#Her opprettes et nytt kurs for en bruker og course_status.
+def new_course():
+    theme = request #from url
+    language = request #from url
+    database = db()
+    database.initiate_course(session["idUser"])
+    courseId = database.get_courseId()
+    database.new_course_status(theme, language, courseId)
+    status = 1
+    return redirect(url_for('course', status))
+ 
 @app.route("/course", methods=['GET', 'POST'])
 def course():
-    return
-    #Når brukeren trykker på "start språkkurs" eller "fortsett" så skjer følgende:
+    database = db()
+    questions = 5 #get from url
     
-    #Hvis brukeren starter et nytt språkkurs:
-        #Opprett et nytt activecourse med brukers id som FK
-        #Sett opp en ny course-status med (level, themeId, språk (norsk = 1), courseId som FK)
-        #Hent ut x-antall oppgaveId´er hvor level = user.level og theme = user.theme og sett dem i en liste
-        #sjekk oppgaveId fra første element listen og sjekk om det er dropdown, multiple choice eller drag and drop
-        #send følgende til oppgave-stien den tilhører:
-            #listen med alle oppgavene blir sendt til riktig oppgavetype
+    #Hvis det kommer inn en liste med spørsmål
+    if questions:
+        id = questions[0] #finne første tall (her finner jeg kun hele tallet)
 
-    #Hvis brukeren fortsetter et språkkurs:
+        if id == 1:
+            return redirect(url_for("multiple_choice", questions = questions))
+        elif id == 3:
+            return redirect(url_for("drop_down", questions = questions))
+        elif id == 5:
+            return redirect(url_for("drag_and_drop", questions = questions))
+    
+    #Hvis det er første gang brukeren kommer inn eller kommer inn i kurset igjen
+    else:
+        questions = database.get_new_questions(session["idUser"])
+        id = questions[0] #finne første tall (her finner jeg kun hele tallet)
 
-    #Hvis det kommer inn en liste med oppgaver:
+        if id == 1:
+            return redirect(url_for("multiple_choice", questions = questions))
+        elif id == 3:
+            return redirect(url_for("drop_down", questions = questions))
+        elif id == 5:
+            return redirect(url_for("drag_and_drop", questions = questions))
     
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
