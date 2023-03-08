@@ -58,23 +58,30 @@ def multiple_choice():
     return render_template('multiple_choice.html', question=question, choices=choices)
 
 
+
 @app.route('/drag_and_drop', methods=["GET", 'POST'])
 def drag_and_drop() -> 'html':
     question = "Jeg like eple."
-    dragdrop = [{"id": 2, "text": "apple"}, {"id": 1, "text": "I"}, {"id": 3, "text": "like"}]
+    dragdrop = [{"id": 3, "text": "apple"}, {"id": 1, "text": "I"}, {"id": 2, "text": "like"}]
 
     if request.method == 'POST':
-        answer = int(request.form['answer'])
         correct_answer = [q["id"] for q in dragdrop]
+        correct_answer.sort()
+        order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
+        new_dragdrop = []
+        for item in order:
+            for elem in dragdrop:
+                if elem['id'] == item:
+                    new_dragdrop.append(elem)
 
-        if answer == correct_answer:
+        if order == correct_answer:
             flash(f'Correct!', "success")
 
         else:
             flash(f'Wrong!', "danger")
+        return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question)
 
-
-    return render_template('drag_and_drop.html', dragdrop= dragdrop,question=question)
+    return render_template('drag_and_drop.html', dragdrop=dragdrop, question=question)
 
 
 

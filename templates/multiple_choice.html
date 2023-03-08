@@ -34,6 +34,8 @@
   {% endfor %}
 {% endif %}
 {% endwith %}
+
+
 <div class="d-flex justify-content-center px-5 py-5 vh-100">
     <div class="container m-2">
       <div class="card" style="border: none">
@@ -83,8 +85,8 @@
         }
     }
 
-
 </script>
+
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 <script>
@@ -99,8 +101,6 @@ function disableForm() {
 {% endif %}
 {% endwith %}
 
-
-  
 
 
         {% endblock %}
