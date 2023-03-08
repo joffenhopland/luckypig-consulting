@@ -43,6 +43,9 @@ def learn():
 @app.route("/new-course", methods=['GET', 'POST'])
 #Her opprettes et nytt kurs for en bruker og course_status.
 def new_course():
+    ''' Kanskje vi bør flytte denne logikken inn i course ruten? 
+        Første gang en bruker starter et kurs så blir det opprettet ett nytt kurs,
+        viss ikke så fortsetter man på kurset man allerede har startet'''
     theme = request #from url
     language = request #from url
     database = db()
@@ -55,7 +58,7 @@ def new_course():
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     database = db()
-    questions = 5 #get from url
+    questions = [1] #get from url
     
     #Hvis det kommer inn en liste med spørsmål
     if questions:
