@@ -220,7 +220,7 @@ def login() -> 'html':
         userlogin = UserLogin()
 
         if not userlogin.isUser(email):
-            flash(f'Det er ingen bruker som er registrert med denne eposten "{email}". Vennligst prøv igjen eller registrer ny bruker', "danger")
+            flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")
             return render_template('login.html', title='Logge inn',
                                    form=form)
 
