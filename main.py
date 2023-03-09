@@ -12,7 +12,7 @@ from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
 import json
-from classes import MultipleChoiceExercise
+from classes import Exercise
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -97,7 +97,7 @@ def multiple_choice():
     exerciseId = 3003
     if request.method == 'POST':
         exerciseId = request.form['exerciseId']              #to be changed when the course is running
-        exercise = MultipleChoiceExercise(exerciseId)
+        exercise = Exercise(exerciseId,3)
         exercise.getExercise()
         print(f'exercise: {exercise}')
         question = exercise.question
@@ -124,7 +124,7 @@ def multiple_choice():
     # need to get a new exercise number from course and get the new exercise
     exerciseId
     print(f'exerciseId: {exerciseId}')
-    exercise = MultipleChoiceExercise(exerciseId)
+    exercise = Exercise(exerciseId, 3)
     exercise.getExercise()
     print(f'exercise: {exercise.exerciseID}')
     question = exercise.question

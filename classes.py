@@ -1,14 +1,14 @@
 from database import db
 
-class MultipleChoiceExercise:
-    def __init__(self, exerciseID):
+class Exercise:
+    def __init__(self, exerciseID, type):
         self.exerciseID = exerciseID
         self.level = 0
         self.score = 0
         self.number_asked = 0
         self.number_succeed = 0
         self.themeId = 0
-        self.type = 3
+        self.type = type
         self.question = ''
         self.answer = ''
         self.choices = []
