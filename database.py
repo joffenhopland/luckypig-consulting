@@ -222,3 +222,48 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
+
+    def course_status(self, id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT courseId from active_course where userId=(%s)", (id,))
+            result = cursor.fetchone()
+            if result == None:
+                return False
+            else:
+                return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
+    def initiate_course(self, id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO active_course (userId)
+                VALUES (%s)'''
+            insert = (id,)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def new_course_status(self, themeId, languageId, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO course_status (themeId, languageId, courseId)
+                VALUES (%s, %s, %s)'''
+            insert = (themeId, languageId, courseId)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+
+def main():
+    database = db()
+    database.initiate_course(2)
+main()

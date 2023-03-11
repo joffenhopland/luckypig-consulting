@@ -17,7 +17,7 @@ class db:
         return self
     
     def read_file(self):
-        data = pd.read_csv("new_questions.csv", delimiter=";", encoding= 'unicode_escape')
+        data = pd.read_csv("new_questions2.csv", delimiter=";", encoding= 'unicode_escape')
         for i in range(len(data)):
             line = data.iloc[i].tolist()
             line[1] = int(line[1])
@@ -115,7 +115,7 @@ class db:
                 print(err)
     
 
-#def main():
-#    database = db()
-#    database.read_file()
-#main()
+def main():
+    database = db()
+    database.read_file()
+main()

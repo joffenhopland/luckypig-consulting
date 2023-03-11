@@ -39,50 +39,69 @@ def home():
 
 @app.route("/learn")
 def learn():
-    return render_template("learn.html")
-
-@app.route("/new-course", methods=['GET', 'POST'])
-#Her opprettes et nytt kurs for en bruker og course_status.
-def new_course():
-    ''' Kanskje vi bør flytte denne logikken inn i course ruten?
-        Første gang en bruker starter et kurs så blir det opprettet ett nytt kurs,
-        viss ikke så fortsetter man på kurset man allerede har startet'''
-    theme = request #from url
-    language = request #from url
     database = db()
-    database.initiate_course(session["idUser"])
-    courseId = database.get_courseId()
-    database.new_course_status(theme, language, courseId)
-    status = 1
-    return redirect(url_for('course', status))
+    #Er det er kurs registrert på denne personen?
+    course_status = database.course_status(session["idUser"])
+    return render_template("learn.html", course_status = course_status)
+
 
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     database = db()
-    questions = [1] #get from url
+    course_status = request.arg.get("course_status")
+    questions = request.arg.get("questions")
 
-    #Hvis det kommer inn en liste med spørsmål
-    if questions:
-        id = questions[0] #finne første tall (her finner jeg kun hele tallet)
+    #new course
+    if course_status == False:
+        theme = request.arg.get("theme") #todo - sett dropdown tema lik 1 (kokk), 2 (bilmekaniker) eller 3 (finans)
+        language = 1
+        
+        #Vi lager et nytt active course for brukeren
+        database.initiate_course(session["idUser"])
+        #Vi henter id for det nye kurset
+        course_status = database.course_status(session["idUser"])
+        #Vi setter ny course_status for det kurset
+        database.new_course_status(theme, language, course_status)
+        questions = None
+        return url_for("course", course_status = course_status, questions = questions)
 
-        if id == 1:
-            return redirect(url_for("multiple_choice", questions = questions))
-        elif id == 3:
-            return redirect(url_for("drop_down", questions = questions))
-        elif id == 5:
-            return redirect(url_for("drag_and_drop", questions = questions))
+    #existing course - user returns or new course
+    if course_status and not questions: #set questions to None in user page
+        questions = database.get_new_questions(session["idUser"]) #todo - lage sql spørring
+        id = questions[0]
+        first = int(str(id)[0])
+        checknumber(first, questions)
+    
+    #existing course - user submit question
+    if course_status == 1 and questions:
+        
+        #Henter oppgaveId og setter question_done
+        prev_exercise = request.arg.get("prev_exercise")
+        database.question_done(prev_exercise)
 
-    #Hvis det er første gang brukeren kommer inn eller kommer inn i kurset igjen
-    else:
-        questions = database.get_new_questions(session["idUser"])
-        id = questions[0] #finne første tall (her finner jeg kun hele tallet)
-
-        if id == 1:
-            return redirect(url_for("multiple_choice", questions = questions))
-        elif id == 3:
-            return redirect(url_for("drop_down", questions = questions))
-        elif id == 5:
-            return redirect(url_for("drag_and_drop", questions = questions))
+        #Finner ID for neste spørsmål og sender det videre
+        id = questions[0]
+        first = int(str(id)[0])
+        checknumber(first, questions)
+    
+    
+    #user has done alle questions in one level and successrate is good
+    if course_status == 1 and len(questions) == 0 and database.success_rate(): 
+        flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
+        return url_for("home")
+    
+    #user has done alle questions in one level and successrate is NOT good
+    if course_status == 1 and len(questions) == 0 and database.success_rate(): 
+        flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
+        return url_for("home")
+    
+def checknumber(id, questions):
+    if id == 1:
+        return redirect(url_for("multiple_choice", questions = questions))
+    elif id == 3:
+        return redirect(url_for("drop_down", questions = questions))
+    elif id == 5:
+        return redirect(url_for("drag_and_drop", questions = questions))
 
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
