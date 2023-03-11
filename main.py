@@ -1,6 +1,8 @@
 import os
 import secrets
 import uuid
+import itertools
+import random
 
 from flask import Flask,flash,request,redirect,render_template, url_for,session
 from flask_mail import Mail, Message
@@ -40,7 +42,7 @@ def home():
 @app.route("/learn")
 def learn():
     database = db()
-    #Er det er kurs registrert på denne personen?
+    #Er det er kurs registrert på denne personen? 0 hvis ikke, courseId hvir ja
     course_status = database.course_status(session["idUser"])
     return render_template("learn.html", course_status = course_status)
 
@@ -53,7 +55,7 @@ def course():
 
     #new course
     if course_status == False:
-        theme = request.arg.get("theme") #todo - sett dropdown tema lik 1 (kokk), 2 (bilmekaniker) eller 3 (finans)
+        theme = 1 # request.arg.get("theme") #todo - sett dropdown tema lik 1 (kokk), 2 (bilmekaniker) eller 3 (finans)
         language = 1
         
         #Vi lager et nytt active course for brukeren
@@ -66,20 +68,27 @@ def course():
         return url_for("course", course_status = course_status, questions = questions)
 
     #existing course - user returns or new course
-    if course_status and not questions: #set questions to None in user page
-        questions = database.get_new_questions(session["idUser"]) #todo - lage sql spørring
+    if course_status and not questions: 
+        level = 1 #todo - hente fra DB eller annet
+        allQuestions = (database.get_new_questions(level, theme))
+        #gjør tuple om til list
+        allQuestionslst = list(itertools.chain(*allQuestions))
+        question_done = (database.get_questions_done(course_status))
+        #Gjør tuple om til list
+        question_donelst = list(itertools.chain(*question_done))
+        #Henter ut alle spørsmål brukeren ikke har gjort
+        questions = [x for x in allQuestions if x not in question_donelst]
+        #Setter spørsmålene i tilfeldig rekkefølge
+        random.shuffle(questions)
+
+        #Henter første oppgaveid, first er for å se hvilken oppgavetype det der. Sender videre for sjekk
         id = questions[0]
         first = int(str(id)[0])
         checknumber(first, questions)
     
     #existing course - user submit question
-    if course_status == 1 and questions:
+    if course_status and questions:
         
-        #Henter oppgaveId og setter question_done
-        prev_exercise = request.arg.get("prev_exercise")
-        database.question_done(prev_exercise)
-
-        #Finner ID for neste spørsmål og sender det videre
         id = questions[0]
         first = int(str(id)[0])
         checknumber(first, questions)

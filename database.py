@@ -1,4 +1,5 @@
 import mysql.connector
+import itertools
 
 
 class db:
@@ -262,8 +263,40 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def get_new_questions(self, level, theme):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT exerciseId from multiple_choice where level=(%s) and themeId=(%s) \
+                           UNION \
+                           SELECT exerciseId from drag_and_drop where level=(%s) and themeId=(%s) \
+                           UNION \
+                           SELECT exerciseId from drop_down where level=(%s) and themeId =(%s)",(level, theme, level, theme, level, theme,))
+            result = cursor.fetchall()
+            return result
+                
+        except mysql.connector.Error as err:
+            print(err)
+
+    def get_questions_done(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT exerciseId from question_done where courseId=(%s)", (courseId,))
+            result = cursor.fetchall()
+            if result == None:
+                return []
+            else:
+                return result
+        except mysql.connector.Error as err:
+            print(err)
+
 
 def main():
     database = db()
-    database.initiate_course(2)
+    f = database.get_new_questions(1, 1)
+    out = list(itertools.chain(*f))
+    z = [1003, 3003]
+    questions = [x for x in out if x not in z]
+    print(questions)
 main()
