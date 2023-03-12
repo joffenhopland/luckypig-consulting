@@ -14,7 +14,7 @@ from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
 import json
-from classes import Exercise
+from classes import Exercise, Dropdown
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -68,7 +68,8 @@ def course():
         return url_for("course", course_status = course_status, questions = questions)
 
     #existing course - user returns or new course
-    if course_status and not questions: 
+    if course_status and not questions:
+        theme = 1
         level = 1 #todo - hente fra DB eller annet
         allQuestions = (database.get_new_questions(level, theme))
         #gjør tuple om til list
@@ -160,7 +161,36 @@ def multiple_choice():
     choices = exercise.choices
     print(f'choices: {choices}')
     return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
+@app.route('/dropdown', methods=['GET', 'POST'])
+def dropdown():
+    exerciseId = 1010
+    #exerciseId = request.form['exerciseId']              #to be changed when the course is running
+    exercise = Dropdown(exerciseId, 1)
+    exercise.getExercise()
+    norwegian_question = exercise.question
+    english_question = exercise.question_translated
+    choices = exercise.choices
+    right_answer = exercise.answer
 
+    #to remove indicators of placement for the dropdown manu
+    blank_placeholders = '{ blank }', '{blank}'
+    for blank_placeholder in blank_placeholders:
+        if blank_placeholder in english_question:
+        # identify the position of the placeholder
+            placeholder_index = english_question.find(blank_placeholder)
+
+    if request.method == 'POST':
+        answer = request.form['answer']
+        if answer == right_answer:
+            flash(f'Correct!', "success")
+            exercise.number_succeed += 1
+            #exercise.score - score must also be updated eventually
+        else:
+            flash(f'Sorry, that is wrong. Try again.', "danger")
+
+        return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
+    else:
+        return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
 @app.route('/drag_and_drop', methods=["GET", 'POST'])
 def drag_and_drop() -> 'html':
     question = "Jeg like eple."

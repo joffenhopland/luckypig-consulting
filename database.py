@@ -175,7 +175,7 @@ class db:
             cursor = conn.cursor()
             if type == 1:
                 cursor.execute(
-                    "SELECT choice FROM drop_down WHERE dropId=(%s)", (exerciseID,))
+                    "SELECT choice FROM drop_down_choice WHERE dropId=(%s)", (exerciseID,))
             elif type == 3:
                 cursor.execute(
                     "SELECT choice FROM multiple_choice_choice WHERE multipleId=(%s)", (exerciseID,))

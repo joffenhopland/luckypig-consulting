@@ -46,3 +46,28 @@ class ActiveCourse:
         self.last_login = last_login
         self.languageId = languageId
         self.courseId = courseId
+
+class Dropdown(Exercise):
+    def __init__(self, exerciseID, type):
+        super().__init__(exerciseID, type)
+        self.question_translated = ""
+
+    def getExercise(self):
+        database = db()
+
+        #fill exercise info
+        (exerciseID, level, question, answer, score, number_asked, number_succeed, themeId, question_translated) = database.getExerciseByIdandType(self.exerciseID, self.type)
+        self.level = level
+        self.question = question
+        self.answer = answer
+        self.score = score
+        self.number_asked = number_asked
+        self.number_succeed = number_succeed
+        self.themeId = themeId
+        self.question_translated = question_translated
+
+        # fill option
+        choices = database.getOptionsByExerciseIdandType(self.exerciseID, self.type)
+        self.choices = choices
+    def updateExercise(self):
+        super().updateExercise()
