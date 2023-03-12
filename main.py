@@ -1,18 +1,17 @@
-import os
+import random
 import secrets
 import uuid
 
-from flask import Flask,flash,request,redirect,render_template, url_for,session
+from flask import Flask, flash, request, redirect, render_template, url_for, session
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 
+from classes import MultipleChoiceExercise, DragAndDropService
 from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
-import json
-from classes import MultipleChoiceExercise
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -133,29 +132,35 @@ def multiple_choice():
     print(f'choices: {choices}')
     return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
 
+
+
+dragAndDropService = DragAndDropService()
 @app.route('/drag_and_drop', methods=["GET", 'POST'])
 def drag_and_drop() -> 'html':
-    question = "Jeg like eple."
-    dragdrop = [{"id": 3, "text": "apple"}, {"id": 1, "text": "I"}, {"id": 2, "text": "like"}]
+    exerciseId = request.args['exerciseId']
+    exercise = dragAndDropService.getExercise(exerciseId)
+    question = exercise.question
+    choices = exercise.choices
 
     if request.method == 'POST':
-        correct_answer = [q["id"] for q in dragdrop]
-        correct_answer.sort()
+        correct_answer = exercise.answer
         order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
         new_dragdrop = []
+        user_answer = []
         for item in order:
-            for elem in dragdrop:
+            for elem in exercise.choices:
                 if elem['id'] == item:
                     new_dragdrop.append(elem)
+                    user_answer.append(elem['text'])
 
-        if order == correct_answer:
+        if " ".join(user_answer) == correct_answer:
             flash(f'Correct!', "success")
-
         else:
             flash(f'Wrong!', "danger")
-        return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question)
 
-    return render_template('drag_and_drop.html', dragdrop=dragdrop, question=question)
+        return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, disabled="disabled")
+    random.shuffle(choices)
+    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, disabled="")
 
 
 @ app.route('/register', methods=["GET", "POST"])

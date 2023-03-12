@@ -179,8 +179,14 @@ class db:
                 cursor.execute(
                     "SELECT choice FROM multiple_choice_choice WHERE multipleId=(%s)", (exerciseID,))
             elif type == 5:
+                #hent dictionary med text og id, ikke bare text per choice
                 cursor.execute(
-                    "SELECT choice FROM drag_and_drop WHERE dragId=(%s)", (exerciseID,))
+                    "SELECT choice, choiceId FROM drag_choices WHERE dragId=(%s)", (exerciseID,))
+                result = cursor.fetchall()
+                options = []
+                for option in result:
+                    options.append({"id":option[1],"text":option[0]})
+                return options
 
             result = cursor.fetchall()
             options = []
