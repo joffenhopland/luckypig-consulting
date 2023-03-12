@@ -72,7 +72,6 @@
                 <a href="{{ url_for('learn') }}">
                     <i class="bi bi-x-lg"></i>
                 </a>
-
                 <div class="card-header bg-transparent text-center px-5 mx-5 vh-100" style="border: none">
                     <h1 class="pb-5">Level: Bronse</h1>
                     <div class="pb-4"><h2>Drag og drop ord i riktig rekkefølge</h2></div>
@@ -82,7 +81,8 @@
                                 <h5 class="pb-5">{{ question }}</h5>
                             </div>
 
-                            <form class="vh-100" method="POST" action="{{ url_for('drag_and_drop') }}">
+                            <form class="vh-100" method="POST"
+                                  action="{{ url_for('drag_and_drop')+'?exerciseId=' + exerciseId }}">
 
                                 <ul class="list-group list-group-sortable">
                                     {% for q in dragdrop %}
@@ -97,24 +97,26 @@
 
                                 <div class="d-flex justify-content-around">
                                     <button type="button" class="btn btn-outline-secondary">Skip</button>
-                                    <button id="submit-btn" type="submit" class="btn btn-primary">Check</button>
-
-
+                                    <button
+                                            {{ disabled }}
+                                            id="submit-btn"
+                                            type="submit"
+                                            class="btn btn-primary">Check
+                                    </button>
                                 </div>
-                                <p>
-                                    {% with messages = get_flashed_messages(with_categories=true) %}
-                                        {% for category, message in messages %}
-                                            <div class="alert alert-{{ category }}">
-                                            <div class="d-flex justify-content-around">
-                                                <p>
-                                                    {{ message }}
-                                                </p>
-                                                <a href="{{ url_for('drag_and_drop') }}" class="btn btn-{{ category }}">Continue</a>
-                                            </div>
-                                        {% endfor %}
-                                    {% endwith %}
-
-
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ category }}">
+                                        <div class="d-flex justify-content-around">
+                                            <p>
+                                                {{ message }}
+                                            </p>
+                                            <a href="{{ url_for('drag_and_drop')+'?exerciseId=' + exerciseId }}"
+                                               class="btn btn-{{ category }}">Continue</a>
+                                        </div>
+                                    {% endfor %}
+                                {% endwith %}
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -122,40 +124,6 @@
             </div>
         </div>
     </div>
-
-
-    </script>
-
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const checkBtn = document.querySelector('#submit-btn');
-                    const draggables = document.querySelectorAll('.list-group-sortable li');
-
-                    checkBtn.addEventListener('click', function () {
-                        draggables.forEach(function (draggable) {
-                            draggable.setAttribute('draggable', false);
-                            draggable.classList.add('disabled');
-                        });
-                        checkBtn.disabled = true;
-                    });
-                });
-
-                // Disable all input elements and buttons in the form
-                function disableForm() {
-                    document.getElementsByTagName('form')[0].classList.add('disabled');
-                    document.getElementsByTagName('form')[0].querySelectorAll('input, button').forEach(function (el) {
-                        el.disabled = true;
-                    });
-                }
-
-                disableForm()
-            </script>
-        {% endif %}
-    {% endwith %}
-
 
 
     {# drag and drop script #}

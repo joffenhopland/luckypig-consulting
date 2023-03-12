@@ -1,14 +1,15 @@
-import os
+import random
 import secrets
 import uuid
 import itertools
 import random
 
-from flask import Flask,flash,request,redirect,render_template, url_for,session
+from flask import Flask, flash, request, redirect, render_template, url_for, session
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 
+from classes import MultipleChoiceExercise, DragAndDropService
 from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
@@ -57,7 +58,7 @@ def course():
     if course_status == False:
         theme = 1 # request.arg.get("theme") #todo - sett dropdown tema lik 1 (kokk), 2 (bilmekaniker) eller 3 (finans)
         language = 1
-        
+
         #Vi lager et nytt active course for brukeren
         database.initiate_course(session["idUser"])
         #Vi henter id for det nye kurset
@@ -86,25 +87,25 @@ def course():
         id = questions[0]
         first = int(str(id)[0])
         checknumber(first, questions)
-    
+
     #existing course - user submit question
     if course_status and questions:
-        
+
         id = questions[0]
         first = int(str(id)[0])
         checknumber(first, questions)
-    
-    
+
+
     #user has done alle questions in one level and successrate is good
-    if course_status == 1 and len(questions) == 0 and database.success_rate(): 
+    if course_status == 1 and len(questions) == 0 and database.success_rate():
         flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
         return url_for("home")
-    
+
     #user has done alle questions in one level and successrate is NOT good
-    if course_status == 1 and len(questions) == 0 and database.success_rate(): 
+    if course_status == 1 and len(questions) == 0 and database.success_rate():
         flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
         return url_for("home")
-    
+
 def checknumber(id, questions):
     if id == 1:
         return redirect(url_for("multiple_choice", questions = questions))
@@ -191,29 +192,37 @@ def dropdown():
         return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
     else:
         return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
+
+
+
+dragAndDropService = DragAndDropService()
+
 @app.route('/drag_and_drop', methods=["GET", 'POST'])
 def drag_and_drop() -> 'html':
-    question = "Jeg like eple."
-    dragdrop = [{"id": 3, "text": "apple"}, {"id": 1, "text": "I"}, {"id": 2, "text": "like"}]
+    exerciseId = request.args['exerciseId']
+    exercise = dragAndDropService.getExercise(exerciseId)
+    question = exercise.question
+    choices = exercise.choices
 
     if request.method == 'POST':
-        correct_answer = [q["id"] for q in dragdrop]
-        correct_answer.sort()
+        correct_answer = exercise.answer
         order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
         new_dragdrop = []
+        user_answer = []
         for item in order:
-            for elem in dragdrop:
+            for elem in exercise.choices:
                 if elem['id'] == item:
                     new_dragdrop.append(elem)
+                    user_answer.append(elem['text'])
 
-        if order == correct_answer:
+        if " ".join(user_answer) == correct_answer:
             flash(f'Correct!', "success")
-
         else:
             flash(f'Wrong!', "danger")
-        return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question)
 
-    return render_template('drag_and_drop.html', dragdrop=dragdrop, question=question)
+        return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, disabled="disabled")
+    random.shuffle(choices)
+    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, disabled="")
 
 
 @ app.route('/register', methods=["GET", "POST"])
