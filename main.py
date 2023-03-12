@@ -9,7 +9,7 @@ from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 
-from classes import MultipleChoiceExercise, DragAndDropService
+from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
