@@ -17,27 +17,28 @@ class db:
         return self
     
     def read_file(self):
-        data = pd.read_csv("new_questions2.csv", delimiter=";", encoding= 'unicode_escape')
+        data = pd.read_csv("new_questions2.csv", delimiter=";", encoding='ANSI')
         for i in range(len(data)):
             line = data.iloc[i].tolist()
+            print(line[3])
+            if line[0] == 1:
+                self.insert_drop(line)
+            elif line[0] == 3:
+               self.insert_multiple(line)
+            elif line[0] == 5:
+                self.insert_drag(line)
+    
+    def insert_drop(self, line):
+        try:
             line[1] = int(line[1])
             line[2] = int(line[2])
-            line[5] = int(line[5])
-            question = line[1:6]
-            choice = line[6:]
-            if line[0] == 1:
-                self.insert_drop(question, choice)
-            elif line[0] == 3:
-               self.insert_multiple(question, choice)
-            elif line[0] == 5:
-                self.insert_drag(question, choice)
-    
-    def insert_drop(self, question, choice):
-        try:
+            line[6] = int(line[6])
+            question = line[1:7]
+            choice = line[7:]
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO drop_down (level, themeId, question, answer, score)
-                VALUES (%s, %s, %s, %s, %s)'''
+            sql1 = '''INSERT INTO drop_down (level, themeId, question, question_translated, answer, score)
+                VALUES (%s, %s, %s, %s, %s, %s)'''
             cursor.execute(sql1, question)
             conn.commit()
             conn.close()
@@ -60,8 +61,13 @@ class db:
                 print(err)
 
     
-    def insert_multiple(self, question, choice):
+    def insert_multiple(self, line):
         try:
+            line[1] = int(line[1])
+            line[2] = int(line[2])
+            line[5] = int(line[5])
+            question = line[1:6]
+            choice = line[6:]
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO multiple_choice (level, themeId, question, answer, score)
@@ -115,7 +121,7 @@ class db:
                 print(err)
     
 
-def main():
-    database = db()
-    database.read_file()
-main()
+#def main():
+#    database = db()
+#    database.read_file()
+#main()
