@@ -55,8 +55,11 @@ def learn():
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     database = db()
-    course_status = request.args.get("course_status")
-    questions = request.args.get("questions")
+    # course_status = request.args.get("course_status")
+    course_status = database.course_status(session["idUser"])
+
+    questions = request.args.getlist("questions")
+    print(f'questions in /course: {questions}')
 
     print(f'course_status: {course_status}')
     print(f'questions: {questions}')
@@ -77,6 +80,7 @@ def course():
 
     #existing course - user returns or new course
     if course_status and not questions:
+        print("---not questions---")
         theme = 1
         level = 1 #todo - hente fra DB eller annet
         allQuestions = (database.get_new_questions(level, theme))
@@ -97,7 +101,9 @@ def course():
         # first = int(str(id)[0])
         first = 3
         view = checknumber(first)
-        return redirect(url_for(view, questions = q2))
+        exerciseId = q2.pop(0)
+        print(f'exerciseId in /course: {exerciseId}')
+        return redirect(url_for(view, questions = q2, exerciseId=exerciseId))
 
         #Henter første oppgaveid, first er for å se hvilken oppgavetype det der. Sender videre for sjekk
         #id = questions[0]
@@ -108,7 +114,7 @@ def course():
     #existing course - user submit question
     if course_status and questions:
 
-        id = questions[0]
+        # id = questions[0]
         # first = int(str(id)[0])
         first = 3
         view = checknumber(first)
@@ -123,7 +129,10 @@ def course():
         # Convert the list to a JSON string and encode it
         # questions_str = urllib.parse.quote(json.dumps(questions))
         # print(questions_str)
-        return redirect(url_for(view, questions = questions))
+        exerciseId = questions.pop(0)
+        print(f'exerciseId in /course: {exerciseId}')
+
+        return redirect(url_for(view, questions = questions, exerciseId=exerciseId))
 
 
 
@@ -156,13 +165,14 @@ def multiple_choice():
     # choices = ["I love food", "I made food", "I am making food", "Food is nice"]
     questions = request.args.getlist('questions')
     print(f'questions_str: {questions}')
+    exerciseId = request.args.get('exerciseId')
     # questions = eval(questions_str)
     # Decode the URL-encoded string and convert it back to a list
     # questions = json.loads(urllib.parse.unquote(questions_str))
 
     # print(f'questions_list: {questions_str}')
     if request.method == 'POST':
-        exerciseId = request.args.get('exerciseId')
+        # exerciseId = request.args.get('exerciseId')
         print(f'exerciseId: {exerciseId}')
         # exerciseId = request.form['exerciseId']              #to be changed when the course is running
         exercise = Exercise(exerciseId, 3)
@@ -190,7 +200,7 @@ def multiple_choice():
         exercise.updateExercise()
         return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId, questions=questions)
     # need to get a new exercise number from course and get the new exercise
-    exerciseId = questions.pop(0)
+    # exerciseId = questions.pop(0)
     print(f'exerciseId: {exerciseId}')
     exercise = Exercise(exerciseId, 3)
     exercise.getExercise()
