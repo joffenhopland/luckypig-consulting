@@ -302,7 +302,8 @@ def main():
     database = db()
     f = database.get_new_questions(1, 1)
     out = list(itertools.chain(*f))
-    z = [1003, 3003]
+    z = []
     questions = [x for x in out if x not in z]
-    print(questions)
+    q2 = questions[4:]
+    print(q2)
 main()

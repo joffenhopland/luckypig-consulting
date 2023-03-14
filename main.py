@@ -81,12 +81,15 @@ def course():
         #Henter ut alle spørsmål brukeren ikke har gjort
         questions = [x for x in allQuestions if x not in question_donelst]
         #Setter spørsmålene i tilfeldig rekkefølge
-        random.shuffle(questions)
-
-        #Henter første oppgaveid, first er for å se hvilken oppgavetype det der. Sender videre for sjekk
-        id = questions[0]
+        #random.shuffle(questions)
+        q2 = questions[4:]
+        id = q2[0]
         first = int(str(id)[0])
-        checknumber(first, questions)
+        checknumber(first, q2)
+        #Henter første oppgaveid, first er for å se hvilken oppgavetype det der. Sender videre for sjekk
+        #id = questions[0]
+        #first = int(str(id)[0])
+        #checknumber(first, questions)
 
     #existing course - user submit question
     if course_status and questions:
