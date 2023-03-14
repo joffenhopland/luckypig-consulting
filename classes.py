@@ -19,6 +19,7 @@ class Exercise:
         # fill exercise info
         (exerciseID, level, question, answer, score, number_asked, number_succeed,
          themeId) = database.getExerciseByIdandType(self.exerciseID, self.type)
+        self.exerciseID = exerciseID
         self.level = level
         self.question = question
         self.answer = answer

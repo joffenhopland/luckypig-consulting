@@ -17,6 +17,9 @@ from User import User
 import json
 from classes import Exercise, Dropdown
 
+import json
+import urllib.parse
+
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -45,17 +48,24 @@ def learn():
     database = db()
     #Er det er kurs registrert på denne personen? 0 hvis ikke, courseId hvir ja
     course_status = database.course_status(session["idUser"])
+    print(f'course_status: {course_status}')
     return render_template("learn.html", course_status = course_status)
 
 
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     database = db()
-    course_status = request.arg.get("course_status")
-    questions = request.arg.get("questions")
+    # course_status = request.args.get("course_status")
+    course_status = database.course_status(session["idUser"])
+
+    questions = request.args.getlist("questions")
+    print(f'questions in /course: {questions}')
+
+    print(f'course_status: {course_status}')
+    print(f'questions: {questions}')
 
     #new course
-    if course_status == False:
+    if course_status == False: 
         theme = 1 # request.arg.get("theme") #todo - sett dropdown tema lik 1 (kokk), 2 (bilmekaniker) eller 3 (finans)
         language = 1
 
@@ -70,6 +80,7 @@ def course():
 
     #existing course - user returns or new course
     if course_status and not questions:
+        print("---not questions---")
         theme = 1
         level = 1 #todo - hente fra DB eller annet
         allQuestions = (database.get_new_questions(level, theme))
@@ -79,44 +90,69 @@ def course():
         #Gjør tuple om til list
         question_donelst = list(itertools.chain(*question_done))
         #Henter ut alle spørsmål brukeren ikke har gjort
-        questions = [x for x in allQuestions if x not in question_donelst]
+        questions = [x for x in allQuestionslst if x not in question_donelst]
+        print(f'questions: {questions}')
+
         #Setter spørsmålene i tilfeldig rekkefølge
         #random.shuffle(questions)
-        q2 = questions[4:]
-        id = q2[0]
-        first = int(str(id)[0])
-        checknumber(first, q2)
+        q2 = questions[:2]
+        # id = q2[0]
+        # print(f'id: {id}')
+        # first = int(str(id)[0])
+        first = 3
+        view = checknumber(first)
+        exerciseId = q2.pop(0)
+        print(f'exerciseId in /course: {exerciseId}')
+        return redirect(url_for(view, questions = q2, exerciseId=exerciseId))
+
         #Henter første oppgaveid, first er for å se hvilken oppgavetype det der. Sender videre for sjekk
         #id = questions[0]
+        #print(f'id: {id}')
         #first = int(str(id)[0])
         #checknumber(first, questions)
 
     #existing course - user submit question
     if course_status and questions:
 
-        id = questions[0]
-        first = int(str(id)[0])
-        checknumber(first, questions)
+        # id = questions[0]
+        # first = int(str(id)[0])
+        first = 3
+        view = checknumber(first)
+        # # Convert the list to a string representation
+        # questions_str = str(questions)
+
+        # # Remove the square brackets at the beginning and end of the string
+        # questions_str = questions_str[1:-1]
+
+        # # Replace the commas with a comma and a space
+        # questions_str = questions_str.replace(",", ", ")
+        # Convert the list to a JSON string and encode it
+        # questions_str = urllib.parse.quote(json.dumps(questions))
+        # print(questions_str)
+        exerciseId = questions.pop(0)
+        print(f'exerciseId in /course: {exerciseId}')
+
+        return redirect(url_for(view, questions = questions, exerciseId=exerciseId))
+
 
 
     #user has done alle questions in one level and successrate is good
-    if course_status == 1 and len(questions) == 0 and database.success_rate():
+    if course_status and len(questions) == 0 and database.success_rate():
         flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
         return url_for("home")
 
     #user has done alle questions in one level and successrate is NOT good
-    if course_status == 1 and len(questions) == 0 and database.success_rate():
+    if course_status and len(questions) == 0 and database.success_rate():
         flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
         return url_for("home")
 
-def checknumber(id, questions):
+def checknumber(id):
     if id == 1:
-        return redirect(url_for("multiple_choice", questions = questions))
+        return "dropdown"
     elif id == 3:
-        return redirect(url_for("drop_down", questions = questions))
+        return "multiple_choice"
     elif id == 5:
-        return redirect(url_for("drag_and_drop", questions = questions))
-
+        return "drag_and_drop"
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
@@ -127,10 +163,19 @@ def multiple_choice():
     # making question and answer choices just for testing
     # question = "Jeg lager mat."
     # choices = ["I love food", "I made food", "I am making food", "Food is nice"]
-    exerciseId = 3003
+    questions = request.args.getlist('questions')
+    print(f'questions_str: {questions}')
+    exerciseId = request.args.get('exerciseId')
+    # questions = eval(questions_str)
+    # Decode the URL-encoded string and convert it back to a list
+    # questions = json.loads(urllib.parse.unquote(questions_str))
+
+    # print(f'questions_list: {questions_str}')
     if request.method == 'POST':
-        exerciseId = request.form['exerciseId']              #to be changed when the course is running
-        exercise = Exercise(exerciseId,3)
+        # exerciseId = request.args.get('exerciseId')
+        print(f'exerciseId: {exerciseId}')
+        # exerciseId = request.form['exerciseId']              #to be changed when the course is running
+        exercise = Exercise(exerciseId, 3)
         exercise.getExercise()
         print(f'exercise: {exercise}')
         question = exercise.question
@@ -153,9 +198,9 @@ def multiple_choice():
             flash(f'Wrong!', "danger")
         exercise.number_asked += 1
         exercise.updateExercise()
-        return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
+        return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId, questions=questions)
     # need to get a new exercise number from course and get the new exercise
-    exerciseId
+    # exerciseId = questions.pop(0)
     print(f'exerciseId: {exerciseId}')
     exercise = Exercise(exerciseId, 3)
     exercise.getExercise()
@@ -164,7 +209,8 @@ def multiple_choice():
     print(f'question: {question}')
     choices = exercise.choices
     print(f'choices: {choices}')
-    return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId)
+    return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId, questions=questions)
+
 @app.route('/dropdown', methods=['GET', 'POST'])
 def dropdown():
     exerciseId = 1010
