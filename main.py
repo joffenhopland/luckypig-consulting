@@ -353,7 +353,7 @@ def login() -> 'html':
             session["idUser"] = user.user_id
             session["role"] = user.role
             flash(f'Du er logget inn!', "success")
-            return render_template('learn.html')
+            return redirect(url_for('learn'))
 
         else:
             flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")
