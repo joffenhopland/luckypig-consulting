@@ -57,6 +57,7 @@ def course():
     database = db()
     # course_status = request.args.get("course_status")
     course_status = database.course_status(session["idUser"])
+    session['courseId'] = course_status
 
     questions = request.args.getlist("questions")
     print(f'questions in /course: {questions}')
@@ -180,7 +181,7 @@ def multiple_choice():
             # write new score to active_course
 
             #Need to be uncommented and tested:
-            #courseStatus = CourseStatus(courseId)
+            #courseStatus = CourseStatus(session['courseId'])
             #courseStatus.updatePoints(exercise.score)
 
         else:
@@ -494,6 +495,7 @@ def logout() -> 'html':
     session.pop("access", None)
     session.pop("idUser", None)
     session.pop("role", None)
+    session.pop("courseId", None)
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
 
