@@ -15,7 +15,7 @@ from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
 from User import User
 import json
-from classes import Exercise, Dropdown
+from classes import Exercise, Dropdown, CourseStatus
 
 import json
 import urllib.parse
@@ -173,11 +173,13 @@ def multiple_choice():
         if answer == right_answer:
             flash(f'Correct!', "success")
             exercise.number_succeed += 1
-            exercise.score
+
             # need to update user score
             # get current score from course_status
             # add exercise.score to the current score
             # write new score to active_course
+            #courseStatus = CourseStatus(courseId)
+            #courseStatus.updatePoints(exercise.score)
 
         else:
             flash(f'Wrong!', "danger")

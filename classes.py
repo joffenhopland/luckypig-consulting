@@ -38,7 +38,9 @@ class Exercise:
                                                    str(self.number_succeed))
 
 
+
 class ActiveCourse:
+
     def __init__(self, statusId, level, points, themeId, number_exercises, number_login_week, last_login, languageId,
                  courseId):
         self.statusId = statusId
@@ -50,6 +52,29 @@ class ActiveCourse:
         self.last_login = last_login
         self.languageId = languageId
         self.courseId = courseId
+
+class CourseStatus:
+    def __init__(self, courseID):
+        (statusId, level, points, themeId, number_exercises, number_login_week, last_login, languageId,
+         courseId) = self.getCourseStatusByCourseId(courseID)
+        self.statusId = statusId
+        self.level = level
+        self.points = points
+        self.themeId = themeId
+        self.number_exercises = number_exercises
+        self.number_login_week = number_login_week
+        self.last_login = last_login
+        self.languageId = languageId
+        self.courseId = courseId
+
+    def getCourseStatusByCourseId(self,courseID):
+        database = db()
+        database.getCourseStatusByCourseId(courseID)
+    def updatePoints(self, exerciseScore):
+        database = db()
+        database.updatePoints(self.statusId,str(exerciseScore))
+
+
 
 class Dropdown(Exercise):
     def __init__(self, exerciseID, type):

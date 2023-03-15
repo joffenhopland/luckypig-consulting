@@ -219,13 +219,31 @@ class db:
             print(err)
 
         
-    def getCourseStatus(self, courseId):
+    def getCourseStatusByCourseId(self, courseId):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT * FROM course_status WHERE courseId=(%s)", (courseId,))
             result = cursor.fetchone()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def updatePoints(self, course_statusId,exerciseScore):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT points FROM course_status WHERE statusId=(%s)", (course_statusId,))
+            result = cursor.fetchone()
+            totalPoints = result + exerciseScore
+            sql1 = '''UPDATE course_status
+                        SET points = (%s) WHERE statusId = (%s)'''
+            oppdater = (totalPoints, course_statusId)
+            cursor.execute(sql1, oppdater)
+            conn.commit()
+            conn.close()
             return result
         except mysql.connector.Error as err:
             print(err)
@@ -300,6 +318,7 @@ class db:
 
 def main():
     database = db()
+    print(database.getUser(email='cla040@uit.no'))
     f = database.get_new_questions(1, 1)
     out = list(itertools.chain(*f))
     z = []
