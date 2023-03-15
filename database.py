@@ -318,7 +318,6 @@ class db:
 
 def main():
     database = db()
-    print(database.getUser(email='cla040@uit.no'))
     f = database.get_new_questions(1, 1)
     out = list(itertools.chain(*f))
     z = []

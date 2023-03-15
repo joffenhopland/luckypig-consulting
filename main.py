@@ -178,6 +178,8 @@ def multiple_choice():
             # get current score from course_status
             # add exercise.score to the current score
             # write new score to active_course
+
+            #Need to be uncommented and tested:
             #courseStatus = CourseStatus(courseId)
             #courseStatus.updatePoints(exercise.score)
 
