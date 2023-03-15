@@ -216,13 +216,13 @@ def dropdown():
             placeholder_index = english_question.find(blank_placeholder)
 
     if request.method == 'POST':
-        answer = request.form['answer']
+        answer = request.form['blank_choice']
         if answer == right_answer:
             flash(f'Correct!', "success")
             exercise.number_succeed += 1
             #exercise.score - score must also be updated eventually
         else:
-            flash(f'Sorry, that is wrong. Try again.', "danger")
+            flash(f'Sorry, that is wrong. The answer was "{right_answer}".', "danger")
 
         return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
     else:
