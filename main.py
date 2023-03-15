@@ -57,9 +57,9 @@ def course():
     database = db()
     # course_status = request.args.get("course_status")
     course_status = database.course_status(session["idUser"])
-    session['courseId'] = course_status
+    session["courseId"] = course_status
 
-    questions = request.args.getlist("questions")
+    questions = session["questions"]
     print(f'questions in /course: {questions}')
 
     print(f'course_status: {course_status}')
@@ -76,11 +76,11 @@ def course():
         course_status = database.course_status(session["idUser"])
         #Vi setter ny course_status for det kurset
         database.new_course_status(theme, language, course_status)
-        questions = None
-        return url_for("course", course_status = course_status, questions = questions)
+        session["questions"] = []
+        return url_for("course", course_status = course_status)
 
     #existing course - user returns or new course
-    if course_status and not questions:
+    if course_status and questions == []:
         print("---not questions---")
         theme = 1
         level = 1 #todo - hente fra DB eller annet
@@ -102,9 +102,11 @@ def course():
         # first = int(str(id)[0])
         first = 3
         view = checknumber(first)
-        exerciseId = q2.pop(0)
-        print(f'exerciseId in /course: {exerciseId}')
-        return redirect(url_for(view, questions = q2, exerciseId=exerciseId))
+        session["questions"] = questions[:2]
+        session["exerciseId"] = session["questions"].pop(0)
+        print(f'questions in /course: {session["questions"]}')
+        print(f'exerciseId in /course: {session["exerciseId"]}')
+        return redirect(url_for(view))
 
         #Henter første oppgaveid, first er for å se hvilken oppgavetype det der. Sender videre for sjekk
         #id = questions[0]
@@ -113,7 +115,7 @@ def course():
         #checknumber(first, questions)
 
     #existing course - user submit question
-    if course_status and questions:
+    if course_status and not(questions == []):
 
         # id = questions[0]
         # first = int(str(id)[0])
@@ -125,15 +127,11 @@ def course():
         # # Remove the square brackets at the beginning and end of the string
         # questions_str = questions_str[1:-1]
 
-        # # Replace the commas with a comma and a space
-        # questions_str = questions_str.replace(",", ", ")
-        # Convert the list to a JSON string and encode it
-        # questions_str = urllib.parse.quote(json.dumps(questions))
-        # print(questions_str)
-        exerciseId = questions.pop(0)
-        print(f'exerciseId in /course: {exerciseId}')
+        session["exerciseId"] = session["questions"].pop(0)
+        print(f'questions in /course: {session["questions"]}')
+        print(f'exerciseId in /course: {session["exerciseId"]}')
 
-        return redirect(url_for(view, questions = questions, exerciseId=exerciseId))
+        return redirect(url_for(view))
 
 
 
@@ -158,12 +156,11 @@ def checknumber(id):
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
 
-    questions = request.args.getlist('questions')
-    print(f'questions_str: {questions}')
-    exerciseId = request.args.get('exerciseId')
+    exerciseId = session['exerciseId']
+    print(f'questions_str: {session["questions"]}')
+    print(f'exerciseId in /course: {exerciseId}')
 
     if request.method == 'POST':
-        print(f'exerciseId: {exerciseId}')
         exercise = Exercise(exerciseId, 3)
         exercise.getExercise()
         question = exercise.question
@@ -188,14 +185,14 @@ def multiple_choice():
             flash(f'Wrong!', "danger")
         exercise.number_asked += 1
         exercise.updateExercise()
-        return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId, questions=questions)
+        return render_template('multiple_choice.html', question=question, choices=choices)
 
     print(f'exerciseId: {exerciseId}')
     exercise = Exercise(exerciseId, 3)
     exercise.getExercise()
     question = exercise.question
     choices = exercise.choices
-    return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId, questions=questions)
+    return render_template('multiple_choice.html', question=question, choices=choices)
 
 @app.route('/dropdown', methods=['GET', 'POST'])
 def dropdown():
@@ -338,6 +335,7 @@ def login() -> 'html':
             session["username"] = user.username
             session["idUser"] = user.user_id
             session["role"] = user.role
+            session["questions"] = []
             flash(f'Du er logget inn!', "success")
             return redirect(url_for('learn'))
 
