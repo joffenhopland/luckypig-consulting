@@ -156,35 +156,20 @@ def checknumber(id):
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
-    #Her må dere ta i mot listen og pop ut (hente ut og fjern) oppgaveId
 
-    #get the exercise from the database: to be tested when the exercises are filled in the database
-
-    # making question and answer choices just for testing
-    # question = "Jeg lager mat."
-    # choices = ["I love food", "I made food", "I am making food", "Food is nice"]
     questions = request.args.getlist('questions')
     print(f'questions_str: {questions}')
     exerciseId = request.args.get('exerciseId')
-    # questions = eval(questions_str)
-    # Decode the URL-encoded string and convert it back to a list
-    # questions = json.loads(urllib.parse.unquote(questions_str))
 
-    # print(f'questions_list: {questions_str}')
     if request.method == 'POST':
-        # exerciseId = request.args.get('exerciseId')
         print(f'exerciseId: {exerciseId}')
-        # exerciseId = request.form['exerciseId']              #to be changed when the course is running
         exercise = Exercise(exerciseId, 3)
         exercise.getExercise()
-        print(f'exercise: {exercise}')
         question = exercise.question
-        print(f'question: {question}')
         choices = exercise.choices
-        print(f'choices: {choices}')
         right_answer = exercise.answer
         answer = request.form['answer']
-        #if answer == "I am making food":
+
         if answer == right_answer:
             flash(f'Correct!', "success")
             exercise.number_succeed += 1
@@ -199,16 +184,12 @@ def multiple_choice():
         exercise.number_asked += 1
         exercise.updateExercise()
         return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId, questions=questions)
-    # need to get a new exercise number from course and get the new exercise
-    # exerciseId = questions.pop(0)
+
     print(f'exerciseId: {exerciseId}')
     exercise = Exercise(exerciseId, 3)
     exercise.getExercise()
-    print(f'exercise: {exercise.exerciseID}')
     question = exercise.question
-    print(f'question: {question}')
     choices = exercise.choices
-    print(f'choices: {choices}')
     return render_template('multiple_choice.html', question=question, choices=choices, exerciseId=exerciseId, questions=questions)
 
 @app.route('/dropdown', methods=['GET', 'POST'])
