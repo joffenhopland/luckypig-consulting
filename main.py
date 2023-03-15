@@ -335,7 +335,9 @@ def login() -> 'html':
             session["username"] = user.username
             session["idUser"] = user.user_id
             session["role"] = user.role
+            session["courseId"] = 0
             session["questions"] = []
+            session["exerciseId"] = 0
             flash(f'Du er logget inn!', "success")
             return redirect(url_for('learn'))
 
@@ -494,6 +496,8 @@ def logout() -> 'html':
     session.pop("idUser", None)
     session.pop("role", None)
     session.pop("courseId", None)
+    session.pop("questions", None)
+    session.pop("exerciseId", None)
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
 
