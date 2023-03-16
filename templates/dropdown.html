@@ -26,7 +26,7 @@
                 <p>
                     {{ message }}
                 </p>
-                <a class="btn btn-{{ category }}" href="{{ url_for('dropdown') }}">Continue</a>
+                <a class="btn btn-{{ category }}" href="{{ url_for('course', questions=questions, course_status=course_status) }}">Continue</a>
             </div>
         </div>
     </div>
@@ -52,7 +52,7 @@
                                 <h5 class="pb-5">{{ nortext }}</h5>
                                 <br>
                                 <h5> {{ text[:placeholder_index] }}<!-- render the text before the placeholder -->
-                                    <select name="blank_choice">
+                                    <select name="answer">
                                         {% for choice in choices %}
                                         <option value="{{ choice }}">{{ choice }}</option>
                                         {% endfor %}

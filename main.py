@@ -54,7 +54,10 @@ def learn():
 def course():
     database = db()
     course_status = request.args.get("course_status")
+    print(f'57. course_status: {course_status}')
     session["courseId"] = course_status
+    print(f'58. session["courseId"]: {session["courseId"]}')
+
     questions = session["questions"]
    
     # course_status = database.course_status(session["idUser"]) - Her kan vi få en eller flere id´er inn.
@@ -63,7 +66,7 @@ def course():
     #print(f'questions: {questions}')
 
     #new course
-    if course_status == False: 
+    if session["courseId"] == "False": 
         session["theme"] = 1 #dette må sendes fra learn siden et kurs ikke har blitt opprettet
         session["language"] = 1 #Kan øke med flere språk i fremtiden
    
@@ -71,14 +74,19 @@ def course():
         database.initiate_course(session["idUser"])
         #Vi henter id for det nye kurset
         course_status = database.course_status(session["idUser"])
+        print(f'77. course_status: {course_status}')
+        session["courseId"] = course_status
         #Vi setter ny course_status for det kurset
         database.new_course_status(session["theme"], session["language"], course_status)
         session["questions"] = []
-        return url_for("course", course_status = course_status)
+        url_for("course", course_status = course_status)
 
     #existing course - user returns or new course
-    if session["courseId"] and questions == []:
+    if session["courseId"] != "False" and questions == []:
+        print(f'session["courseId"]: {session["courseId"]}')
         info = database.get_level_theme(session["courseId"])
+        print(f'info: {info}')
+
         theme = info[1] 
         session["level"] = info[0] 
         
@@ -90,27 +98,31 @@ def course():
         
         questions = [x for x in allQuestionslst if x not in question_donelst]
         random.shuffle(questions)
+        # print(f'questions: {questions}')
+        # temporary just to test multiple choice ex. 
+        # questions = [3002, 3003, 3004, 3005, 3006, 3007]
 
         #q2 = questions[:2]
         # id = q2[0]
         # print(f'id: {id}')
         # first = int(str(id)[0])
-        first = 3
-        view = checknumber(first)
-        session["questions"] = questions[:2]
+        
+        session["questions"] = questions
         session["exerciseId"] = session["questions"].pop(0)
+        first = int(str(session["exerciseId"])[0])
+        print(f'first: {first}')
+        view = checknumber(first)
         #print(f'questions in /course: {session["questions"]}')
         #print(f'exerciseId in /course: {session["exerciseId"]}')
         return redirect(url_for(view))
 
 
     #existing course - user submit question
-    if course_status and not(questions == []):
+    if session["courseId"] != "False" and not(questions == []):
 
         # id = questions[0]
         # first = int(str(id)[0])
-        first = 3
-        view = checknumber(first)
+
         # # Convert the list to a string representation
         # questions_str = str(questions)
 
@@ -118,6 +130,9 @@ def course():
         # questions_str = questions_str[1:-1]
 
         session["exerciseId"] = session["questions"].pop(0)
+        first = int(str(session["exerciseId"])[0])
+        print(f'first: {first}')        
+        view = checknumber(first)
         print(f'questions in /course: {session["questions"]}')
         print(f'exerciseId in /course: {session["exerciseId"]}')
 
@@ -125,7 +140,7 @@ def course():
 
 
     #user has done alle questions in one level and successrate is good
-    if course_status and len(questions) == 0 and database.success_rate(session["courseId"]):
+    if session["courseId"] != "False" and len(questions) == 0 and database.success_rate(session["courseId"]):
         level = session["level"]
         level += 1
         #Vi øker level med 1 og setter inn i DB
@@ -136,7 +151,7 @@ def course():
         return url_for("home")
 
     #user has done alle questions in one level and successrate is NOT good
-    if course_status and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
+    if session["courseId"] != "False" and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
         database.update_levelpoints(session["courseId"])
         database.delete_question_done(session["courseId"])
         flash(f'Du har dessverre ikke klart nok oppgaver og må gjøre nivået på nytt', "danger")
@@ -156,7 +171,7 @@ def multiple_choice():
     database = db()
     exerciseId = session['exerciseId']
     print(f'questions_str: {session["questions"]}')
-    print(f'exerciseId in /course: {exerciseId}')
+    print(f'exerciseId in /multiple-choice: {exerciseId}')
 
     if request.method == 'POST':
         exercise = Exercise(exerciseId, 3)
@@ -187,76 +202,128 @@ def multiple_choice():
         
         exercise.number_asked += 1
         exercise.updateExercise()
-        return render_template('multiple_choice.html', question=question, choices=choices)
+        return render_template('multiple_choice.html', question=question, choices=choices, course_status=session["courseId"])
 
     print(f'exerciseId: {exerciseId}')
     exercise = Exercise(exerciseId, 3)
     exercise.getExercise()
     question = exercise.question
     choices = exercise.choices
-    return render_template('multiple_choice.html', question=question, choices=choices)
+    return render_template('multiple_choice.html', question=question, choices=choices, course_status=session["courseId"])
 
 @app.route('/dropdown', methods=['GET', 'POST'])
 def dropdown():
-    exerciseId = 1010
-    #exerciseId = request.form['exerciseId']              #to be changed when the course is running
+    database = db()
+    exerciseId = session['exerciseId']
+    print(f'questions_str: {session["questions"]}')
+    print(f'exerciseId in /dropdown: {exerciseId}')       #to be changed when the course is running
+    # exercise = Dropdown(exerciseId, 1)
+    # exercise.getExercise()
+    # norwegian_question = exercise.question
+    # english_question = exercise.question_translated
+    # choices = exercise.choices
+    # right_answer = exercise.answer
+
+
+
+    if request.method == 'POST':
+        exercise = Dropdown(exerciseId, 1)
+        exercise.getExercise()
+        norwegian_question = exercise.question
+        english_question = exercise.question_translated
+        choices = exercise.choices
+        right_answer = exercise.answer
+        answer = request.form['answer']
+
+        if answer == right_answer:
+            flash(f'Correct!', "success")
+            exercise.number_succeed += 1
+            success = 1
+            database.question_done(exerciseId, success, session["level"], session["courseId"])
+
+            #exercise.score - score must also be updated eventually
+        else:
+            flash(f'Wrong!', "danger")
+            success = 0
+            database.question_done(exerciseId, success, session["level"], session["courseId"])
+
+            # flash(f'Sorry, that is wrong. The answer was "{right_answer}".', "danger")
+        exercise.number_asked += 1
+        exercise.updateExercise()
+            #to remove indicators of placement for the dropdown manu
+        blank_placeholders = '{ blank }', '{blank}'
+        for blank_placeholder in blank_placeholders:
+            if blank_placeholder in english_question:
+            # identify the position of the placeholder
+                placeholder_index = english_question.find(blank_placeholder)
+        return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index, course_status=session["courseId"])
+    
     exercise = Dropdown(exerciseId, 1)
     exercise.getExercise()
     norwegian_question = exercise.question
     english_question = exercise.question_translated
-    choices = exercise.choices
-    right_answer = exercise.answer
-
-    #to remove indicators of placement for the dropdown manu
+    choices = exercise.choices    
+        #to remove indicators of placement for the dropdown manu
     blank_placeholders = '{ blank }', '{blank}'
     for blank_placeholder in blank_placeholders:
         if blank_placeholder in english_question:
         # identify the position of the placeholder
             placeholder_index = english_question.find(blank_placeholder)
-
-    if request.method == 'POST':
-        answer = request.form['blank_choice']
-        if answer == right_answer:
-            flash(f'Correct!', "success")
-            exercise.number_succeed += 1
-            #exercise.score - score must also be updated eventually
-        else:
-            flash(f'Sorry, that is wrong. The answer was "{right_answer}".', "danger")
-
-        return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
-    else:
-        return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
+    return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index, course_status=session["courseId"])
 
 
 
 dragAndDropService = DragAndDropService()
 
-@app.route('/drag_and_drop', methods=["GET", 'POST'])
-def drag_and_drop() -> 'html':
-    exerciseId = request.args['exerciseId']
-    exercise = dragAndDropService.getExercise(exerciseId)
-    question = exercise.question
-    choices = exercise.choices
+@app.route('/drag-and-drop', methods=["GET", 'POST'])
+def drag_and_drop():
+    database = db()
+
+    exerciseId = session['exerciseId']
+    # exercise = dragAndDropService.getExercise(exerciseId)
+    # question = exercise.question
+    # choices = exercise.choices
 
     if request.method == 'POST':
-        correct_answer = exercise.answer
-        order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
+        exercise = dragAndDropService.getExercise(exerciseId)
+        # exercise = Exercise(exerciseId, 5)
+        # exercise.getExercise()
+        question = exercise.question
+        choices = exercise.choices
+        right_answer = exercise.answer
+        # order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
         new_dragdrop = []
         user_answer = []
-        for item in order:
-            for elem in exercise.choices:
-                if elem['id'] == item:
-                    new_dragdrop.append(elem)
-                    user_answer.append(elem['text'])
+        # for item in order:
+        #     for elem in exercise.choices:
+        #         if elem['id'] == item:
+        #             new_dragdrop.append(elem)
+        #             user_answer.append(elem['text'])
 
-        if " ".join(user_answer) == correct_answer:
+        if " ".join(user_answer) == right_answer:
             flash(f'Correct!', "success")
+            success = 1
+            database.question_done(exerciseId, success, session["level"], session["courseId"])
+
         else:
             flash(f'Wrong!', "danger")
-
+            success = 0
+            database.question_done(exerciseId, success, session["level"], session["courseId"])
+        exercise.number_asked += 1
+        # exercise.updateExercise()
         return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, disabled="disabled")
+    
+    print(f'exerciseId: {exerciseId}')
+    exercise = dragAndDropService.getExercise(exerciseId)
+
+    # exercise = Exercise(exerciseId, 5)
+    # exercise.getExercise()
+    question = exercise.question
+    choices = exercise.choices
     random.shuffle(choices)
     return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, disabled="")
+
+
 
 
 @ app.route('/register', methods=["GET", "POST"])
