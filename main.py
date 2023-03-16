@@ -54,7 +54,6 @@ def learn():
 def course():
     database = db()
     print(f'58. session["courseId"]: {session["courseId"]}')
-    print(f'58. session["courseId"]: {session["courseId"]}')
     questions = session["questions"]
     # course_status = database.course_status(session["idUser"]) - Her kan vi få en eller flere id´er inn.
     #print(f'questions in /course: {questions}')
