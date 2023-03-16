@@ -46,57 +46,52 @@ def home():
 @app.route("/learn")
 def learn():
     database = db()
-    #Er det er kurs registrert på denne personen? 0 hvis ikke, courseId hvir ja
     course_status = database.course_status(session["idUser"])
-    print(f'course_status: {course_status}')
     return render_template("learn.html", course_status = course_status)
 
 
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     database = db()
-    # course_status = request.args.get("course_status")
-    course_status = database.course_status(session["idUser"])
+    course_status = request.args.get("course_status")
     session["courseId"] = course_status
-
     questions = session["questions"]
-    print(f'questions in /course: {questions}')
-
-    print(f'course_status: {course_status}')
-    print(f'questions: {questions}')
+   
+    # course_status = database.course_status(session["idUser"]) - Her kan vi få en eller flere id´er inn.
+    #print(f'questions in /course: {questions}')
+    #print(f'course_status: {course_status}')
+    #print(f'questions: {questions}')
 
     #new course
     if course_status == False: 
-        theme = 1 # request.arg.get("theme") #todo - sett dropdown tema lik 1 (kokk), 2 (bilmekaniker) eller 3 (finans)
-        language = 1
-
+        session["theme"] = 1 #dette må sendes fra learn siden et kurs ikke har blitt opprettet
+        session["language"] = 1 #Kan øke med flere språk i fremtiden
+   
         #Vi lager et nytt active course for brukeren
         database.initiate_course(session["idUser"])
         #Vi henter id for det nye kurset
         course_status = database.course_status(session["idUser"])
         #Vi setter ny course_status for det kurset
-        database.new_course_status(theme, language, course_status)
+        database.new_course_status(session["theme"], session["language"], course_status)
         session["questions"] = []
         return url_for("course", course_status = course_status)
 
     #existing course - user returns or new course
-    if course_status and questions == []:
-        print("---not questions---")
-        theme = 1
-        level = 1 #todo - hente fra DB eller annet
-        allQuestions = (database.get_new_questions(level, theme))
-        #gjør tuple om til list
+    if session["courseId"] and questions == []:
+        info = database.get_level_theme(session["courseId"])
+        theme = info[1] 
+        session["level"] = info[0] 
+        
+        allQuestions = (database.get_new_questions(session["level"], theme))
         allQuestionslst = list(itertools.chain(*allQuestions))
-        question_done = (database.get_questions_done(course_status))
-        #Gjør tuple om til list
+        
+        question_done = (database.get_questions_done(session["courseId"]))
         question_donelst = list(itertools.chain(*question_done))
-        #Henter ut alle spørsmål brukeren ikke har gjort
+        
         questions = [x for x in allQuestionslst if x not in question_donelst]
-        print(f'questions: {questions}')
+        random.shuffle(questions)
 
-        #Setter spørsmålene i tilfeldig rekkefølge
-        #random.shuffle(questions)
-        q2 = questions[:2]
+        #q2 = questions[:2]
         # id = q2[0]
         # print(f'id: {id}')
         # first = int(str(id)[0])
@@ -104,15 +99,10 @@ def course():
         view = checknumber(first)
         session["questions"] = questions[:2]
         session["exerciseId"] = session["questions"].pop(0)
-        print(f'questions in /course: {session["questions"]}')
-        print(f'exerciseId in /course: {session["exerciseId"]}')
+        #print(f'questions in /course: {session["questions"]}')
+        #print(f'exerciseId in /course: {session["exerciseId"]}')
         return redirect(url_for(view))
 
-        #Henter første oppgaveid, first er for å se hvilken oppgavetype det der. Sender videre for sjekk
-        #id = questions[0]
-        #print(f'id: {id}')
-        #first = int(str(id)[0])
-        #checknumber(first, questions)
 
     #existing course - user submit question
     if course_status and not(questions == []):
@@ -134,16 +124,24 @@ def course():
         return redirect(url_for(view))
 
 
-
     #user has done alle questions in one level and successrate is good
-    if course_status and len(questions) == 0 and database.success_rate():
+    if course_status and len(questions) == 0 and database.success_rate(session["courseId"]):
+        level = session["level"]
+        level += 1
+        #Vi øker level med 1 og setter inn i DB
+        database.update_level(level, session["courseId"])
+        #Vi sletter level_points. Hvor mange poeng brukeren har oppnådd i det levelet
+        database.update_levelpoints(session["courseId"])
         flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
         return url_for("home")
 
     #user has done alle questions in one level and successrate is NOT good
-    if course_status and len(questions) == 0 and database.success_rate():
-        flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
+    if course_status and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
+        database.update_levelpoints(session["courseId"])
+        database.delete_question_done(session["courseId"])
+        flash(f'Du har dessverre ikke klart nok oppgaver og må gjøre nivået på nytt', "danger")
         return url_for("home")
+
 
 def checknumber(id):
     if id == 1:
@@ -155,7 +153,7 @@ def checknumber(id):
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
-
+    database = db()
     exerciseId = session['exerciseId']
     print(f'questions_str: {session["questions"]}')
     print(f'exerciseId in /course: {exerciseId}')
@@ -171,7 +169,8 @@ def multiple_choice():
         if answer == right_answer:
             flash(f'Correct!', "success")
             exercise.number_succeed += 1
-
+            success = 1
+            database.question_done(exerciseId, success, session["level"], session["courseId"])
             # need to update user score
             # get current score from course_status
             # add exercise.score to the current score
@@ -183,6 +182,9 @@ def multiple_choice():
 
         else:
             flash(f'Wrong!', "danger")
+            success = 0
+            database.question_done(exerciseId, success, session["level"], session["courseId"])
+        
         exercise.number_asked += 1
         exercise.updateExercise()
         return render_template('multiple_choice.html', question=question, choices=choices)
@@ -502,6 +504,6 @@ def logout() -> 'html':
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int("3000"))
+    app.run(debug=True, host="0.0.0.0", port=int("4000"))
 
 

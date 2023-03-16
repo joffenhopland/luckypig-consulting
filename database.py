@@ -315,13 +315,87 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def get_level_theme(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT level, themeId from course_status where courseId=(%s)", (courseId,))
+            result = cursor.fetchone()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
 
-def main():
-    database = db()
-    f = database.get_new_questions(1, 1)
-    out = list(itertools.chain(*f))
-    z = []
-    questions = [x for x in out if x not in z]
-    q2 = questions[4:]
-    print(q2)
-main()
+    def success_rate(self, courseId ):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT SUM(case sucess when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
+            result = cursor.fetchone()
+            if result[0] >= 0.8:
+                return True
+            else:
+                return False
+        except mysql.connector.Error as err:
+            print(err)
+
+        
+    def update_level(self, level, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE course_status
+            SET level = (%s) WHERE courseId = (%s)'''
+            update = (level, courseId)
+            cursor.execute(sql1, update)
+            conn.commit()
+            conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+
+    def update_levelpoints(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE course_status
+            SET level_points = (%s) WHERE courseId = (%s)'''
+            update = (0, courseId)
+            cursor.execute(sql1, update)
+            conn.commit()
+            conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+
+    def delete_question_done(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = "DELETE FROM question_done where courseId = (%s)", (courseId,)
+            cursor.execute(sql1)
+            conn.commit()
+            conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+
+    def question_done(self, exerciseId, success, level, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO question_done (exerciseId, success, courseId, level)
+                VALUES (%s, %s, %s, %s)'''
+            insert = (exerciseId, success, courseId, level)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+
+    
+
+
+#def main():
+#    database = db()
+#main()
