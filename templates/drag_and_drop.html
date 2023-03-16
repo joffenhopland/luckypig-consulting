@@ -55,7 +55,7 @@
                                 <p>
                                     {{ message }}
                                 </p>
-                                <a href="{{ url_for('course', course_status=course_status) }}" class="btn btn-{{ category }}">Continue</a>
+                                <a href="{{ url_for('course') }}" class="btn btn-{{ category }}">Continue</a>
                             </div>
                         </div>
 
@@ -96,7 +96,7 @@
 
 
                                 <div class="d-flex justify-content-around">
-                                    <button type="button" class="btn btn-outline-secondary">Skip</button>
+                                    <a href="{{ url_for('course') }}" class="btn btn-outline-secondary">Skip</a>
                                     <button
                                             {{ disabled }}
                                             id="submit-btn"
@@ -111,8 +111,7 @@
                                             <p>
                                                 {{ message }}
                                             </p>
-                                            <a href="{{ url_for('course', questions=questions, course_status=course_status) }}"
-                                               class="btn btn-{{ category }}">Continue</a>
+                                            <a href="{{ url_for('course') }}" class="btn btn-{{ category }}">Continue</a>
                                         </div>
                                     {% endfor %}
                                 {% endwith %}

@@ -26,7 +26,7 @@
                 <p>
                     {{ message }}
                 </p>
-                <a class="btn btn-{{ category }}" href="{{ url_for('course', questions=questions, course_status=course_status) }}">Continue</a>
+                <a class="btn btn-{{ category }}" href="{{ url_for('course') }}">Continue</a>
             </div>
         </div>
     </div>
@@ -66,7 +66,7 @@
                                 <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
                                 <input name="exerciseId" type="hidden" value="{{ exerciseId }}">
                                 <div class="d-flex justify-content-around">
-                                    <button class="btn btn-outline-secondary" type="button">Skip</button>
+                                    <a href="{{ url_for('course') }}" class="btn btn-outline-secondary">Skip</a>
                                     <button class="btn btn-primary" id="submit-btn" type="submit">Check
                                     </button>
                                 </div>

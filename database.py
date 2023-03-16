@@ -230,14 +230,15 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def updatePoints(self, course_statusId,exerciseScore):
+    def updatePoints(self, course_statusId, exerciseScore):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT points FROM course_status WHERE statusId=(%s)", (course_statusId,))
             result = cursor.fetchone()
-            totalPoints = result + exerciseScore
+            print(result)
+            totalPoints = int(result[0]) + int(exerciseScore)
             sql1 = '''UPDATE course_status
                         SET points = (%s) WHERE statusId = (%s)'''
             oppdater = (totalPoints, course_statusId)
@@ -396,6 +397,7 @@ class db:
     
 
 
-#def main():
-#    database = db()
-#main()
+def main():
+    database = db()
+    print(database.success_rate(22))
+main()
