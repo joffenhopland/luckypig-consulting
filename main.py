@@ -140,6 +140,7 @@ def course():
         database.update_level(level, session["courseId"])
         #Vi sletter level_points. Hvor mange poeng brukeren har oppnådd i det levelet
         database.update_levelpoints(session["courseId"])
+        session["init_course"] = 1
         flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
         return redirect(url_for("learn"))
 
@@ -147,6 +148,7 @@ def course():
     if session["courseId"] != "False" and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
         database.update_levelpoints(session["courseId"])
         database.delete_question_done(session["courseId"])
+        session["init_course"] = 1
         flash(f'Du har dessverre ikke klart nok oppgaver og må gjøre nivået på nytt', "danger")
         return redirect(url_for("learn"))
     return redirect(url_for("learn"))
