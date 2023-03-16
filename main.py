@@ -504,6 +504,6 @@ def logout() -> 'html':
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int("4000"))
+    app.run(debug=True, host="0.0.0.0", port=int("3000"))
 
 
