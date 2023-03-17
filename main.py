@@ -301,14 +301,14 @@ def drag_and_drop():
         question = exercise.question
         choices = exercise.choices
         right_answer = exercise.answer
-        # order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
+        order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
         new_dragdrop = []
         user_answer = []
-        # for item in order:
-        #     for elem in exercise.choices:
-        #         if elem['id'] == item:
-        #             new_dragdrop.append(elem)
-        #             user_answer.append(elem['text'])
+        for item in order:
+             for elem in exercise.choices:
+                 if elem['id'] == item:
+                     new_dragdrop.append(elem)
+                     user_answer.append(elem['text'])
 
         if " ".join(user_answer) == right_answer:
             flash(f'Correct!', "success")
