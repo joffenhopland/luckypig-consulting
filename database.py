@@ -326,6 +326,16 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def get_level_points(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT level_points from course_status where courseId=(%s)", (courseId,))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
     def success_rate(self, courseId ):
         try:
             conn = mysql.connector.connect(**self.configuration)
