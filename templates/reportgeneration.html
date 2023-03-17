@@ -25,9 +25,58 @@
     <div class="row justify-content-center">
       <div class="col-sm-12 col-md-8 col-lg-6">
         <div class="card shadow-lg">
-          <div class="card-body">
-            <div class="text-center">
-                <p>Rapportgenerering</p>
+            <div class="card-body">
+                <h1>Rapportgenerering</h1>
+                <p>Sorterer på:</p>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="globalt" checked>
+                    <label class="form-check-label" for="globalt">
+                      Globalt
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="gruppe1">
+                    <label class="form-check-label" for="Gruppe1">
+                      Gruppe1
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="gruppe2">
+                    <label class="form-check-label" for="gruppe2">
+                      Gruppe2
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="tema">
+                    <label class="form-check-label" for="tema">
+                      Tema
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="vanskelighetsgrad">
+                    <label class="form-check-label" for="vanskelighetsgrad">
+                      Vanskelighetsgrad
+                    </label>
+                  </div>
+                  <br>
+                <p>(Valgfritt) Se på vanskelige...:</p>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="ord">
+                    <label class="form-check-label" for="ord">
+                      Ord
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="oppgaver">
+                    <label class="form-check-label" for="oppgaver">
+                      Oppgaver
+                    </label>
+                  </div>
+                  <br>
+                    <button type="button" class="btn btn-primary">Rapportgenerere</button>
+                    <a href="{{ url_for('viewuser') }}">
+                        <button type="button" class="btn btn-primary">Tilbake</button>
+                    </a>
           </div>
       </div>
   </div>

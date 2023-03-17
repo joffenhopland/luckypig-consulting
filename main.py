@@ -580,7 +580,7 @@ def reportgeneration() -> 'html':
     if session["role"] == 3 or session["role"] == 2:
         return render_template('reportgeneration.html')
     else: #if user is not admin or teacher (2 or 3) -> create a logic that handles this problem
-        return render_template("learn.html") #(This is temporary)
+       return render_template("learn.html") #(This is temporary)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int("4000"))
