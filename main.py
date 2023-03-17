@@ -300,6 +300,7 @@ def drag_and_drop():
 
         if " ".join(user_answer) == right_answer:
             flash(f'Correct!', "success")
+            print("ok")
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
             #Increase the user points:
