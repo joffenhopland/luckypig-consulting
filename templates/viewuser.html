@@ -43,6 +43,12 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <button class="button-place" type="login">Endre passord</button>
             </form>
+            {%if role == "3" %}
+            <form action="{{url_for('reportgeneration')}}" method="GET">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="button-place" type="login">Rapportgenerering</button>
+            </form>
+            {% endif %}
         </div>
     </div>
 </div>
