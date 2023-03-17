@@ -61,7 +61,7 @@ def course():
     #print(f'questions: {questions}')
 
     #new course
-    if session["courseId"] == "False": 
+    if session["courseId"] == False: 
         session["theme"] = 1 #dette må sendes fra learn siden et kurs ikke har blitt opprettet
         session["language"] = 1 #Kan øke med flere språk i fremtiden
    
@@ -79,7 +79,7 @@ def course():
         url_for("course")
 
     #existing course - user returns or new course
-    if session["courseId"] != "False" and len(questions) == 0 and session["init_course"] == 1:
+    if session["courseId"] != False and len(questions) == 0 and session["init_course"] == 1:
         session["init_course"] = 0
         print(f'session["courseId"]: {session["courseId"]}')
         info = database.get_level_theme(session["courseId"])
@@ -111,16 +111,7 @@ def course():
 
 
     #existing course - user submit question
-    if session["courseId"] != "False" and len(questions) > 0:
-
-        # id = questions[0]
-        # first = int(str(id)[0])
-
-        # # Convert the list to a string representation
-        # questions_str = str(questions)
-
-        # # Remove the square brackets at the beginning and end of the string
-        # questions_str = questions_str[1:-1]
+    if session["courseId"] != False and len(questions) > 0:
 
         session["exerciseId"] = session["questions"].pop(0)
         first = int(str(session["exerciseId"])[0])
@@ -133,7 +124,7 @@ def course():
 
 
     #user has done alle questions in one level and successrate is good
-    if session["courseId"] != "False" and len(questions) == 0 and database.success_rate(session["courseId"]):
+    if session["courseId"] != False and len(questions) == 0 and database.success_rate(session["courseId"]):
         level = session["level"]
         level += 1
         #Vi øker level med 1 og setter inn i DB
@@ -145,12 +136,13 @@ def course():
         return redirect(url_for("learn"))
 
     #user has done alle questions in one level and successrate is NOT good
-    if session["courseId"] != "False" and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
+    if session["courseId"] != False and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
         database.update_levelpoints(session["courseId"])
         database.delete_question_done(session["courseId"])
         session["init_course"] = 1
         flash(f'Du har dessverre ikke klart nok oppgaver og må gjøre nivået på nytt', "danger")
         return redirect(url_for("learn"))
+    
     return redirect(url_for("learn"))
 
 
@@ -301,6 +293,10 @@ def drag_and_drop():
         #         if elem['id'] == item:
         #             new_dragdrop.append(elem)
         #             user_answer.append(elem['text'])
+
+        print(f'riktig svar: {right_answer}')
+        print(user_answer)
+        print(f'user ansvar {" ".join(user_answer)}')
 
         if " ".join(user_answer) == right_answer:
             flash(f'Correct!', "success")
@@ -578,6 +574,6 @@ def logout() -> 'html':
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int("3000"))
+    app.run(debug=True, host="0.0.0.0", port=int("4000"))
 
 

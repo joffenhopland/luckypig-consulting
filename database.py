@@ -330,7 +330,7 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT SUM(case sucess when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
+            cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
             result = cursor.fetchone()
             if result[0] >= 0.8:
                 return True
@@ -372,8 +372,7 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = "DELETE FROM question_done where courseId = (%s)", (courseId,)
-            cursor.execute(sql1)
+            cursor.execute("DELETE FROM question_done where courseId = (%s)", (courseId,))
             conn.commit()
             conn.close()
             return True
@@ -399,5 +398,7 @@ class db:
 
 def main():
     database = db()
-    print(database.success_rate(22))
+    #database.delete_question_done(25)
+#    print(database.success_rate(25))
+    database.update_level(2, 25)
 main()
