@@ -26,9 +26,15 @@
             <h5 class="card-title">Bronse</h5>
             <p class="card-text">Svar 80% riktig for å oppnå bronse og gå videre til neste nivå.</p>
           </div>
+          {% if session['level'] == 1 %}
           <div class="col-4 d-flex justify-content-end">
-            <a href="{{ url_for('course', course_status = course_status) }}" class="btn btn-primary">Start</a>
+            <a href="{{ url_for('course', level=1) }}" class="btn btn-primary">Start</a>
           </div>
+          {% else %}
+          <div class="col-4 d-flex justify-content-end">
+            <button type="button" class="btn btn-primary">Låst</button>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -39,9 +45,15 @@
             <h5 class="card-title">Sølv</h5>
             <p class="card-text">Du må oppnå bronse for å gå videre til sølv.</p>
           </div>
+           {% if session['level'] == 2 %}
+          <div class="col-4 d-flex justify-content-end">
+            <a href="{{ url_for('course', level=2) }}" class="btn btn-primary">Start</a>
+          </div>
+          {% else %}
           <div class="col-4 d-flex justify-content-end">
             <button type="button" class="btn btn-primary">Låst</button>
           </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -52,13 +64,20 @@
             <h5 class="card-title">Gull</h5>
             <p class="card-text">Du må oppnå sølv for å gå videre til gull.</p>
           </div>
+          {% if session['level'] == 3 %}
+          <div class="col-4 d-flex justify-content-end">
+            <a href="{{ url_for('course', level=3) }}" class="btn btn-primary">Start</a>
+          </div>
+          {% else %}
           <div class="col-4 d-flex justify-content-end">
             <button type="button" class="btn btn-primary">Låst</button>
           </div>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
+</div>
 </div>
   
   

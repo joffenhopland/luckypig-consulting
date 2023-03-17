@@ -262,6 +262,19 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def getCourseId(self, id, theme, level):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT courseId from active_course where userId=(%s)", (id,))
+            result = cursor.fetchone()
+            if result == None:
+                return False
+            else:
+                return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
     def initiate_course(self, id):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -330,7 +343,7 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT SUM(case sucess when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
+            cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
             result = cursor.fetchone()
             if result[0] >= 0.8:
                 return True
@@ -338,6 +351,7 @@ class db:
                 return False
         except mysql.connector.Error as err:
             print(err)
+
 
         
     def update_level(self, level, courseId):
@@ -372,8 +386,9 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = "DELETE FROM question_done where courseId = (%s)", (courseId,)
-            cursor.execute(sql1)
+            sql1 = "DELETE FROM question_done where courseId = (%s)"
+            delete = (courseId,)
+            cursor.execute(sql1, delete)
             conn.commit()
             conn.close()
             return True
@@ -399,5 +414,5 @@ class db:
 
 def main():
     database = db()
-    print(database.success_rate(22))
+    database.delete_question_done("21")
 main()
