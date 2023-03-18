@@ -100,6 +100,9 @@ def course():
         # questions = [3002, 3003, 3004, 3005, 3006, 3007]
 
         session["questions"] = questions
+        if len(session["questions"]) == 0:
+            flash(f'Du har gjort alle oppgavene', "success")
+            return redirect(url_for("learn"))
         session["exerciseId"] = session["questions"].pop(0)
         first = int(str(session["exerciseId"])[0])
         print(f'first: {first}')
@@ -120,7 +123,9 @@ def course():
 
         # # Remove the square brackets at the beginning and end of the string
         # questions_str = questions_str[1:-1]
-
+        if len(session["questions"]) == 0:
+            flash(f'Du har gjort alle oppgavene', "success")
+            return redirect(url_for("learn"))
         session["exerciseId"] = session["questions"].pop(0)
         first = int(str(session["exerciseId"])[0])
         print(f'first: {first}')
