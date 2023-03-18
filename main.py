@@ -138,19 +138,24 @@ def course():
 
     # user has done alle questions in one level and successrate is good
     if len(questions) == 0 and database.success_rate(session["courseId"]):
+        print(f'session["level"]: {session["level"]}')
         if session["level"] < 3:
             level = session["level"]
             level += 1
+            print(f'session["level"] if: {session["level"]}')
             # Vi øker level med 1 og setter inn i DB
             database.update_level(level, session["courseId"])
             # Vi sletter level_points. Hvor mange poeng brukeren har oppnådd i det levelet
             database.update_levelpoints(session["courseId"])
             session["level"] = level
-        #should we remove the question done once level done?
-        database.delete_question_done(session["courseId"])
-        session["init_course"] = 1
-        flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
-        return redirect(url_for("learn"))
+            #should we remove the question done once level done?
+            database.delete_question_done(session["courseId"])
+            session["init_course"] = 1
+            flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
+            return redirect(url_for("learn"))
+        else:
+            flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
+            return redirect(url_for("learn"))
 
     # user has done alle questions in one level and successrate is NOT good
     if len(questions) == 0 and database.success_rate(session["courseId"]) == False:
