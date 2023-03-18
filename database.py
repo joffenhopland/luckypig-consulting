@@ -364,13 +364,13 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def update_levelpoints(self, courseId):
+    def update_levelpoints(self, courseId, level_points):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             sql1 = '''UPDATE course_status
             SET level_points = (%s) WHERE courseId = (%s)'''
-            update = (0, courseId)
+            update = (level_points, courseId)
             cursor.execute(sql1, update)
             conn.commit()
             conn.close()
