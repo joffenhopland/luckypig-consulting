@@ -61,7 +61,7 @@ def course():
     questions = session["questions"]
 
     '''
-    #find course or create if None
+    #find course or create if None. This is needed if user takes courses in several themes
     if session["courseId"] == -1:
         session["theme"] = 1 #dette må sendes fra learn siden et kurs ikke har blitt opprettet
         session["language"] = 1 #Kan øke med flere språk i fremtiden
