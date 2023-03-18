@@ -132,9 +132,9 @@ def course():
         view = checknumber(first)
         print(f'questions in /course: {session["questions"]}')
         print(f'exerciseId in /course: {session["exerciseId"]}')
-        levelName = checklevel()
-        print(f"level: {levelName}")
-        return redirect(url_for(view, levelName = levelName))
+        # checkLevel sets session["level_name"] to the name of the level
+        checklevel()
+        return redirect(url_for(view))
 
     # user has done alle questions in one level and successrate is good
     if len(questions) == 0 and database.success_rate(session["courseId"]):
@@ -177,11 +177,14 @@ def checknumber(id):
 
 def checklevel():
     if session["level"] == 1:
-        return "Level: Bronze"
+        session["level_name"] = "Level: Bronse"
+        # return "Level: Bronze"
     elif session["level"] == 2:
-        return "Level: Sølv"
+        session["level_name"] = "Level: Sølv"
+        # return "Level: Sølv"
     elif session["level"] == 3:
-        return "Level: Gull"
+        session["level_name"] = "Level: Gull"
+        # return "Level: Gull"
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
@@ -221,14 +224,14 @@ def multiple_choice():
         
         exercise.number_asked += 1
         exercise.updateExercise()
-        return render_template('multiple_choice.html', question=question, choices=choices)
+        return render_template('multiple_choice.html', question=question, choices=choices, level_name=session["level_name"])
 
     print(f'exerciseId: {exerciseId}')
     exercise = Exercise(exerciseId, 3)
     exercise.getExercise()
     question = exercise.question
     choices = exercise.choices
-    return render_template('multiple_choice.html', question=question, choices=choices)
+    return render_template('multiple_choice.html', question=question, choices=choices, level_name=session["level_name"])
 
 @app.route('/dropdown', methods=['GET', 'POST'])
 def dropdown():
@@ -279,7 +282,7 @@ def dropdown():
             if blank_placeholder in english_question:
             # identify the position of the placeholder
                 placeholder_index = english_question.find(blank_placeholder)
-        return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
+        return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index, level_name=session["level_name"])
     
     exercise = Dropdown(exerciseId, 1)
     exercise.getExercise()
@@ -292,7 +295,7 @@ def dropdown():
         if blank_placeholder in english_question:
         # identify the position of the placeholder
             placeholder_index = english_question.find(blank_placeholder)
-    return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index)
+    return render_template('dropdown.html', choices=choices, nortext=norwegian_question, text=english_question, placeholder_index=placeholder_index, level_name=session["level_name"])
 
 
 
@@ -345,7 +348,7 @@ def drag_and_drop():
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
         # exercise.updateExercise()
-        return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, disabled="disabled")
+        return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, level_name=session["level_name"])
     
     print(f'exerciseId: {exerciseId}')
     exercise = dragAndDropService.getExercise(exerciseId)
@@ -355,7 +358,7 @@ def drag_and_drop():
     question = exercise.question
     choices = exercise.choices
     random.shuffle(choices)
-    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, disabled="")
+    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, level_name=session["level_name"])
 
 
 
