@@ -309,6 +309,7 @@ def drag_and_drop():
         question = exercise.question
         choices = exercise.choices
         right_answer = exercise.answer
+        print(f"equest.form.getlist('answer'): {request.form.getlist('answer')}")
         order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
         new_dragdrop = []
         user_answer = []
