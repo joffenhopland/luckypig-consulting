@@ -382,7 +382,9 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM question_done where courseId = (%s)", (courseId,))
+            sql1 = "DELETE FROM question_done where courseId = (%s)"
+            delete = (courseId,)
+            cursor.execute(sql1, delete)
             conn.commit()
             conn.close()
             return True

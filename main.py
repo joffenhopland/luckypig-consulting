@@ -106,7 +106,9 @@ def course():
         view = checknumber(first)
         # print(f'questions in /course: {session["questions"]}')
         # print(f'exerciseId in /course: {session["exerciseId"]}')
-        return redirect(url_for(view))
+        levelName = checklevel()
+        print(f"level: {levelName}")
+        return redirect(url_for(view, levelName = levelName))
 
     # existing course - user submit question
     if len(questions) > 0:
@@ -125,19 +127,22 @@ def course():
         view = checknumber(first)
         print(f'questions in /course: {session["questions"]}')
         print(f'exerciseId in /course: {session["exerciseId"]}')
-
-        return redirect(url_for(view))
+        levelName = checklevel()
+        print(f"level: {levelName}")
+        return redirect(url_for(view, levelName = levelName))
 
     # user has done alle questions in one level and successrate is good
     if len(questions) == 0 and database.success_rate(session["courseId"]):
-        level = session["level"]
-        level += 1
-        # Vi øker level med 1 og setter inn i DB
-        database.update_level(level, session["courseId"])
-        # Vi sletter level_points. Hvor mange poeng brukeren har oppnådd i det levelet
-        database.update_levelpoints(session["courseId"])
-        session["level"] = level
-        # session["courseId"] = -1
+        if session["level"] < 3:
+            level = session["level"]
+            level += 1
+            # Vi øker level med 1 og setter inn i DB
+            database.update_level(level, session["courseId"])
+            # Vi sletter level_points. Hvor mange poeng brukeren har oppnådd i det levelet
+            database.update_levelpoints(session["courseId"])
+            session["level"] = level
+        #should we remove the question done once level done?
+        database.delete_question_done(session["courseId"])
         session["init_course"] = 1
         flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
         return redirect(url_for("learn"))
@@ -146,7 +151,6 @@ def course():
     if len(questions) == 0 and database.success_rate(session["courseId"]) == False:
         database.update_levelpoints(session["courseId"])
         database.delete_question_done(session["courseId"])
-        # session["courseId"] = -1
         session["init_course"] = 1
         flash(f'Du har dessverre ikke klart nok oppgaver og må gjøre nivået på nytt', "danger")
         return redirect(url_for("learn"))
@@ -160,6 +164,14 @@ def checknumber(id):
         return "multiple_choice"
     elif id == 5:
         return "drag_and_drop"
+
+def checklevel():
+    if session["level"] == 1:
+        return "Level: Bronze"
+    elif session["level"] == 2:
+        return "Level: Sølv"
+    elif session["level"] == 3:
+        return "Level: Gull"
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
@@ -390,6 +402,7 @@ def verify(code):
 
 @app.route('/login', methods=["GET", "POST"])
 def login() -> 'html':
+    database = db()
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -592,13 +605,13 @@ def getCourseId(idUser, theme, language):
     database = db()
     courseId = database.course_status(idUser)
 
-    if courseId == None:
+    if courseId == False:
         # Vi lager et nytt active course for brukeren
         database.initiate_course(idUser)
         # Vi henter id for det nye kurset
         courseId = database.course_status(idUser)
         # Vi setter ny course_status for det kurset
-        database.new_course_status(theme, language, idUser)
+        database.new_course_status(theme, language, courseId)
     return courseId
 
 
