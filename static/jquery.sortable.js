@@ -6,13 +6,25 @@
  * Released under the MIT license.
  */
 (function ($) {
+
   var dragging, placeholders = $();
+
   $.fn.sortable = function (options) {
+
     var method = String(options);
     options = $.extend({
       connectWith: false,
       placeholderClass: ''
     }, options);
+
+   function updateAnswer() {
+    let answerArray = $('#order_form').val().split(',');
+    let answerString = answerArray.map(id => $('#' + id).text().trim()).join(' ');
+    console.log('Answer string:', answerString); // log answerString til konsollen
+    document.querySelector('#answer-display p').textContent = answerString;
+    return answerString;
+  }
+
     return this.each(function () {
       if (/^enable|disable|destroy$/.test(method)) {
         var dragitems = $(this).children($(this).data('items')).attr('draggable', method == 'enable');
@@ -22,19 +34,25 @@
         }
         return;
       }
+
       var isHandle, parent, index, items = $(this).children(options.items);
       var placeholder = $('<' + (/^ul|ol$/i.test(this.tagName) ? 'li' : /^tbody$/i.test(this.tagName) ? 'tr' : 'div') +
                           ' class="sortable-placeholder ' + options.placeholderClass + '">').html('&nbsp;');
+
       items.find(options.handle).mousedown(function () {
         isHandle = true;
       }).mouseup(function () {
         isHandle = false;
       });
+
       $(this).data('items', options.items)
       placeholders = placeholders.add(placeholder);
+
+
       if (options.connectWith) {
         $(options.connectWith).add(this).data('connectWith', options.connectWith);
       }
+
       items.attr('draggable', 'true').on('dragstart.h5s', function (e) {
         if (options.handle && !isHandle) {
           return false;
@@ -60,6 +78,7 @@
           dragging.parent().trigger('sortconnect', {
             item: dragging
           });
+           updateAnswer();
         }
         dragging = null;
       }).not('a[href], img').on('selectstart.h5s', function () {
@@ -69,12 +88,14 @@
         if (!items.is(dragging) && options.connectWith !== $(dragging).parent().data('connectWith')) {
           return true;
         }
+
         if (e.type == 'drop') {
           e.stopPropagation();
           placeholders.filter(':visible').after(dragging);
           dragging.trigger('dragend.h5s');
           return false;
         }
+
         e.preventDefault();
         e.originalEvent.dataTransfer.dropEffect = 'move';
         if (items.is(this)) {

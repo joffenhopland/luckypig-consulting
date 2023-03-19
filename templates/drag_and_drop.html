@@ -43,6 +43,8 @@
             left: 0;
             right: 0;
         }
+</style>
+
     </style>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -90,6 +92,10 @@
                                     {% endfor %}
                                 </ul>
 
+                                <div id="answer-display">
+                                  <p></p>
+                                </div>
+
 
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="answer" id="order_form" value="{{ order | join(',') }}">
@@ -132,6 +138,13 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="../static/jquery.sortable.js"></script>
     <script>
+         function updateAnswer() {
+            let answerArray = $('#order_form').val().split(',');
+            let answerString = answerArray.map(id => $('#' + id).text().trim()).join(' ');
+            console.log('Answer string:', answerString); // log answerString til konsollen
+            document.querySelector('#answer-display p').textContent = answerString;
+            return answerString;
+}
 
         $(function () {
             $('.list-group-sortable').sortable({
@@ -142,6 +155,7 @@
                     currentOrder.push(choice.id)
                 }
                 document.getElementById('order_form').value = currentOrder
+                updateAnswer();
                 //ui.item contains the current dragged element.
                 //Triggered when the user stopped sorting and the DOM position has changed.
             });
