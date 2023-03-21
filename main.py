@@ -66,7 +66,9 @@ def theme():
 
 @app.route("/learn")
 def learn():
-    return render_template("learn.html", total_points=total_points(), level=session['level_name'])
+    database = db()
+    total_points = database.getTotalPoints(session["idUser"])
+    return render_template("learn.html", total_points=total_points, level=session['level_name'])
 
 
 @app.route("/course", methods=['GET', 'POST'])
@@ -107,7 +109,8 @@ def course():
     # existing course - user returns or new course
     if session["courseId"] > -1 and len(questions) == 0 and session["init_course"] == 1:
         print(f'105. session["courseId"]: {session["courseId"]}')
-        level_points = 0
+        # level_points = 0
+        level_points = database.getTotalPoints(session["idUser"])
         session["level_points"] = level_points
         database.update_levelpoints(session["courseId"], level_points)
         session["init_course"] = 0
@@ -191,7 +194,8 @@ def course():
 
     # user has done alle questions in one level and successrate is NOT good
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
-        level_points = 0
+        # level_points = 0
+        level_points = database.getTotalPoints(session["idUser"])
         database.update_levelpoints(session["courseId"], level_points)
         database.delete_question_done(session["courseId"])
         session["init_course"] = 1
@@ -590,7 +594,9 @@ def updatepassword() -> 'html':
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Passordet er oppdatert!"
                 flash(f"Passordet er oppdatert!", "success")
-                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points(), level=session['level_name'])
+                database = db()
+                total_points = database.getTotalPoints(session["idUser"])
+                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'])
 
             else:
                 flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
@@ -608,7 +614,9 @@ def viewuser() -> 'html':
     userView = UserLogin()
     email = session["email"]
     user = User(*userView.getUserByEmail(email))
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points(), level=session['level_name'])
+    database = db()
+    total_points = database.getTotalPoints(session["idUser"])
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'])
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
@@ -630,7 +638,9 @@ def updateuser() -> 'html':
         session["username"] = username
         flash(f'Brukerinformasjonen er oppdatert!', "success")
         user = User(*userUpdate.getUserByEmail(email))
-        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points(), level=session['level_name'])
+        database = db()
+        total_points = database.getTotalPoints(session["idUser"])
+        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'])
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
 
@@ -655,15 +665,15 @@ def logout() -> 'html':
     return redirect(url_for('home'))
 
 
-def total_points():
-    if session["logged in"] == True:
-        userlogin = UserLogin()
-        email = session["email"]
-        user = User(*userlogin.getUserByEmail(email))
-        userID = user.user_id
-        database = db()
-        total_points = database.get_total_points(userID)
-        return total_points
+# def total_points():
+#     if session["logged in"] == True:
+#         userlogin = UserLogin()
+#         email = session["email"]
+#         user = User(*userlogin.getUserByEmail(email))
+#         userID = user.user_id
+#         database = db()
+#         total_points = database.get_total_points(userID)
+#         return total_points
 
 
 if __name__ == "__main__":
