@@ -262,6 +262,20 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def getCourseIdByUserIdAndTheme(self, userId, themeId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+            '''SELECT course_status.courseId FROM course_status 
+                INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                WHERE active_course.userId = (%s) AND course_status.themeId = (%s)
+                ORDER BY course_status.level DESC''', (userId, themeId))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
     def initiate_course(self, id):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -409,9 +423,10 @@ class db:
                 conn = mysql.connector.connect(**self.configuration)
                 cursor = conn.cursor()
                 cursor.execute(
-                '''SELECT distinct(themeId) FROM course_status 
+                '''SELECT distinct(theme) FROM course_status 
                     INNER JOIN active_course ON course_status.courseId=active_course.courseId 
-                    WHERE active_course.userId = (%s) ORDER BY course_status.themeId''',
+                    INNER JOIN theme ON theme.themeId = course_status.themeId
+                    WHERE active_course.userId = (%s) ORDER BY theme.theme''',
                     (userId,))
                 result = cursor.fetchall()
                 themes = []
@@ -427,9 +442,13 @@ class db:
                 cursor = conn.cursor()
                 cursor.execute("SELECT theme FROM theme")
                 result = cursor.fetchall()
-                return result
+                themes = []
+                for theme in result:
+                    themes.append(theme[0])
+                return themes
             except mysql.connector.Error as err:
                 print(err)
+
 
     
 
@@ -437,5 +456,5 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.getThemes())
+    print(database.getUserThemes(3))
 main()
