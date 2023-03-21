@@ -645,18 +645,6 @@ def logout() -> 'html':
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
 
-def getCourseId(idUser, theme, language):
-    database = db()
-    courseId = database.course_status(idUser)
-
-    if courseId == False:
-        # Vi lager et nytt active course for brukeren
-        database.initiate_course(idUser)
-        # Vi henter id for det nye kurset
-        courseId = database.course_status(idUser)
-        # Vi setter ny course_status for det kurset
-        database.new_course_status(theme, language, courseId)
-    return courseId
 
 def total_points():
     if session["logged in"] == True:
