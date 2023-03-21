@@ -108,7 +108,7 @@
 
                     <div class="card shadow-lg">
                         <div class="card-body">
-                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_fire.svg') }}" class="d-inline-block"> {{ 0 }}</h5>
+                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}" class="d-inline-block">Øvelse gjør mester</h5>
                             <div class="card-text text-secondary px-2">
                                 tre-dagers login streak
                             </div>
@@ -116,31 +116,49 @@
                     </div>
                     <div class="card shadow-lg">
                         <div class="card-body">
-                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_elements_star.svg') }}" class="d-inline-block">{{ total_points }}</h5>
+                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/gold_badge.svg') }}" class="d-inline-block">Gull</h5>
                             <div class="card-text text-secondary px-2">
-                                Total poeng
+                                Fullført gull-nivå
                             </div>
                         </div>
                     </div>
+                    {% if total_points >= 10 and total_points < 50 %}
                     <div class="card shadow-lg">
                         <div class="card-body">
-                            <h5 class="card-title">{% if level == "Bronse" %}
-                                <img src="{{ url_for('static', filename = 'assets/vecteezy_bronze_medal.svg') }}" class="d-inline-block">
-                                {% elif level == "Sølv" %}
-                                <img src="{{ url_for('static', filename = 'assets/vecteezy_silver_medal.svg') }}" class="d-inline-block">
-                                {% elif level == "Gull" %}
-                                <img src="{{ url_for('static', filename = 'assets/vecteezy_gold_medal.svg') }}" class="d-inline-block">
-                                {% endif %}{{ level }}</h5>
-                            <div class="card-text text-secondary px-2">
-                                Nåværende nivå
+                            <h5 class="card-title">
+                                <img src="{{ url_for('static', filename = 'assets/number_10.svg') }}" class="d-inline-block">10 points badge</h5>
+                                <div class="card-text text-secondary px-2">
+                                    Oppnå 10 poeng
+                                </div>
                             </div>
                         </div>
-                    </div>
+                                {% elif total_points >= 50 and total_points < 100 %}
+                                <div class="card shadow-lg">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <img src="{{ url_for('static', filename = 'assets/number_50.svg') }}" class="d-inline-block">50 points badge</h5>
+                                            <div class="card-text text-secondary px-2">
+                                                Oppnå 50 poeng
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                {% elif total_points >= 100 %}
+                                <div class="card shadow-lg">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <img src="{{ url_for('static', filename = 'assets/number_100.svg') }}" class="d-inline-block">100 points badge</h5>
+                                            <div class="card-text text-secondary px-2">
+                                                Oppnå 100 poeng
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
                     <div class="card shadow-lg">
                         <div class="card-body">
-                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_elements_star.svg') }}" class="d-inline-block">{{ 0 }}</h5>
+                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/first_place_badge.svg') }}" class="d-inline-block">Første plass</h5>
                             <div class="card-text text-secondary px-2">
-                                Plassering
+                                Oppnå første plass på leaderboard
                             </div>
                         </div>
                     </div>
