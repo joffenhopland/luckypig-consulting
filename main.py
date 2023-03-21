@@ -46,12 +46,12 @@ def home():
 @app.route("/theme")
 def theme():
     database = db()
-    themeId = request.args.get("themeId")
+    themeId = int(request.args.get("themeId"))
     #the user has just logged in and the program get his active courses
     if themeId == -1:
         userThemes = database.getUserThemes(session["idUser"])
         themes = database.getThemes()
-        return render_template("theme.html", userThemes = userThemes, themes = themes)
+        return render_template("theme.html", userThemes = userThemes, themes = themes, newUser = len(userThemes))
 
     # the user choose his theme
     else:

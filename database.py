@@ -450,5 +450,5 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.getUserThemes(2))
+    print(database.getThemes(2))
 main()
