@@ -58,6 +58,7 @@ def theme():
         #the user changes his theme (from dropdown choice)
         if session["themeId"] != themeId:
             session["courseId"] = -1
+            session["level"] = 1
             session["themeId"] = themeId
             return redirect(url_for("course"))
         else:
@@ -110,7 +111,7 @@ def course():
     if session["courseId"] > -1 and len(questions) == 0 and session["init_course"] == 1:
         print(f'105. session["courseId"]: {session["courseId"]}')
         # level_points = 0
-        level_points = database.getTotalPoints(session["idUser"])
+        level_points = database.get_level_points(session["courseId"])
         session["level_points"] = level_points
         database.update_levelpoints(session["courseId"], level_points)
         session["init_course"] = 0
