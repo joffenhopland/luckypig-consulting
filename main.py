@@ -596,7 +596,7 @@ def updatepassword() -> 'html':
                 flash(f"Passordet er oppdatert!", "success")
                 database = db()
                 total_points = database.getTotalPoints(session["idUser"])
-                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'])
+                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
 
             else:
                 flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
@@ -616,7 +616,7 @@ def viewuser() -> 'html':
     user = User(*userView.getUserByEmail(email))
     database = db()
     total_points = database.getTotalPoints(session["idUser"])
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'])
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
@@ -640,7 +640,7 @@ def updateuser() -> 'html':
         user = User(*userUpdate.getUserByEmail(email))
         database = db()
         total_points = database.getTotalPoints(session["idUser"])
-        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'])
+        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
 
@@ -663,6 +663,13 @@ def logout() -> 'html':
     session.pop("new_level", None)
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
+
+@app.route('/reportgeneration', methods=["GET", "POST"])    
+def reportgeneration() -> 'html':
+    if session["role"] == 3 or session["role"] == 2:
+        return render_template('reportgeneration.html')
+    else: #if user is not admin or teacher (2 or 3) -> create a logic that handles this problem
+       return render_template("learn.html") #(This is temporary)
 
 
 # def total_points():
