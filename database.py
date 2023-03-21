@@ -1,7 +1,6 @@
 import mysql.connector
 import itertools
 
-
 class db:
     def __init__(self) -> None:
         dbconfig = {'host': '34.121.34.57',
