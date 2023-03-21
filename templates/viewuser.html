@@ -35,17 +35,56 @@
             <h5>Brukernavn:  {{user.username}}</h5>
             <h5>Epost:      {{user.email}}</h5>
 
-            <form action="{{url_for('updateuser')}}" method="GET">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="button-place" type="login">Redigere</button>
-            </form>
-            <form action="{{url_for('updatepassword')}}" method="GET">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="button-place" type="login">Endre passord</button>
-            </form>
+                    <form action="{{ url_for('updateuser') }}" method="GET">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button class="button-place" type="login">Redigere</button>
+                    </form>
+
+                    <form action="{{ url_for('updatepassword') }}" method="GET">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button class="button-place" type="login">Endre passord</button>
+                    </form>
+
+                    <h5>Statistics</h5>
+                    <style>
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                    </style>
+                    <body>
+
+
+                    <table style="width:50%">
+                        <tr>
+                            <th><p>0</p>
+                                <p>Day streak</p></th>
+                            <th><p>{{ total_points }}</p>
+                                <p>Total score</p></th>
+
+                        </tr>
+
+                        <tr>
+                            <th><p>0</p>
+                                <p>Current level</p></th>
+                            <th><p>0</p>
+                                <p>Top 3</p></th>
+
+                        </tr>
+
+                        </tr>
+
+
+                    <form action="{{ url_for('updateuser') }}" method="GET">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button class="button-place" type="login">Redigere</button>
+                    </form>
+
+                        </table>
+
+
+                </div>
+            </div>
         </div>
     </div>
-</div>
-</div>
 </div>
 {% endblock %}

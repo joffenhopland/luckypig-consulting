@@ -45,7 +45,19 @@ def home():
 
 @app.route("/learn")
 def learn():
-    return render_template("learn.html")
+    return render_template("learn.html", total_points=total_points())
+
+
+def total_points():
+    if session["logged in"] == True:
+        userlogin = UserLogin()
+        email = session["email"]
+        user = User(*userlogin.getUserByEmail(email))
+        userID = user.user_id
+        database = db()
+        total_points = database.get_total_points(userID)
+
+        return total_points
 
 
 @app.route("/course", methods=['GET', 'POST'])
@@ -582,7 +594,8 @@ def updatepassword() -> 'html':
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Passordet er oppdatert!"
                 flash(f"Passordet er oppdatert!", "success")
-                return render_template('viewuser.html',user=user, title="Brukerinformasjon")
+                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points())
+
             else:
                 flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
                 message += "Passordene du skrev stemmer ikke overens. Prøv igjen!"
@@ -599,7 +612,7 @@ def viewuser() -> 'html':
     userView = UserLogin()
     email = session["email"]
     user = User(*userView.getUserByEmail(email))
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon")
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points())
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
@@ -621,7 +634,7 @@ def updateuser() -> 'html':
         session["username"] = username
         flash(f'Brukerinformasjonen er oppdatert!', "success")
         user = User(*userUpdate.getUserByEmail(email))
-        return render_template('viewuser.html',user=user, title="Brukerinformasjon")
+        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points())
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
 
