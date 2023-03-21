@@ -59,7 +59,9 @@ def theme():
         if session["themeId"] != themeId:
             session["courseId"] = -1
             session["themeId"] = themeId
-        return redirect(url_for("course"))
+            return redirect(url_for("course"))
+        else:
+            return redirect(url_for("learn"))
 
 
 @app.route("/learn")
@@ -71,6 +73,7 @@ def learn():
 def course():
     database = db()
     print(f'58. session["courseId"]: {session["courseId"]}')
+    print(f'58. session["themeId"]: {session["themeId"]}')
     questions = session["questions"]
    # level_points = database.get_level_points(session["courseId"])
     #session["level_points"] = level_points
@@ -94,7 +97,10 @@ def course():
             #database.new_course_status(session["theme"], session["language"], course_status)
             database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
 
+        session["level"] = database.get_level(session["courseId"])
         session["questions"] = []
+        print(f'105. session["courseId"]: {session["courseId"]}')
+        print(f'58. session["level"]: {session["level"]}')
         return redirect(url_for("learn"))
 
 
