@@ -87,6 +87,8 @@ def course():
     #find course or create if None. This is needed if user takes courses in several themes
     if session["courseId"] == -1:
         session["courseId"] = database.getCourseIdByUserIdAndTheme(session["idUser"], session['themeId'])
+        #To get change of theme from dropdown to work
+        session["init_course"] = 1
 
 
         #new course
