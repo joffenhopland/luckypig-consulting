@@ -97,6 +97,7 @@ def course():
             #database.new_course_status(session["theme"], session["language"], course_status)
             database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
 
+        level = database.get_level()
         session["questions"] = []
         return redirect(url_for("learn"))
 
