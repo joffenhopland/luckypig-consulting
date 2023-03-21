@@ -425,7 +425,10 @@ class db:
                         where userId = (%s);''', (userId,))
             result = cursor.fetchone()
             print(result[0])
-            return result[0]
+            if result[0] == None:
+                return 0
+            else:
+                return result[0]
         except mysql.connector.Error as err:
             print(err)
 
