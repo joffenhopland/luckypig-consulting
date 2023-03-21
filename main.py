@@ -65,9 +65,9 @@ def theme():
 @app.route("/learn")
 def learn():
     database = db()
-    totalPoint = database.getTotalPoints(session["userId"])
+    totalPoints = database.getTotalPoints(session["idUser"])
 
-    return render_template("learn.html")
+    return render_template("learn.html", totalPoints = totalPoints)
 
 
 @app.route("/course", methods=['GET', 'POST'])
@@ -83,7 +83,10 @@ def course():
     if session["courseId"] == -1:
         session["courseId"] = database.getCourseIdByUserIdAndTheme(session["idUser"], session['themeId'])
 
-        if session["courseId"] == None:
+
+        #new course
+        if session["courseId"] == None or session["new_level"] == 1:
+            session["new_level"] = 0
             #Vi lager et nytt active course for brukeren
             database.initiate_course(session["idUser"])
             #Vi henter id for det nye kurset
@@ -92,10 +95,11 @@ def course():
             print(f'77. course_status: {session["courseId"]}')
             #Vi setter ny course_status for det kurset
             #database.new_course_status(session["theme"], session["language"], course_status)
-            database.new_course_status(session["themeId"], session["language"], session["courseId"])
+            database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
 
         session["questions"] = []
         return redirect(url_for("learn"))
+
 
     # existing course - user returns or new course
     if session["courseId"] > -1 and len(questions) == 0 and session["init_course"] == 1:
@@ -162,32 +166,22 @@ def course():
     # user has done alle questions in one level and successrate is good
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]):
         print(f'session["level"]: {session["level"]}')
-        # level_points = database.get_level_points(session["courseId"])
         # print(f'level_points: {level_points}')
         if session["level"] < 3:
             level = session["level"]
             level += 1
             session["level"] = level
             print(f'session["level"] if: {session["level"]}')
-            # Vi øker level med 1 og setter inn i DB
-            #database.update_level(level, session["courseId"])
-            # Vi sletter level_points. Hvor mange poeng brukeren har oppnådd i det levelet
-            #level_points = 0
-            #session["level_points"] = level_points
-            #database.update_levelpoints(session["courseId"], level_points)
-
             #should we remove the question done once level done?
             database.delete_question_done(session["courseId"])
 
             #start a new course for the new level
             session["courseId"] = -1
             session["init_course"] = 1
+            session["new_level"] = 1
             flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
             return redirect(url_for("learn"))
         else:
-            #level_points = 0
-            #session["level_points"] = level_points
-            #database.update_levelpoints(session["courseId"], level_points)
             flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
             return redirect(url_for("learn"))
 
@@ -480,13 +474,10 @@ def login() -> 'html':
             session["courseId"] = -1
             session["themeId"] = -1
             session["level"] = 1
-            #session["courseId"] = getCourseId(session["idUser"],session["theme"],session["language"])
-            #(level,theme) = database.get_level_theme(session["courseId"])
-            #session["theme"] = theme
-            #session["level"] = level
             session["questions"] = []
             session["exerciseId"] = 0
             session["init_course"] = 1
+            session["new_level"] = 0
             flash(f'Du er logget inn!', "success")
             #return redirect(url_for('learn'))
             return redirect(url_for('theme', themeId = session["themeId"]))
@@ -648,21 +639,13 @@ def logout() -> 'html':
     session.pop("courseId", None)
     session.pop("questions", None)
     session.pop("exerciseId", None)
+    session.pop("language", None)
+    session.pop("themeId", None)
+    session.pop("level", None)
+    session.pop("init_course", None)
+    session.pop("new_level", None)
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
-
-def getCourseId(idUser, theme, language):
-    database = db()
-    courseId = database.course_status(idUser)
-
-    if courseId == False:
-        # Vi lager et nytt active course for brukeren
-        database.initiate_course(idUser)
-        # Vi henter id for det nye kurset
-        courseId = database.course_status(idUser)
-        # Vi setter ny course_status for det kurset
-        database.new_course_status(theme, language, courseId)
-    return courseId
 
 
 if __name__ == "__main__":

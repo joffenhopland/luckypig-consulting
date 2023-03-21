@@ -247,7 +247,7 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT courseId from active_course where userId=(%s)", (id,))
+            cursor.execute("SELECT courseId from active_course where userId=(%s) ORDER BY courseId DESC ", (id,))
             result = cursor.fetchone()
             if result == None:
                 return False
@@ -266,7 +266,10 @@ class db:
                 WHERE active_course.userId = (%s) AND course_status.themeId = (%s)
                 ORDER BY course_status.level DESC''', (userId, themeId))
             result = cursor.fetchone()
-            return result[0]
+            if result == None:
+                return result
+            else:
+                return result[0]
         except mysql.connector.Error as err:
             print(err)
 
@@ -283,13 +286,13 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def new_course_status(self, themeId, languageId, courseId):
+    def new_course_status(self, themeId, languageId, courseId, level):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO course_status (themeId, languageId, courseId)
-                VALUES (%s, %s, %s)'''
-            insert = (themeId, languageId, courseId)
+            sql1 = '''INSERT INTO course_status (themeId, languageId, courseId, level)
+                VALUES (%s, %s, %s, %s)'''
+            insert = (themeId, languageId, courseId,level)
             cursor.execute(sql1, insert)
             conn.commit()
             conn.close()
@@ -443,6 +446,16 @@ class db:
             except mysql.connector.Error as err:
                 print(err)
 
+    def get_level(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT level from course_status where courseId=(%s)", (courseId,))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
 
     
 
@@ -450,4 +463,5 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
+    print(database.get_level_theme(34))
 main()
