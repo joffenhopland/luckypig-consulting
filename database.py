@@ -423,7 +423,7 @@ class db:
                 conn = mysql.connector.connect(**self.configuration)
                 cursor = conn.cursor()
                 cursor.execute(
-                '''SELECT distinct(theme) FROM course_status 
+                '''SELECT distinct(course_status.themeId), theme.theme FROM course_status 
                     INNER JOIN active_course ON course_status.courseId=active_course.courseId 
                     INNER JOIN theme ON theme.themeId = course_status.themeId
                     WHERE active_course.userId = (%s) ORDER BY theme.theme''',
@@ -431,7 +431,7 @@ class db:
                 result = cursor.fetchall()
                 themes = []
                 for theme in result:
-                    themes.append(theme[0])
+                    themes.append(theme)
                 return themes
             except mysql.connector.Error as err:
                 print(err)
