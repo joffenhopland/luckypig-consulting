@@ -434,11 +434,11 @@ class db:
             try:
                 conn = mysql.connector.connect(**self.configuration)
                 cursor = conn.cursor()
-                cursor.execute("SELECT theme FROM theme")
+                cursor.execute("SELECT * FROM theme")
                 result = cursor.fetchall()
                 themes = []
                 for theme in result:
-                    themes.append(theme[0])
+                    themes.append(theme)
                 return themes
             except mysql.connector.Error as err:
                 print(err)
@@ -450,5 +450,4 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.getThemes(2))
 main()

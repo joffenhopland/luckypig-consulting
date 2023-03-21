@@ -59,7 +59,7 @@ def theme():
         if session["themeId"] != themeId:
             session["courseId"] = -1
             session["themeId"] = themeId
-        return render_template("course.html")
+        return redirect(url_for("course"))
 
 
 @app.route("/learn")
@@ -75,9 +75,9 @@ def course():
     database = db()
     print(f'58. session["courseId"]: {session["courseId"]}')
     questions = session["questions"]
-    level_points = database.get_level_points(session["courseId"])
-    session["level_points"] = level_points
-    print(f'level_points: {level_points}')
+   # level_points = database.get_level_points(session["courseId"])
+    #session["level_points"] = level_points
+    #print(f'level_points: {level_points}')
 
     #find course or create if None. This is needed if user takes courses in several themes
     if session["courseId"] == -1:
@@ -95,7 +95,7 @@ def course():
             database.new_course_status(session["themeId"], session["language"], session["courseId"])
 
         session["questions"] = []
-        return redirect(url_for("course"))
+        return redirect(url_for("learn"))
 
     # existing course - user returns or new course
     if session["courseId"] > -1 and len(questions) == 0 and session["init_course"] == 1:
