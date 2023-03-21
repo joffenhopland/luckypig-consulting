@@ -475,6 +475,8 @@ def login() -> 'html':
             session["exerciseId"] = 0
             session["init_course"] = 1
             session["new_level"] = 0
+            session["level_name"] = ""
+            checklevel()
             flash(f'Du er logget inn!', "success")
             #return redirect(url_for('learn'))
             return redirect(url_for('theme', themeId = session["themeId"]))
