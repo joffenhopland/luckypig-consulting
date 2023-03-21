@@ -30,58 +30,140 @@
             <h1 class="mb-3">{{title}}</h1>
             </div>
             <br>
-            <h5>Fornavn: {{user.firstname}}</h5>
-            <h5>Etternavn:  {{user.lastname}}</h5>
-            <h5>Brukernavn:  {{user.username}}</h5>
-            <h5>Epost:      {{user.email}}</h5>
-
+            <h5 class="text-secondary d-inline-block">Fornavn:</h5><h5 class="d-inline-block px-1">{{user.firstname}}</h5><br>
+            <h5 class="text-secondary d-inline-block">Etternavn:</h5><h5 class="d-inline-block px-1">{{user.lastname}}</h5><br>
+            <h5 class="text-secondary d-inline-block">Brukernavn:</h5><h5 class="d-inline-block px-1">{{user.username}}</h5><br>
+            <h5 class="text-secondary d-inline-block">Epost:</h5><h5 class="d-inline-block px-1">{{user.email}}</h5>
+            <div class="row my-3">
+                <div class="col-md-6">
                     <form action="{{ url_for('updateuser') }}" method="GET">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button class="button-place" type="login">Redigere</button>
+                        <button class="btn btn-primary" type="submit">Redigere</button>
                     </form>
-
+                </div>
+                <div class="col-md-6">
                     <form action="{{ url_for('updatepassword') }}" method="GET">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button class="button-place" type="login">Endre passord</button>
+                        <button class="btn btn-primary" type="submit">Endre passord</button>
                     </form>
+                </div>
+                <div class="col-md-6">
+                  <form action="{{ url_for('reportgeneration') }}" method="GET">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                      <button class="btn btn-primary" type="submit">Rapportgenerering</button>
+                  </form>
+              </div>
+                </div>
+                    <h5>Statistikk</h5>
+                    <div class="row my-3">
+                        <div class="col-md-6">
+                          <div class="card shadow-lg">
+                            <div class="card-body">
+                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_fire.svg') }}" class="d-inline-block"> {{ 0 }}</h5>
+                              <div class="card-text text-secondary px-2">
+                                Daglig login streak
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="card shadow-lg">
+                            <div class="card-body">
+                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_elements_star.svg') }}" class="d-inline-block">{{ total_points }}</h5>
+                              <div class="card-text text-secondary px-2">
+                                Total poeng
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="row my-3">
+                        <div class="col-md-6">
+                          <div class="card shadow-lg">
+                            <div class="card-body">
+                              <h5 class="card-title">{% if level == "Bronse" %}
+                                <img src="{{ url_for('static', filename = 'assets/vecteezy_bronze_medal.svg') }}" class="d-inline-block">
+                                {% elif level == "Sølv" %}
+                                <img src="{{ url_for('static', filename = 'assets/vecteezy_silver_medal.svg') }}" class="d-inline-block">
+                                {% elif level == "Gull" %}
+                                <img src="{{ url_for('static', filename = 'assets/vecteezy_gold_medal.svg') }}" class="d-inline-block">
+                                {% endif %}{{ level }}</h5>
+                              <div class="card-text text-secondary px-2">
+                                Nåværende nivå
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="card shadow-lg">
+                            <div class="card-body">
+                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/trophy.svg') }}" class="d-inline-block">{{ 0 }}</h5>
+                              <div class="card-text text-secondary px-2">
+                                Plassering
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                    <h5>Statistics</h5>
-                    <style>
-                        table, th, td {
-                            border: 1px solid black;
-                        }
-                    </style>
-                    <body>
+                      <h5>Prestasjoner</h5>
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}" class="d-inline-block">Øvelse gjør mester</h5>
+                            <div class="card-text text-secondary px-2">
+                                tre-dagers login streak
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/gold_badge.svg') }}" class="d-inline-block">Gull</h5>
+                            <div class="card-text text-secondary px-2">
+                                Fullført gull-nivå
+                            </div>
+                        </div>
+                    </div>
+                    {% if total_points >= 10 and total_points < 50 %}
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <img src="{{ url_for('static', filename = 'assets/number_10.svg') }}" class="d-inline-block">10 points badge</h5>
+                                <div class="card-text text-secondary px-2">
+                                    Oppnå 10 poeng
+                                </div>
+                            </div>
+                        </div>
+                                {% elif total_points >= 50 and total_points < 100 %}
+                                <div class="card shadow-lg">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <img src="{{ url_for('static', filename = 'assets/number_50.svg') }}" class="d-inline-block">50 points badge</h5>
+                                            <div class="card-text text-secondary px-2">
+                                                Oppnå 50 poeng
+                                            </div>
+                                        </div>
+                                    </div>
 
-
-                    <table style="width:50%">
-                        <tr>
-                            <th><p>0</p>
-                                <p>Day streak</p></th>
-                            <th><p>{{ total_points }}</p>
-                                <p>Total score</p></th>
-
-                        </tr>
-
-                        <tr>
-                            <th><p>0</p>
-                                <p>Current level</p></th>
-                            <th><p>0</p>
-                                <p>Top 3</p></th>
-
-                        </tr>
-
-                        </tr>
-
-
-                    <form action="{{ url_for('updateuser') }}" method="GET">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button class="button-place" type="login">Redigere</button>
-                    </form>
-
-                        </table>
-
-
+                                {% elif total_points >= 100 %}
+                                <div class="card shadow-lg">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <img src="{{ url_for('static', filename = 'assets/number_100.svg') }}" class="d-inline-block">100 points badge</h5>
+                                            <div class="card-text text-secondary px-2">
+                                                Oppnå 100 poeng
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                    <div class="card shadow-lg">
+                        <div class="card-body">
+                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/first_place_badge.svg') }}" class="d-inline-block">Første plass</h5>
+                            <div class="card-text text-secondary px-2">
+                                Oppnå første plass på leaderboard
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

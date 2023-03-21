@@ -1,7 +1,6 @@
 import mysql.connector
 import itertools
 
-
 class db:
     def __init__(self) -> None:
         dbconfig = {'host': '34.121.34.57',
@@ -230,22 +229,16 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def updatePoints(self, course_statusId, exerciseScore):
+    def getTotalPoints(self, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT points FROM course_status WHERE statusId=(%s)", (course_statusId,))
+                '''SELECT SUM(level_points) FROM course_status
+                INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                WHERE active_course.userId = (%s)''', (userId,))
             result = cursor.fetchone()
-            print(result)
-            totalPoints = int(result[0]) + int(exerciseScore)
-            sql1 = '''UPDATE course_status
-                        SET points = (%s) WHERE statusId = (%s)'''
-            oppdater = (totalPoints, course_statusId)
-            cursor.execute(sql1, oppdater)
-            conn.commit()
-            conn.close()
-            return result
+            return result[0]
         except mysql.connector.Error as err:
             print(err)
 
@@ -253,10 +246,27 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT courseId from active_course where userId=(%s)", (id,))
+            cursor.execute("SELECT courseId from active_course where userId=(%s) ORDER BY courseId DESC ", (id,))
             result = cursor.fetchone()
             if result == None:
                 return False
+            else:
+                return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
+    def getCourseIdByUserIdAndTheme(self, userId, themeId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+            '''SELECT course_status.courseId FROM course_status 
+                INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                WHERE active_course.userId = (%s) AND course_status.themeId = (%s)
+                ORDER BY course_status.level DESC''', (userId, themeId))
+            result = cursor.fetchone()
+            if result == None:
+                return result
             else:
                 return result[0]
         except mysql.connector.Error as err:
@@ -275,13 +285,13 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def new_course_status(self, themeId, languageId, courseId):
+    def new_course_status(self, themeId, languageId, courseId, level):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO course_status (themeId, languageId, courseId)
-                VALUES (%s, %s, %s)'''
-            insert = (themeId, languageId, courseId)
+            sql1 = '''INSERT INTO course_status (themeId, languageId, courseId, level)
+                VALUES (%s, %s, %s, %s)'''
+            insert = (themeId, languageId, courseId,level)
             cursor.execute(sql1, insert)
             conn.commit()
             conn.close()
@@ -425,15 +435,58 @@ class db:
                         where userId = (%s);''', (userId,))
             result = cursor.fetchone()
             print(result[0])
+            if result[0] == None:
+                return 0
+            else:
+                return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+    def getUserThemes(self, userId):
+            try:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                cursor.execute(
+                '''SELECT distinct(course_status.themeId), theme.theme FROM course_status 
+                    INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                    INNER JOIN theme ON theme.themeId = course_status.themeId
+                    WHERE active_course.userId = (%s) ORDER BY theme.theme''',
+                    (userId,))
+                result = cursor.fetchall()
+                themes = []
+                for theme in result:
+                    themes.append(theme)
+                return themes
+            except mysql.connector.Error as err:
+                print(err)
+
+    def getThemes(self):
+            try:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM theme")
+                result = cursor.fetchall()
+                themes = []
+                for theme in result:
+                    themes.append(theme)
+                return themes
+            except mysql.connector.Error as err:
+                print(err)
+
+    def get_level(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT level from course_status where courseId=(%s)", (courseId,))
+            result = cursor.fetchone()
             return result[0]
         except mysql.connector.Error as err:
             print(err)
 
 
 
+
 def main():
     database = db()
     #database.delete_question_done(25)
-#    print(database.success_rate(25))
-    database.update_level(2, 25)
+    print(database.get_level_theme(34))
 main()

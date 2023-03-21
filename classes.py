@@ -57,7 +57,7 @@ class CourseStatus:
     def __init__(self, courseID):
         print(self.getCourseStatusByCourseId(courseID))
         (statusId, level, points, themeId, number_exercises, number_login_week, last_login, languageId,
-         courseId,level_points) = self.getCourseStatusByCourseId(courseID)
+         courseId,level_points, active) = self.getCourseStatusByCourseId(courseID)
         self.statusId = statusId
         self.level = level
         self.points = points
@@ -68,6 +68,7 @@ class CourseStatus:
         self.languageId = languageId
         self.courseId = courseId
         self.level_points = level_points
+        self.active = active
 
     def getCourseStatusByCourseId(self,courseID):
         database = db()
