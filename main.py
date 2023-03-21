@@ -43,6 +43,18 @@ app.secret_key = secrets.token_urlsafe(16)
 def home():
     return render_template("mainPage.html")
 
+@app.route("/theme")
+def theme():
+    database = db()
+    #the user has just logged in and the program get his active courses
+    if session["theme"] == -1:
+        userThemes = database.getUserThemes(session["idUser"])
+        themes = database.get
+        return render_template("theme.html", userThemes = userThemes, themes = themes)
+
+    return render_template("learn.html")
+
+
 @app.route("/learn")
 def learn():
     return render_template("learn.html")
@@ -468,17 +480,19 @@ def login() -> 'html':
             session["idUser"] = user.user_id
             session["role"] = user.role
             session["language"] = 1
-            session["theme"] = 1
+            session["courseId"] = -1
+            session["theme"] = -1
             session["level"] = 1
-            session["courseId"] = getCourseId(session["idUser"],session["theme"],session["language"])
-            (level,theme) = database.get_level_theme(session["courseId"])
-            session["theme"] = theme
-            session["level"] = level
+            #session["courseId"] = getCourseId(session["idUser"],session["theme"],session["language"])
+            #(level,theme) = database.get_level_theme(session["courseId"])
+            #session["theme"] = theme
+            #session["level"] = level
             session["questions"] = []
             session["exerciseId"] = 0
             session["init_course"] = 1
             flash(f'Du er logget inn!', "success")
-            return redirect(url_for('learn'))
+            #return redirect(url_for('learn'))
+            return redirect(url_for('theme'))
 
         else:
             flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")

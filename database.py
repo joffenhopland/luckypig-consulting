@@ -404,6 +404,32 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def getUserThemes(self, userId):
+            try:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                cursor.execute(
+                '''SELECT distinct(themeId) FROM course_status 
+                    INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                    WHERE active_course.userId = (%s) ORDER BY course_status.themeId''',
+                    (userId,))
+                result = cursor.fetchall()
+                themes = []
+                for theme in result:
+                    themes.append(theme[0])
+                return themes
+            except mysql.connector.Error as err:
+                print(err)
+
+    def getThemes(self):
+            try:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                cursor.execute("SELECT theme FROM theme")
+                result = cursor.fetchall()
+                return result
+            except mysql.connector.Error as err:
+                print(err)
 
     
 
@@ -411,6 +437,5 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-#    print(database.success_rate(25))
-    database.update_level(2, 25)
+    print(database.getThemes())
 main()
