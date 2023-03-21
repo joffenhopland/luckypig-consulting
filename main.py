@@ -582,7 +582,7 @@ def updatepassword() -> 'html':
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Passordet er oppdatert!"
                 flash(f"Passordet er oppdatert!", "success")
-                return render_template('viewuser.html',user=user, title="Brukerinformasjon", role="3")
+                return render_template('viewuser.html',user=user, title="Brukerinformasjon")
             else:
                 flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
                 message += "Passordene du skrev stemmer ikke overens. Prøv igjen!"
@@ -599,7 +599,7 @@ def viewuser() -> 'html':
     userView = UserLogin()
     email = session["email"]
     user = User(*userView.getUserByEmail(email))
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon", role="3")
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon")
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
@@ -621,7 +621,7 @@ def updateuser() -> 'html':
         session["username"] = username
         flash(f'Brukerinformasjonen er oppdatert!', "success")
         user = User(*userUpdate.getUserByEmail(email))
-        return render_template('viewuser.html',user=user, title="Brukerinformasjon", role="3")
+        return render_template('viewuser.html',user=user, title="Brukerinformasjon")
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
 
@@ -654,14 +654,7 @@ def getCourseId(idUser, theme, language):
     return courseId
 
 
-@app.route('/reportgeneration', methods=["GET", "POST"])    
-def reportgeneration() -> 'html':
-    if session["role"] == 3 or session["role"] == 2:
-        return render_template('reportgeneration.html')
-    else: #if user is not admin or teacher (2 or 3) -> create a logic that handles this problem
-       return render_template("learn.html") #(This is temporary)
-
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int("4000"))
+    app.run(debug=True, host="0.0.0.0", port=int("3000"))
 
 
