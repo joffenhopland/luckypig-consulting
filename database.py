@@ -230,22 +230,16 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def updatePoints(self, course_statusId, exerciseScore):
+    def getTotalPoints(self, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT points FROM course_status WHERE statusId=(%s)", (course_statusId,))
+                '''SELECT SUM(level_points) FROM course_status
+                INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                WHERE active_course.userId = (%s)''', (userId,))
             result = cursor.fetchone()
-            print(result)
-            totalPoints = int(result[0]) + int(exerciseScore)
-            sql1 = '''UPDATE course_status
-                        SET points = (%s) WHERE statusId = (%s)'''
-            oppdater = (totalPoints, course_statusId)
-            cursor.execute(sql1, oppdater)
-            conn.commit()
-            conn.close()
-            return result
+            return result[0]
         except mysql.connector.Error as err:
             print(err)
 
@@ -456,5 +450,5 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.getUserThemes(3))
+    print(database.getUserThemes(2))
 main()

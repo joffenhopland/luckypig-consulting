@@ -46,7 +46,7 @@ def home():
 @app.route("/theme")
 def theme():
     database = db()
-    theme = request.args.get("theme")
+    theme = request.args.get("themeID")
     #the user has just logged in and the program get his active courses
     if theme == -1:
         userThemes = database.getUserThemes(session["idUser"])
@@ -64,6 +64,8 @@ def theme():
 
 @app.route("/learn")
 def learn():
+    database = db()
+    totalPoint = database.getTotalPoints(session["userId"])
     return render_template("learn.html")
 
 
@@ -182,9 +184,9 @@ def course():
             flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
             return redirect(url_for("learn"))
         else:
-            level_points = 0
-            session["level_points"] = level_points
-            database.update_levelpoints(session["courseId"], level_points)
+            #level_points = 0
+            #session["level_points"] = level_points
+            #database.update_levelpoints(session["courseId"], level_points)
             flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
             return redirect(url_for("learn"))
 
@@ -244,10 +246,6 @@ def multiple_choice():
             # add exercise.score to the current score
             # write new score to active_course
 
-            # Increase the users total points:
-            courseStatus = CourseStatus(session['courseId'])
-            print(f'exercise.score: {exercise.score}')
-            courseStatus.updatePoints(exercise.score)
             # Increase users current level points
             level_points = database.get_level_points(session["courseId"])
             level_points += 1
@@ -298,10 +296,6 @@ def dropdown():
             exercise.number_succeed += 1
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
-            #Increase the user points:
-            courseStatus = CourseStatus(session['courseId'])
-            print(f'exercise.score: {exercise.score}')
-            courseStatus.updatePoints(exercise.score)
             # Increase users current level points
             level_points = database.get_level_points(session["courseId"])
             level_points += 1
@@ -376,10 +370,6 @@ def drag_and_drop():
             print("ok")
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
-            #Increase the user points:
-            courseStatus = CourseStatus(session['courseId'])
-            print(f'exercise.score: {exercise.score}')
-            courseStatus.updatePoints(exercise.score)
             # Increase users current level points
             level_points = database.get_level_points(session["courseId"])
             level_points += 1
