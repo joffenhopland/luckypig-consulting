@@ -46,9 +46,9 @@ def home():
 @app.route("/theme")
 def theme():
     database = db()
-    theme = request.args.get("themeID")
+    themeId = request.args.get("themeId")
     #the user has just logged in and the program get his active courses
-    if theme == -1:
+    if themeId == -1:
         userThemes = database.getUserThemes(session["idUser"])
         themes = database.getThemes()
         return render_template("theme.html", userThemes = userThemes, themes = themes)
@@ -56,9 +56,9 @@ def theme():
     # the user choose his theme
     else:
         #the user changes his theme (from dropdown choice)
-        if session["theme"] != theme:
+        if session["themeId"] != themeId:
             session["courseId"] = -1
-            session["theme"] = theme
+            session["themeId"] = themeId
         return render_template("course.html")
 
 
@@ -66,6 +66,7 @@ def theme():
 def learn():
     database = db()
     totalPoint = database.getTotalPoints(session["userId"])
+
     return render_template("learn.html")
 
 
@@ -80,7 +81,7 @@ def course():
 
     #find course or create if None. This is needed if user takes courses in several themes
     if session["courseId"] == -1:
-        session["courseId"] = database.getCourseIdByUserIdAndTheme(session["idUser"], session['theme'])
+        session["courseId"] = database.getCourseIdByUserIdAndTheme(session["idUser"], session['themeId'])
 
         if session["courseId"] == None:
             #Vi lager et nytt active course for brukeren
@@ -91,7 +92,7 @@ def course():
             print(f'77. course_status: {session["courseId"]}')
             #Vi setter ny course_status for det kurset
             #database.new_course_status(session["theme"], session["language"], course_status)
-            database.new_course_status(session["theme"], session["language"], session["courseId"])
+            database.new_course_status(session["themeId"], session["language"], session["courseId"])
 
         session["questions"] = []
         return redirect(url_for("course"))
@@ -477,7 +478,7 @@ def login() -> 'html':
             session["role"] = user.role
             session["language"] = 1
             session["courseId"] = -1
-            session["theme"] = -1
+            session["themeId"] = -1
             session["level"] = 1
             #session["courseId"] = getCourseId(session["idUser"],session["theme"],session["language"])
             #(level,theme) = database.get_level_theme(session["courseId"])
@@ -488,7 +489,7 @@ def login() -> 'html':
             session["init_course"] = 1
             flash(f'Du er logget inn!', "success")
             #return redirect(url_for('learn'))
-            return redirect(url_for('theme', theme = session["theme"]))
+            return redirect(url_for('theme', themeId = session["themeId"]))
 
         else:
             flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")
