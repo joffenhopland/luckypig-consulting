@@ -106,6 +106,7 @@ def course():
 
     # existing course - user returns or new course
     if session["courseId"] > -1 and len(questions) == 0 and session["init_course"] == 1:
+        print(f'105. session["courseId"]: {session["courseId"]}')
         level_points = 0
         session["level_points"] = level_points
         database.update_levelpoints(session["courseId"], level_points)
