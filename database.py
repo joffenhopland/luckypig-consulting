@@ -404,8 +404,31 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def get_total_points(self, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute('''select sum(scores.score) as total
+                    from active_course ac
+                        join question_done qd on ac.courseId = qd.courseId
+                        join (
+                             select exerciseID, score
+                             from multiple_choice mc
+                             union
+                             select exerciseID, score
+                             from drop_down dd
+                             union
+                             select exerciseID, score
+                             from drag_and_drop drag
+                         ) scores
+                        on scores.exerciseID = qd.exerciseId
+                        where userId = (%s);''', (userId,))
+            result = cursor.fetchone()
+            print(result[0])
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
 
-    
 
 
 def main():
