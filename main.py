@@ -75,16 +75,7 @@ def course():
     level_points = database.get_level_points(session["courseId"])
     session["level_points"] = level_points
     print(f'level_points: {level_points}')
-    '''
-    if courseId == False:
-        # Vi lager et nytt active course for brukeren
-        database.initiate_course(idUser)
-        # Vi henter id for det nye kurset
-        courseId = database.course_status(idUser)
-        # Vi setter ny course_status for det kurset
-        database.new_course_status(theme, language, courseId)
-    return courseId
-    '''
+
     #find course or create if None. This is needed if user takes courses in several themes
     if session["courseId"] == -1:
         session["courseId"] = database.getCourseIdByUserIdAndTheme(session["idUser"], session['theme'])
@@ -104,7 +95,7 @@ def course():
         return redirect(url_for("course"))
 
     # existing course - user returns or new course
-    if len(questions) == 0 and session["init_course"] == 1:
+    if session["courseId"] > -1 and len(questions) == 0 and session["init_course"] == 1:
         level_points = 0
         session["level_points"] = level_points
         database.update_levelpoints(session["courseId"], level_points)
@@ -142,7 +133,7 @@ def course():
         return redirect(url_for(view))
 
     # existing course - user submit question
-    if len(questions) > 0:
+    if session["courseId"] > -1 and len(questions) > 0:
         # id = questions[0]
         # first = int(str(id)[0])
 
@@ -166,7 +157,7 @@ def course():
         return redirect(url_for(view))
 
     # user has done alle questions in one level and successrate is good
-    if len(questions) == 0 and database.success_rate(session["courseId"]):
+    if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]):
         print(f'session["level"]: {session["level"]}')
         # level_points = database.get_level_points(session["courseId"])
         # print(f'level_points: {level_points}')
@@ -198,7 +189,7 @@ def course():
             return redirect(url_for("learn"))
 
     # user has done alle questions in one level and successrate is NOT good
-    if len(questions) == 0 and database.success_rate(session["courseId"]) == False:
+    if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
         level_points = 0
         database.update_levelpoints(session["courseId"], level_points)
         database.delete_question_done(session["courseId"])
