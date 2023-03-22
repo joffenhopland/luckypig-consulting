@@ -5,7 +5,7 @@ import itertools
 import random
 import pandas as pd
 
-from flask import Flask, flash, request, redirect, render_template, url_for, session
+from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
@@ -264,7 +264,12 @@ def multiple_choice():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            flash(f'Wrong!', "danger")
+            #flash(f'Wrong!', "danger")
+
+            #correct_answer = ', '.join([word['text'] for word in right_answer])
+            print(f"Right answer: {right_answer}")
+
+            flash(Markup(f"The correct order is: {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         
@@ -314,7 +319,10 @@ def dropdown():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            flash(f'Wrong!', "danger")
+            #flash(f'Wrong!', "danger")
+            print(f"Right answer: {right_answer}")
+
+            flash(Markup(f"The correct order is: {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
 
@@ -388,7 +396,10 @@ def drag_and_drop():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            flash(f'Wrong!', "danger")
+            #flash(f'Wrong!', "danger")
+            print(f"Right answer: {right_answer}")
+
+            flash(Markup(f"The correct order is: {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
