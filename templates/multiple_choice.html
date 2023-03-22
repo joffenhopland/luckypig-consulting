@@ -26,7 +26,7 @@
             <p>
                 {{ message }}
             </p>
-            <a href="{{ url_for('course') }}" class="btn btn-{{ category }}">Continue</a>
+            <a href="{{ url_for('course') }}" class="btn btn-{{ category }}">Fortsett</a>
         </div>
     </div>
     
@@ -34,6 +34,7 @@
   {% endfor %}
 {% endif %}
 {% endwith %}
+
 
 
 <div class="d-flex justify-content-center px-5 py-5 vh-100">
@@ -64,8 +65,8 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="exerciseId" value="{{ exerciseId }}">
                 <div class="d-flex justify-content-around">
-                    <a href="{{ url_for('course') }}" class="btn btn-outline-secondary">Skip</a>
-                    <button id="submit-btn" type="submit" class="btn btn-primary" disabled>Check</button>
+                    <a href="{{ url_for('course') }}" class="btn btn-outline-secondary">Hopp over</a>
+                    <button id="submit-btn" type="submit" class="btn btn-primary" disabled>Sjekk</button>
                   </div>
               </form>
             </div>
