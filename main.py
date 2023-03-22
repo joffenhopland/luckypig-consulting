@@ -60,6 +60,7 @@ def theme():
             session["courseId"] = -1
             session["level"] = 1
             session["themeId"] = themeId
+            session["init_course"] = 1
             return redirect(url_for("course"))
         else:
             return redirect(url_for("learn"))
