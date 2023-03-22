@@ -71,8 +71,9 @@ def learn():
     database = db()
     totalPoints = database.getTotalPoints(session["idUser"])
     themeId = session["themeId"]
+    print(f'total point: {totalPoints}')
 
-    return render_template("learn.html", totalPoints = totalPoints, themeId = themeId)
+    return render_template("learn.html", total_points = totalPoints, themeId = themeId)
 
 
 @app.route("/course", methods=['GET', 'POST'])
