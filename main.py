@@ -183,7 +183,7 @@ def course():
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]):
         print(f'session["level"]: {session["level"]}')
         # print(f'level_points: {level_points}')
-        if session["level"] < 3:
+        if session["level"] < 4:
             level = session["level"]
             level += 1
             session["level"] = level
@@ -195,16 +195,16 @@ def course():
             session["courseId"] = -1
             session["init_course"] = 1
             session["new_level"] = 1
-            flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
-            return redirect(url_for("learn"))
-        else:
-            flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
-            return redirect(url_for("learn"))
+            if session["level"] < 3:
+                flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
+                return redirect(url_for("learn"))
+            else:
+                flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
+                return redirect(url_for("learn"))
 
     # user has done alle questions in one level and successrate is NOT good
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
-        # level_points = 0
-        level_points = database.getTotalPoints(session["idUser"])
+        level_points = 0
         database.update_levelpoints(session["courseId"], level_points)
         database.delete_question_done(session["courseId"])
         session["init_course"] = 1
@@ -231,6 +231,13 @@ def checklevel():
     elif session["level"] == 3:
         session["level_name"] = "Gull"
         # return "Level: Gull"
+
+@app.route("/skipExercise", methods=['GET'])
+def skipExercise():
+    database = db()
+    success = 0
+    database.question_done(session['exerciseId'], success, session["level"], session["courseId"])
+    return redirect(url_for("course"))
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
