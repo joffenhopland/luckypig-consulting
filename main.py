@@ -704,7 +704,8 @@ def reportgeneration() -> 'html':
 @app.route('/report') #Currently used to test report.html UI
 def report():
     database = db()
-    result = database.get_user_view()
+    #result = database.get_user_view()
+    result = database.get_all_tasks_report_view()
     df = pd.DataFrame(result)
     df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')

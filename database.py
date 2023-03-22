@@ -539,29 +539,39 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
-    def get_all_tasks_views(self):
+    def get_all_tasks_report_view(self):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT * from all_tasks_view")
+            cursor.execute("SELECT * from all_tasks_report_view")
             result = cursor.fetchall()
             return result
         except mysql.connector.Error as err:
             print(err)
             
-    def get_filtered_by_theme_on_all_tasks_view(self, theme):
-        if theme == "kokk": 
-            themeId = 1
-        elif theme == "bilmekanikker": 
-            themeId = 2
-        elif theme == "finans": 
-            themeId = 3
+    def get_filtered_by_theme_on_all_report_tasks_view(self, theme):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view where Tema=(%s)", (theme,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_filtered_by_task_type_on_all_tasks_view(self, task_type):
+        if task_type == "drag and drop" or task_type == "drag_and_drop" : 
+            task_type_sql = "drag_and_drop"
+        elif task_type == "multiple choice" or task_type == "multiple_choice": 
+            task_type_sql = "multiple_choice"
+        elif task_type == "drop_down" or task_type == "drop_down":
+            task_type_sql = "drop_down"
         else: 
             return None
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT * from all_tasks_view where themeId=(%s)", (themeId,))
+            cursor.execute("SELECT * from all_tasks_report_view where Type_oppgave=(%s)", (task_type_sql,))
             result = cursor.fetchall()
             return result
         except mysql.connector.Error as err:
