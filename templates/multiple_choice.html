@@ -65,7 +65,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="exerciseId" value="{{ exerciseId }}">
                 <div class="d-flex justify-content-around">
-                    <a href="{{ url_for('course') }}" class="btn btn-outline-secondary">Hopp over</a>
+                    <a href="{{ url_for('skipExercise') }}" class="btn btn-outline-secondary">Hopp over</a>
                     <button id="submit-btn" type="submit" class="btn btn-primary" disabled>Sjekk</button>
                   </div>
               </form>

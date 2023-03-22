@@ -28,11 +28,11 @@
             </div>
              {% if session['level'] == 1 %}
             <div class="col-4 d-flex justify-content-end">
-              <a href="{{ url_for('course', level=1) }}" class="btn btn-primary">Start</a>
+              <a href="{{ url_for('course', level=1) }}" class="btn btn-primary" style="background-color:green">Start</a>
             </div>
             {% else %}
             <div class="col-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary">Låst</button>
+              <button type="button" class="btn btn-primary">Ferdig</button>
             </div>
             {% endif %}
         </div>
@@ -47,11 +47,15 @@
           </div>
              {% if session['level'] == 2 %}
             <div class="col-4 d-flex justify-content-end">
-              <a href="{{ url_for('course', level=2) }}" class="btn btn-primary">Start</a>
+              <a href="{{ url_for('course', level=2) }}" class="btn btn-primary" style="background-color:green">Start</a>
+            </div>
+            {% elif session['level'] < 2 %}
+            <div class="col-4 d-flex justify-content-end">
+              <button type="button" class="btn btn-primary" style="background-color:red">Låst</button>
             </div>
             {% else %}
             <div class="col-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary">Låst</button>
+              <button type="button" class="btn btn-primary">Ferdig</button>
             </div>
             {% endif %}
         </div>
@@ -66,11 +70,15 @@
           </div>
              {% if session['level'] == 3 %}
             <div class="col-4 d-flex justify-content-end">
-              <a href="{{ url_for('course', level=3) }}" class="btn btn-primary">Start</a>
+              <a href="{{ url_for('course', level=3) }}" class="btn btn-primary" style="background-color:green">Start</a>
+            </div>
+            {% elif session['level'] < 3 %}
+            <div class="col-4 d-flex justify-content-end">
+              <button type="button" class="btn btn-primary" style="background-color:red">Låst</button>
             </div>
             {% else %}
             <div class="col-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary">Låst</button>
+              <button type="button" class="btn btn-primary">Ferdig</button>
             </div>
             {% endif %}
         </div>
