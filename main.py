@@ -21,6 +21,8 @@ from classes import Exercise, Dropdown, CourseStatus
 import json
 import urllib.parse
 
+from datetime import datetime, timedelta
+
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -71,10 +73,11 @@ def theme():
 def learn():
     database = db()
     totalPoints = database.getTotalPoints(session["idUser"])
+    login_streak = database.get_login_streak(session["idUser"])
     themeId = session["themeId"]
     print(f'total point: {totalPoints}')
 
-    return render_template("learn.html", total_points = totalPoints, themeId = themeId)
+    return render_template("learn.html", total_points = totalPoints, themeId = themeId, login_streak=login_streak, level=session['level_name'])
 
 
 @app.route("/course", methods=['GET', 'POST'])
@@ -494,8 +497,28 @@ def login() -> 'html':
             session["new_level"] = 0
             session["level_name"] = ""
             checklevel()
+
+            # check last login and update last login and login streak
+            last_login_date = user.last_login
+            login_streak = user.login_streak
+            if last_login_date != None:
+                today = datetime.now().date()
+                yesterday = today - timedelta(days=1)
+                if last_login_date == yesterday:
+                    login_streak += 1
+                    new_login_date = today.strftime("%Y-%m-%d")
+                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+                else:
+                    login_streak = 1
+                    new_login_date = today.strftime("%Y-%m-%d")
+                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+            else:
+                login_streak = 1
+                today = datetime.now().date()
+                new_login_date = today.strftime("%Y-%m-%d")
+                database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+
             flash(f'Du er logget inn!', "success")
-            #return redirect(url_for('learn'))
             return redirect(url_for('theme', themeId = session["themeId"]))
 
         else:
@@ -622,7 +645,8 @@ def viewuser() -> 'html':
     user = User(*userView.getUserByEmail(email))
     database = db()
     total_points = database.getTotalPoints(session["idUser"])
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
+    login_streak = database.get_login_streak(session["idUser"])
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':

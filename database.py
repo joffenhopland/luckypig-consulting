@@ -491,6 +491,30 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
+    
+    def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE user
+            SET last_login = (%s), login_streak = (%s) WHERE userId = (%s)'''
+            update = (new_login_date, login_streak, user_id)
+            cursor.execute(sql1, update)
+            conn.commit()
+            conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+    
+    def get_login_streak(self, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT login_streak from user where userId=(%s)", (user_id,))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
 
 
 def main():
