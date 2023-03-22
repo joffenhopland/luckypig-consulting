@@ -92,12 +92,16 @@
                                 </ul>
 
 
+
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="answer" id="order_form" value="{{ order | join(',') }}">
 
 
                                 <div class="d-flex justify-content-around pt-4">
                                     <a href="{{ url_for('skipExercise') }}" class="btn btn-outline-secondary">Hopp over</a>
+                                     <div id="answer-display">
+                                  <p></p>
+                                </div>
                                     <button
                                             disabled
                                             id="submit-btn"
@@ -116,7 +120,7 @@
                                             <p>
                                                 {{ message }}
                                             </p>
-                                            <a href="{{ url_for('course') }}" class="btn btn-{{ category }}">Continue</a>
+                                            <a href="{{ url_for('course') }}" class="btn btn-{{ category }}">Fortsett</a>
                                         </div>
                                         </div>
                                     {% endfor %}
@@ -149,6 +153,13 @@
 
     <script src="../static/jquery.sortable.js"></script>
     <script>
+        function updateAnswer() {
+            let answerArray = $('#order_form').val().split(',');
+            let answerString = answerArray.map(id => $('#' + id).text().trim()).join(' ');
+            console.log('Answer string:', answerString); // log answerString til konsollen
+            document.querySelector('#answer-display p').textContent = answerString;
+            return answerString;
+}
 
         $(function () {
             $('.list-group-sortable').sortable({
@@ -159,6 +170,7 @@
                     currentOrder.push(choice.id)
                 }
                 document.getElementById('order_form').value = currentOrder
+                updateAnswer();
                 //ui.item contains the current dragged element.
                 //Triggered when the user stopped sorting and the DOM position has changed.
             });
