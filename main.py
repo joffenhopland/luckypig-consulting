@@ -681,7 +681,7 @@ def reportgeneration() -> 'html':
 def report():
     database = db()
     result = database.get_userview()
-    df = pd.DataFrame(result, columns=['Test1', 'Test2', 'Test3', 'Test4', 'Test5', 'Test6', 'Test7', 'Test8', 'Test9'])
+    df = pd.DataFrame(result)
     df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
     html_table = styled_table.to_html()
