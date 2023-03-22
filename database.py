@@ -482,7 +482,15 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-
+    def get_userview(self): #is currently only used for testing report. It needs to select from user_view later
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user")
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
 
 
 def main():
