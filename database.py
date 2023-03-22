@@ -519,7 +519,17 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
-    def get_filtered_theme_user_view(self, value):#example: value="kokk"
+    def get_filtered_by_user_id_on_user_view(self, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user_view where userId=(%s)", (user_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+                       
+    def get_filtered_theme_user_view(self, value):#example: value="kokk" (Muligen slette?)
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
@@ -528,6 +538,7 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
+            
     
 
 def main():
