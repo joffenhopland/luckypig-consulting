@@ -58,16 +58,24 @@
           {% block nav %}
           <nav class="navbar navbar-expand-lg bg-body-tertiary p-0">
             <div class="container-fluid d-flex justify-content-around align-items-center bg-white">
-                <div class="dropdown p-2 w-50">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Velg tema
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ url_for('theme', themeId=1) }}"> Kokk</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('theme', themeId=2) }}"> Bilmekaniker</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('theme', themeId=3) }}">Finans</a></li>
-                  </ul>
-                </div>
+                  <div class="dropdown p-2 w-50">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      {% if themeId == 1 %}
+                      Kokk
+                      {% elif themeId == 2 %}
+                      Bilmekaniker
+                      {% elif themeId == 3 %}
+                      Finans
+                      {% else %}
+                      Velg tema
+                      {% endif %}
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="{{ url_for('theme', themeId=1) }}"> Kokk</a></li>
+                      <li><a class="dropdown-item" href="{{ url_for('theme', themeId=2) }}"> Bilmekaniker</a></li>
+                      <li><a class="dropdown-item" href="{{ url_for('theme', themeId=3) }}">Finans</a></li>
+                    </ul>
+                  </div>
                   <div class="navbar-nav p-2 flex-fill d-flex">
                     <div class="nav-item p-2 flex-fill">
 

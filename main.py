@@ -69,8 +69,10 @@ def theme():
 @app.route("/learn")
 def learn():
     database = db()
-    total_points = database.getTotalPoints(session["idUser"])
-    return render_template("learn.html", total_points=total_points, level=session['level_name'])
+    totalPoints = database.getTotalPoints(session["idUser"])
+    themeId = session["themeId"]
+
+    return render_template("learn.html", totalPoints = totalPoints, themeId = themeId)
 
 
 @app.route("/course", methods=['GET', 'POST'])
