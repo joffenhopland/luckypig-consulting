@@ -549,6 +549,24 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
+    def get_filtered_by_theme_on_all_tasks_view(self, theme):
+        if theme == "kokk": 
+            themeId = 1
+        elif theme == "bilmekanikker": 
+            themeId = 2
+        elif theme == "finans": 
+            themeId = 3
+        else: 
+            return None
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_view where themeId=(%s)", (themeId,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
     
 
 def main():
