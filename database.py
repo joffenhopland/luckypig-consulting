@@ -529,7 +529,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
                        
-    def get_filtered_theme_user_view(self, theme):#(Muligen slette?)
+    def get_filtered_theme_user_view(self, theme):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
@@ -596,11 +596,21 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
-            
-    
+
+    def get_filtered_theme_on_user_view(self, course_theme):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user_view where theme=(%s)", (course_theme,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
 
 def main():
     database = db()
     #database.delete_question_done(25)
     print(database.get_level_theme(34))
+    #print(database.get_filtered_theme_on_user_view('kokk'))
 main()
