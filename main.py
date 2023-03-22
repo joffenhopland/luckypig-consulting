@@ -248,7 +248,7 @@ def multiple_choice():
         answer = request.form['answer']
 
         if answer == right_answer:
-            flash(f'Correct!', "success")
+            flash(f'Korrekt', "success")
             exercise.number_succeed += 1
             success = 1
             print(f'questino_done: {exerciseId}, {success}, {session["level"]}, {session["courseId"]}')
@@ -264,12 +264,7 @@ def multiple_choice():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            #flash(f'Wrong!', "danger")
-
-            #correct_answer = ', '.join([word['text'] for word in right_answer])
-            print(f"Right answer: {right_answer}")
-
-            flash(Markup(f"The correct order is: {right_answer}"), "danger")
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         
@@ -309,7 +304,7 @@ def dropdown():
         answer = request.form['answer']
 
         if answer == right_answer:
-            flash(f'Correct!', "success")
+            flash(f'Korrekt!', "success")
             exercise.number_succeed += 1
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
@@ -319,10 +314,7 @@ def dropdown():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            #flash(f'Wrong!', "danger")
-            print(f"Right answer: {right_answer}")
-
-            flash(Markup(f"The correct order is: {right_answer}"), "danger")
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
 
@@ -386,7 +378,7 @@ def drag_and_drop():
         print(f'user answer {" ".join(user_answer)}')
 
         if " ".join(user_answer) == right_answer:
-            flash(f'Correct!', "success")
+            flash(f'Korrekt!', "success")
             print("ok")
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
@@ -396,10 +388,7 @@ def drag_and_drop():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            #flash(f'Wrong!', "danger")
-            print(f"Right answer: {right_answer}")
-
-            flash(Markup(f"The correct order is: {right_answer}"), "danger")
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
