@@ -577,6 +577,16 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
+    def get_10_ASC_prosent_on_all_report_tasks_view(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view WHERE Antall_ganger_spurt NOT LIKE 0 ORDER BY Prosent ASC")
+            result = cursor.fetchall()
+            return result[:10]
+        except mysql.connector.Error as err:
+            print(err)
+            
     
 
 def main():

@@ -705,7 +705,7 @@ def reportgeneration() -> 'html':
 def report():
     database = db()
     #result = database.get_user_view()
-    result = database.get_all_tasks_report_view()
+    result = database.get_10_ASC_prosent_on_all_report_tasks_view()
     df = pd.DataFrame(result)
     df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
