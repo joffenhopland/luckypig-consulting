@@ -3,6 +3,7 @@ import secrets
 import uuid
 import itertools
 import random
+import pandas as pd
 
 from flask import Flask, flash, request, redirect, render_template, url_for, session
 from flask_mail import Mail, Message
@@ -675,6 +676,15 @@ def reportgeneration() -> 'html':
     else: #if user is not admin or teacher (2 or 3) -> create a logic that handles this problem
        return render_template("learn.html") #(This is temporary)
 
+@app.route('/report') #Currently used to test report.html UI
+def report():
+    database = db()
+    result = database.get_userview()
+    df = pd.DataFrame(result, columns=['Test1', 'Test2', 'Test3', 'Test4', 'Test5', 'Test6', 'Test7', 'Test8', 'Test9'])
+    df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
+    styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
+    html_table = styled_table.to_html()
+    return render_template("report.html", table=html_table)
 
 # def total_points():
 #     if session["logged in"] == True:
