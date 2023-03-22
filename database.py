@@ -529,11 +529,11 @@ class db:
         except mysql.connector.Error as err:
             print(err)
                        
-    def get_filtered_theme_user_view(self, value):#example: value="kokk" (Muligen slette?)
+    def get_filtered_theme_user_view(self, theme):#(Muligen slette?)
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT * from user_view where theme=(%s)", (value,))
+            cursor.execute("SELECT * from user_view where theme=(%s)", (theme,))
             result = cursor.fetchall()
             return result
         except mysql.connector.Error as err:
@@ -584,6 +584,16 @@ class db:
             cursor.execute("SELECT * from all_tasks_report_view WHERE Antall_ganger_spurt NOT LIKE 0 ORDER BY Prosent ASC")
             result = cursor.fetchall()
             return result[:10]
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_filtered_level_on_all_report_tasks_view(self, level):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view where Level=(%s)", (level,))
+            result = cursor.fetchall()
+            return result
         except mysql.connector.Error as err:
             print(err)
             
