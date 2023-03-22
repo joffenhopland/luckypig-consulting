@@ -482,16 +482,6 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def get_userview(self): #is currently only used for testing report. It needs to select from user_view later
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * from user_view")
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-    
     def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -515,7 +505,30 @@ class db:
             return result[0]
         except mysql.connector.Error as err:
             print(err)
-
+          
+            
+    #report
+            
+    def get_user_view(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user_view")
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_filtered_theme_user_view(self, value):#example: value="kokk"
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user_view where theme=(%s)", (value,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+    
 
 def main():
     database = db()
