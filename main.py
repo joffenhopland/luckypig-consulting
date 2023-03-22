@@ -243,7 +243,6 @@ def skipExercise():
 def multiple_choice():
     database = db()
     exerciseId = session['exerciseId']
-    print(f'questions_str: {session["questions"]}')
     print(f'exerciseId in /multiple-choice: {exerciseId}')
 
     if request.method == 'POST':
