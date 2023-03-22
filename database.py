@@ -539,6 +539,16 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
+    def get_all_tasks_views(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_view")
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
     
 
 def main():
