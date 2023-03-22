@@ -24,8 +24,8 @@ class UserLogin:
             result = self.cursor.fetchall()
             for row in result:
 
-                (user_id,firstname, lastname, username, email, password_hash, emailVerified, role, verificationId) = row
-                newUser = User(user_id,firstname, lastname, username, email, password_hash, emailVerified, role, verificationId)
+                (user_id,firstname, lastname, username, email, password_hash, emailVerified, role, verificationId, login_streak, last_login) = row
+                newUser = User(user_id,firstname, lastname, username, email, password_hash, emailVerified, role, verificationId, login_streak, last_login)
                 self.users.append(newUser)
 
         except mysql.connector.Error as err:
