@@ -486,7 +486,7 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT * from user")
+            cursor.execute("SELECT * from user_view")
             result = cursor.fetchall()
             return result
         except mysql.connector.Error as err:
