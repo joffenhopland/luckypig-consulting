@@ -482,16 +482,6 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def get_userview(self): #is currently only used for testing report. It needs to select from user_view later
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * from user")
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-    
     def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -515,7 +505,99 @@ class db:
             return result[0]
         except mysql.connector.Error as err:
             print(err)
-
+          
+            
+    #report
+            
+    def get_user_view(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user_view")
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_filtered_by_user_id_on_user_view(self, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user_view where userId=(%s)", (user_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+                       
+    def get_filtered_theme_user_view(self, theme):#(Muligen slette?)
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from user_view where theme=(%s)", (theme,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_all_tasks_report_view(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view")
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_filtered_by_theme_on_all_report_tasks_view(self, theme):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view where Tema=(%s)", (theme,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_filtered_by_task_type_on_all_tasks_view(self, task_type):
+        if task_type == "drag and drop" or task_type == "drag_and_drop" : 
+            task_type_sql = "drag_and_drop"
+        elif task_type == "multiple choice" or task_type == "multiple_choice": 
+            task_type_sql = "multiple_choice"
+        elif task_type == "drop_down" or task_type == "drop_down":
+            task_type_sql = "drop_down"
+        else: 
+            return None
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view where Type_oppgave=(%s)", (task_type_sql,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_10_ASC_prosent_on_all_report_tasks_view(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view WHERE Antall_ganger_spurt NOT LIKE 0 ORDER BY Prosent ASC")
+            result = cursor.fetchall()
+            return result[:10]
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_filtered_level_on_all_report_tasks_view(self, level):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * from all_tasks_report_view where Level=(%s)", (level,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    
 
 def main():
     database = db()
