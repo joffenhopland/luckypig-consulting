@@ -255,6 +255,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+
     def getCourseIdByUserIdAndTheme(self, userId, themeId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -295,6 +296,29 @@ class db:
             cursor.execute(sql1, insert)
             conn.commit()
             conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def checkCourseDone(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT done FROM course_status WHERE courseId=(%s) ", (courseId,))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
+    def setCourseDone(self, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE course_status SET done = (%s) WHERE courseId = (%s)'''
+            update = (1,courseId)
+            cursor.execute(sql1, update)
+            conn.commit()
+            conn.close()
+            return True
         except mysql.connector.Error as err:
             print(err)
 
@@ -601,6 +625,6 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.get_level_theme(34))
+    print(database.setCourseDone(42))
     #print(database.get_filtered_theme_on_user_view('kokk'))
 main()

@@ -113,8 +113,14 @@ class DragAndDropService:
     def getExercise(self, exerciseID):
         (exerciseID, level, question, answer, score, number_asked, number_succeed,themeId) = self.database.getExerciseByIdandType(exerciseID, 5)
         choices = self.database.getOptionsByExerciseIdandType(exerciseID, 5)
+        self.exerciseID = exerciseID
+        self.type = type
+        self.number_asked = number_asked
+        self.number_succeed = number_succeed
         return DragAndDropExercise(exerciseID, level, question, answer, score, number_asked, number_succeed, themeId,
                                    choices)
+
+
 
 
 class DragAndDropExercise:
@@ -128,3 +134,10 @@ class DragAndDropExercise:
         self.number_succeed = number_succeed
         self.themeId = themeId
         self.choices = choices
+        self.type = 2
+
+
+    def updateExercise(self):
+        database = db()
+        database.updateExerciseByExerciseIdandType(self.exerciseID, self.type, str(self.number_asked),
+                                                        str(self.number_succeed))

@@ -64,6 +64,7 @@ def theme():
             session["level"] = 1
             session["themeId"] = themeId
             session["init_course"] = 1
+            session["new_level"] =0
             return redirect(url_for("course"))
         else:
             return redirect(url_for("learn"))
@@ -92,7 +93,9 @@ def course():
 
     #find course or create if None. This is needed if user takes courses in several themes
     if session["courseId"] == -1:
+        print(f'95. session["themeId"]: {session["themeId"]}')
         session["courseId"] = database.getCourseIdByUserIdAndTheme(session["idUser"], session['themeId'])
+        print(f'97. session["courseId"]: {session["courseId"]}')
 
 
         #new course
@@ -109,6 +112,19 @@ def course():
             database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
 
         session["level"] = database.get_level(session["courseId"])
+
+        if database.checkCourseDone(session["courseId"]) == 1:
+            print(f'114. session["courseId"]: {session["courseId"]}')
+            session["level"] += 1
+            if session["level"] == 4:
+                return redirect(url_for("learn"))
+            elif session["level"] < 4:
+                session["courseId"] = -1
+                session["new_level"] = 1
+                return redirect(url_for("course"))
+
+
+        #session["level"] = database.get_level(session["courseId"])
         session["questions"] = []
         print(f'105. session["courseId"]: {session["courseId"]}')
         print(f'58. session["level"]: {session["level"]}')
@@ -190,6 +206,8 @@ def course():
             print(f'session["level"] if: {session["level"]}')
             #should we remove the question done once level done?
             database.delete_question_done(session["courseId"])
+            #Set the course as done
+            database.setCourseDone(session["courseId"])
 
             #start a new course for the new level
             session["courseId"] = -1
@@ -398,7 +416,7 @@ def drag_and_drop():
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
-        # exercise.updateExercise()
+        #exercise.updateExercise()
         return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"])
     
     print(f'exerciseId: {exerciseId}')
