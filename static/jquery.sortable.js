@@ -60,6 +60,7 @@
           dragging.parent().trigger('sortconnect', {
             item: dragging
           });
+
         }
         dragging = null;
       }).not('a[href], img').on('selectstart.h5s', function () {
