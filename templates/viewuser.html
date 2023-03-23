@@ -34,20 +34,20 @@
             <h5 class="text-secondary d-inline-block">Etternavn:</h5><h5 class="d-inline-block px-1">{{user.lastname}}</h5><br>
             <h5 class="text-secondary d-inline-block">Brukernavn:</h5><h5 class="d-inline-block px-1">{{user.username}}</h5><br>
             <h5 class="text-secondary d-inline-block">Epost:</h5><h5 class="d-inline-block px-1">{{user.email}}</h5>
-            <div class="row my-3">
-                <div class="col-md-6">
+            <div class="d-flex justify-content-evenly">
+                <div>
                     <form action="{{ url_for('updateuser') }}" method="GET">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button class="btn btn-primary" type="submit">Redigere</button>
                     </form>
                 </div>
-                <div class="col-md-6">
+                <div>
                     <form action="{{ url_for('updatepassword') }}" method="GET">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button class="btn btn-primary" type="submit">Endre passord</button>
                     </form>
                 </div>
-                <div class="col-md-6 my-3">
+                <div>
                   <form action="{{ url_for('reportgeneration') }}" method="GET">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                       <button class="btn btn-secondary" type="submit">Rapportgenerering</button>
