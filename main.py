@@ -3,8 +3,9 @@ import secrets
 import uuid
 import itertools
 import random
+import pandas as pd
 
-from flask import Flask, flash, request, redirect, render_template, url_for, session
+from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
@@ -19,6 +20,8 @@ from classes import Exercise, Dropdown, CourseStatus
 
 import json
 import urllib.parse
+
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -60,6 +63,7 @@ def theme():
             session["courseId"] = -1
             session["level"] = 1
             session["themeId"] = themeId
+            session["init_course"] = 1
             return redirect(url_for("course"))
         else:
             return redirect(url_for("learn"))
@@ -68,8 +72,12 @@ def theme():
 @app.route("/learn")
 def learn():
     database = db()
-    total_points = database.getTotalPoints(session["idUser"])
-    return render_template("learn.html", total_points=total_points, level=session['level_name'])
+    totalPoints = database.getTotalPoints(session["idUser"])
+    login_streak = database.get_login_streak(session["idUser"])
+    themeId = session["themeId"]
+    print(f'total point: {totalPoints}')
+
+    return render_template("learn.html", total_points = totalPoints, themeId = themeId, login_streak=login_streak, level=session['level_name'])
 
 
 @app.route("/course", methods=['GET', 'POST'])
@@ -175,7 +183,7 @@ def course():
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]):
         print(f'session["level"]: {session["level"]}')
         # print(f'level_points: {level_points}')
-        if session["level"] < 3:
+        if session["level"] < 4:
             level = session["level"]
             level += 1
             session["level"] = level
@@ -187,16 +195,16 @@ def course():
             session["courseId"] = -1
             session["init_course"] = 1
             session["new_level"] = 1
-            flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
-            return redirect(url_for("learn"))
-        else:
-            flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
-            return redirect(url_for("learn"))
+            if session["level"] < 3:
+                flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
+                return redirect(url_for("learn"))
+            else:
+                flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
+                return redirect(url_for("learn"))
 
     # user has done alle questions in one level and successrate is NOT good
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
-        # level_points = 0
-        level_points = database.getTotalPoints(session["idUser"])
+        level_points = 0
         database.update_levelpoints(session["courseId"], level_points)
         database.delete_question_done(session["courseId"])
         session["init_course"] = 1
@@ -224,11 +232,17 @@ def checklevel():
         session["level_name"] = "Gull"
         # return "Level: Gull"
 
+@app.route("/skipExercise", methods=['GET'])
+def skipExercise():
+    database = db()
+    success = 0
+    database.question_done(session['exerciseId'], success, session["level"], session["courseId"])
+    return redirect(url_for("course"))
+
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
     database = db()
     exerciseId = session['exerciseId']
-    print(f'questions_str: {session["questions"]}')
     print(f'exerciseId in /multiple-choice: {exerciseId}')
 
     if request.method == 'POST':
@@ -240,7 +254,7 @@ def multiple_choice():
         answer = request.form['answer']
 
         if answer == right_answer:
-            flash(f'Correct!', "success")
+            flash(f'Korrekt', "success")
             exercise.number_succeed += 1
             success = 1
             print(f'questino_done: {exerciseId}, {success}, {session["level"]}, {session["courseId"]}')
@@ -256,7 +270,7 @@ def multiple_choice():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            flash(f'Wrong!', "danger")
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         
@@ -296,7 +310,7 @@ def dropdown():
         answer = request.form['answer']
 
         if answer == right_answer:
-            flash(f'Correct!', "success")
+            flash(f'Korrekt!', "success")
             exercise.number_succeed += 1
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
@@ -306,7 +320,7 @@ def dropdown():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            flash(f'Wrong!', "danger")
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
 
@@ -370,7 +384,7 @@ def drag_and_drop():
         print(f'user answer {" ".join(user_answer)}')
 
         if " ".join(user_answer) == right_answer:
-            flash(f'Correct!', "success")
+            flash(f'Korrekt!', "success")
             print("ok")
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
@@ -380,7 +394,7 @@ def drag_and_drop():
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
         else:
-            flash(f'Wrong!', "danger")
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
@@ -489,8 +503,28 @@ def login() -> 'html':
             session["new_level"] = 0
             session["level_name"] = ""
             checklevel()
+
+            # check last login and update last login and login streak
+            last_login_date = user.last_login
+            login_streak = user.login_streak
+            if last_login_date != None:
+                today = datetime.now().date()
+                yesterday = today - timedelta(days=1)
+                if last_login_date == yesterday:
+                    login_streak += 1
+                    new_login_date = today.strftime("%Y-%m-%d")
+                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+                else:
+                    login_streak = 1
+                    new_login_date = today.strftime("%Y-%m-%d")
+                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+            else:
+                login_streak = 1
+                today = datetime.now().date()
+                new_login_date = today.strftime("%Y-%m-%d")
+                database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+
             flash(f'Du er logget inn!', "success")
-            #return redirect(url_for('learn'))
             return redirect(url_for('theme', themeId = session["themeId"]))
 
         else:
@@ -617,7 +651,8 @@ def viewuser() -> 'html':
     user = User(*userView.getUserByEmail(email))
     database = db()
     total_points = database.getTotalPoints(session["idUser"])
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
+    login_streak = database.get_login_streak(session["idUser"])
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
@@ -672,6 +707,15 @@ def reportgeneration() -> 'html':
     else: #if user is not admin or teacher (2 or 3) -> create a logic that handles this problem
        return render_template("learn.html") #(This is temporary)
 
+@app.route('/report') #Currently used to test report.html UI
+def report():
+    database = db()
+    result = database.get_user_view()
+    df = pd.DataFrame(result)
+    df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
+    styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
+    html_table = styled_table.to_html()
+    return render_template("report.html", table=html_table)
 
 # def total_points():
 #     if session["logged in"] == True:

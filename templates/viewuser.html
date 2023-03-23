@@ -34,23 +34,23 @@
             <h5 class="text-secondary d-inline-block">Etternavn:</h5><h5 class="d-inline-block px-1">{{user.lastname}}</h5><br>
             <h5 class="text-secondary d-inline-block">Brukernavn:</h5><h5 class="d-inline-block px-1">{{user.username}}</h5><br>
             <h5 class="text-secondary d-inline-block">Epost:</h5><h5 class="d-inline-block px-1">{{user.email}}</h5>
-            <div class="row my-3">
-                <div class="col-md-6">
+            <div class="d-flex justify-content-evenly">
+                <div>
                     <form action="{{ url_for('updateuser') }}" method="GET">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button class="btn btn-primary" type="submit">Redigere</button>
                     </form>
                 </div>
-                <div class="col-md-6">
+                <div>
                     <form action="{{ url_for('updatepassword') }}" method="GET">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button class="btn btn-primary" type="submit">Endre passord</button>
                     </form>
                 </div>
-                <div class="col-md-6">
+                <div>
                   <form action="{{ url_for('reportgeneration') }}" method="GET">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                      <button class="btn btn-primary" type="submit">Rapportgenerering</button>
+                      <button class="btn btn-secondary" type="submit">Rapportgenerering</button>
                   </form>
               </div>
                 </div>
@@ -59,7 +59,7 @@
                         <div class="col-md-6">
                           <div class="card shadow-lg">
                             <div class="card-body">
-                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_fire.svg') }}" class="d-inline-block"> {{ 0 }}</h5>
+                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_fire.svg') }}" class="d-inline-block"> {{ login_streak }}</h5>
                               <div class="card-text text-secondary px-2">
                                 Daglig login streak
                               </div>
@@ -108,6 +108,7 @@
                       </div>
 
                       <h5>Prestasjoner</h5>
+                      {% if login_streak >= 3 and login_streak < 7 %}
                     <div class="card shadow-lg">
                         <div class="card-body">
                             <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}" class="d-inline-block">Øvelse gjør mester</h5>
@@ -116,6 +117,16 @@
                             </div>
                         </div>
                     </div>
+                    {% elif login_streak >= 7 %}
+                    <div class="card shadow-lg">
+                      <div class="card-body">
+                          <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}" class="d-inline-block">Læremester</h5>
+                          <div class="card-text text-secondary px-2">
+                              syv-dagers login streak
+                          </div>
+                      </div>
+                  </div>
+                  {% endif %}
                     <div class="card shadow-lg">
                         <div class="card-body">
                             <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/gold_badge.svg') }}" class="d-inline-block">Gull</h5>
