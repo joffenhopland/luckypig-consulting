@@ -597,16 +597,6 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    def get_filtered_theme_on_user_view(self, course_theme):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * from user_view where theme=(%s)", (course_theme,))
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-
 
 def main():
     database = db()
