@@ -649,7 +649,7 @@ def updatepassword() -> 'html':
                 flash(f"Passordet er oppdatert!", "success")
                 database = db()
                 total_points = database.getTotalPoints(session["idUser"])
-                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
+                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
 
             else:
                 flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
@@ -676,7 +676,7 @@ def viewuser() -> 'html':
         completedLevel = session['level']
     else:
         completedLevel = session['level'] - 1
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'], login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
@@ -700,7 +700,7 @@ def updateuser() -> 'html':
         user = User(*userUpdate.getUserByEmail(email))
         database = db()
         total_points = database.getTotalPoints(session["idUser"])
-        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
+        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
 
