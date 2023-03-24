@@ -128,26 +128,7 @@
                   </div>
                   {% endif %}
 
-                     {% if completedLevel >= 1 %}
-                    <div class="card shadow-lg">
-                        <div class="card-body">
-                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/bronze_badge.svg') }}" class="d-inline-block">Bronse</h5>
-                            <div class="card-text text-secondary px-2">
-                                Fullført bronse-nivå
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if completedLevel >= 2 %}
-                    <div class="card shadow-lg">
-                        <div class="card-body">
-                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/silver_badge.svg') }}" class="d-inline-block">Sølv</h5>
-                            <div class="card-text text-secondary px-2">
-                                Fullført sølv-nivå
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
+
                     {% if completedLevel >= 3 %}
                     <div class="card shadow-lg">
                         <div class="card-body">

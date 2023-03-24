@@ -680,10 +680,6 @@ def viewuser() -> 'html':
     login_streak = database.get_login_streak(session["idUser"])
     checklevel()
     completedLevel = checkLevelCompleted()
-    #if database.checkCourseDone(session['courseId']) == 1:
-    #    completedLevel = session['level']
-    #else:
-    #    completedLevel = session['level'] - 1
     return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
