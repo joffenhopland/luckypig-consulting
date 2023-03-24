@@ -205,10 +205,8 @@ def course():
             level += 1
             session["level"] = level
             print(f'session["level"] if: {session["level"]}')
-            #should we remove the question done once level done?
-            database.delete_question_done(session["courseId"])
             #Set the course as done
-            database.setCourseDone(session["courseId"])
+            #database.setCourseDone(session["courseId"])
 
             #start a new course for the new level
             session["courseId"] = -1
