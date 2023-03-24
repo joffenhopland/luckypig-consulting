@@ -251,6 +251,12 @@ def checklevel():
         session["level_name"] = "Gull"
         # return "Level: Gull"
 
+def checkLevelCompleted():
+    database = db()
+    if database.checkCourseDone(session['courseId']) == 1:
+        return session['level']
+    else:
+        return session['level'] - 1
 @app.route("/skipExercise", methods=['GET'])
 def skipExercise():
     database = db()
@@ -673,11 +679,11 @@ def viewuser() -> 'html':
     total_points = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     checklevel()
-    completedLevel = 0
-    if database.checkCourseDone(session['courseId']) == 1:
-        completedLevel = session['level']
-    else:
-        completedLevel = session['level'] - 1
+    completedLevel = checkLevelCompleted()
+    #if database.checkCourseDone(session['courseId']) == 1:
+    #    completedLevel = session['level']
+    #else:
+    #    completedLevel = session['level'] - 1
     return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
