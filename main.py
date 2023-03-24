@@ -76,6 +76,7 @@ def learn():
     totalPoints = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     themeId = session["themeId"]
+    checklevel()
     print(f'total point: {totalPoints}')
 
     return render_template("learn.html", total_points = totalPoints, themeId = themeId, login_streak=login_streak, level=session['level_name'])
@@ -246,7 +247,7 @@ def checklevel():
     elif session["level"] == 2:
         session["level_name"] = "Sølv"
         # return "Level: Sølv"
-    elif session["level"] == 3:
+    elif session["level"] >= 3:
         session["level_name"] = "Gull"
         # return "Level: Gull"
 
@@ -403,6 +404,7 @@ def drag_and_drop():
 
         if " ".join(user_answer) == right_answer:
             flash(f'Korrekt!', "success")
+            exercise.number_succeed += 1
             print("ok")
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
@@ -416,14 +418,14 @@ def drag_and_drop():
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
-        #exercise.updateExercise()
+        exercise.updateExercise()
         return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"])
     
     print(f'exerciseId: {exerciseId}')
     exercise = dragAndDropService.getExercise(exerciseId)
 
     # exercise = Exercise(exerciseId, 5)
-    # exercise.getExercise()
+    #exercise.getExercise()
     question = exercise.question
     choices = exercise.choices
     random.shuffle(choices)
@@ -670,7 +672,13 @@ def viewuser() -> 'html':
     database = db()
     total_points = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak)
+    checklevel()
+    completedLevel = 0
+    if database.checkCourseDone(session['courseId']) == 1:
+        completedLevel = session['level']
+    else:
+        completedLevel = session['level'] - 1
+    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':

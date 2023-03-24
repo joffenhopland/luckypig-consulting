@@ -134,7 +134,7 @@ class DragAndDropExercise:
         self.number_succeed = number_succeed
         self.themeId = themeId
         self.choices = choices
-        self.type = 2
+        self.type = 5
 
 
     def updateExercise(self):
