@@ -13,7 +13,7 @@ from flask_bcrypt import Bcrypt
 from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm
 from User import User
 import json
 from classes import Exercise, Dropdown, CourseStatus
@@ -726,17 +726,50 @@ def logout() -> 'html':
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
 
-@app.route('/reportgeneration', methods=["GET", "POST"])    
+@app.route('/reportgeneration', methods=["GET", "POST"])
 def reportgeneration() -> 'html':
-    if session["role"] == 3 or session["role"] == 2:
-        return render_template('reportgeneration.html')
-    else: #if user is not admin or teacher (2 or 3) -> create a logic that handles this problem
-       return render_template("learn.html") #(This is temporary)
-
+    themeId = session["themeId"]
+    print(themeId)
+    if session["role"] == 3:
+        print("Rendering reportgeneration_teacher.html")
+        form = ReportForm()
+        if form.validate_on_submit():
+            report_type = form.report_type.data
+            theme = form.theme.data
+            level = form.level.data
+            userID = form.userID.data
+            print(f"Admin report: report-type: {report_type}, theme: {theme}, level: {level},userID: {userID}")
+            url = url_for('report', report_type=report_type, theme=theme, level=level, userID=userID)
+            return redirect(url)
+        return render_template('reportgeneration_admin.html', form=form, themeId=themeId)
+    elif session["role"] == 2:
+        print("Rendering reportgeneration_admin.html")
+        form = ReportForm()
+        if form.validate_on_submit():
+            report_type = form.report_type.data
+            theme = form.theme.data
+            level = form.level.data
+            userID = form.userID.data
+            print(f"Teacher report: report-type: {report_type}, theme: {theme}, level: {level},userID: {userID}")
+            url = url_for('report', report_type=report_type, theme=theme, level=level, userID=userID)
+            return redirect(url)
+        return render_template('reportgeneration_teacher.html', form=form, themeId=themeId)
+    else:
+        return render_template("learn.html")
 @app.route('/report') #Currently used to test report.html UI
 def report():
     database = db()
-    result = database.get_user_view()
+    report_type = request.args.get('report_type')
+    theme = request.args.get('theme')
+    level = request.args.get('level')
+    userID = request.args.get('userID')
+    if report_type == "user_reports":
+        result = database.get_user_view()
+    elif report_type == "difficult_tasks":
+        result = database.get_all_tasks_report_view()
+    else:
+        print("Error, no valid report type selected")
+
     df = pd.DataFrame(result)
     df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
