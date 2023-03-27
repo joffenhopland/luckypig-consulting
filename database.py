@@ -96,6 +96,21 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def getAllUser(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT userId, username FROM user ORDER BY userId")
+            result = cursor.fetchall()
+            if result == None:
+                return result
+            else:
+                users = []
+                for user in result:
+                    users.append(user)
+                return users
+        except mysql.connector.Error as err:
+            print(err)
 
     #Gets all information from user after verification. For logging in automatic after link pressed.
     def getUser2(self, kode):
@@ -678,6 +693,6 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    #print(database.setCourseDone(42))
+    print(database.getAllUser())
     #print(database.get_filtered_theme_on_user_view('kokk'))
 main()
