@@ -734,8 +734,12 @@ def reportgeneration() -> 'html':
     if session["role"] == 3:
         print("Rendering reportgeneration_teacher.html")
         form = ReportForm()
-        form.userID.choices = database.getAllUser()
-        print(f'choices: {form.userID.choices}')
+        users =[(0,"-")]
+        userDB = database.getAllUser()
+        if userDB is not None:
+            for user in userDB:
+                users.append((user[0],str(user[0]) + " - " + user[1]))
+        form.userID.choices = users
         if form.validate_on_submit():
             report_type = form.report_type.data
             theme = form.theme.data
@@ -748,7 +752,12 @@ def reportgeneration() -> 'html':
     elif session["role"] == 2:
         print("Rendering reportgeneration_admin.html")
         form = ReportForm()
-        form.userID.choices = database.getAllUser() #----------------------To be changed to show just the user of the teacher
+        users = [(0, "-")]
+        userDB = database.getAllUser() #----------------------To be changed to show just the user of the teacher
+        if userDB is not None:
+            for user in userDB:
+                users.append((user[0],str(user[0]) + " - " + user[1]))
+        form.userID.choices = users
         if form.validate_on_submit():
             report_type = form.report_type.data
             theme = form.theme.data
