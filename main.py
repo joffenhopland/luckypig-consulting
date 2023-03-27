@@ -728,11 +728,14 @@ def logout() -> 'html':
 
 @app.route('/reportgeneration', methods=["GET", "POST"])
 def reportgeneration() -> 'html':
+    database = db()
     themeId = session["themeId"]
     print(themeId)
     if session["role"] == 3:
         print("Rendering reportgeneration_teacher.html")
         form = ReportForm()
+        form.userID.choices = database.getAllUser()
+        print(f'choices: {form.userID.choices}')
         if form.validate_on_submit():
             report_type = form.report_type.data
             theme = form.theme.data
@@ -745,6 +748,7 @@ def reportgeneration() -> 'html':
     elif session["role"] == 2:
         print("Rendering reportgeneration_admin.html")
         form = ReportForm()
+        form.userID.choices = database.getAllUser() #----------------------To be changed to show just the user of the teacher
         if form.validate_on_submit():
             report_type = form.report_type.data
             theme = form.theme.data

@@ -88,7 +88,9 @@ class ReportForm(FlaskForm):
     difficult_tasks_sort_teacher = RadioField('Sorter på', choices=[('group', 'Gruppe - not implemented')],
                                       validators=[Optional()])
     global_sort = RadioField('Velg sortering', choices=[('theme', 'Tema'), ('level', 'Nivå'), ('all', 'Alle')], validators=[Optional()])
-    userID = StringField('BrukerID', validators=[Optional()])
+    #userChoices =  []
+    userID = SelectField('BrukerID', coerce=int, validators=[Optional()])
+    #userID = StringField('BrukerID', validators=[Optional()])
     theme = SelectField('Velg tema', choices=[(None, '-'), ('1', 'Kokk'), ('2', 'Bilmekaniker'), ('3', 'Finans')],validators=[Optional()])
     level = SelectField('Velg nivå', choices=[(None, '-'), ('1', 'Bronse'), ('2', 'Sølv'), ('3', 'Gull')],validators=[Optional()])
     submit = SubmitField('Generer rapport')
