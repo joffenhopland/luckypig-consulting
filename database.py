@@ -545,39 +545,89 @@ class db:
         except mysql.connector.Error as err:
             print(err)
           
-            
-    #report
-            
-    def get_user_view(self):
+    # report - flytsskjema
+    
+    def user_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
+        query, values_sql = self.get_sql_query_for_user_view(role, teacher_user_id= teacher_user_id, group_id=group_id, theme_id=theme_id, user_id=user_id, level=level)
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            cursor.execute("SELECT * from user_view")
+            if values_sql != []:
+                cursor.execute(query, (values_sql))
+            else:
+                cursor.execute(query, (values_sql))
             result = cursor.fetchall()
             return result
         except mysql.connector.Error as err:
             print(err)
             
-    def get_filtered_by_user_id_on_user_view(self, user_id):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * from user_view where userId=(%s)", (user_id,))
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-                       
-    def get_filtered_theme_user_view(self, theme):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * from user_view where theme=(%s)", (theme,))
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
+    def get_sql_query_for_user_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
+        select_sql = "SELECT "
+        from_sql = " FROM "
+        where_sql = ""
+        values_sql = []
+        
+        #Role=Admin
+        if role == 3:
+            if group_id == None:
+                select_sql += "u.Navn, u.antall_spm, u.antall_riktige, u.successrate"
+                from_sql += "user_view as u" 
+                
+                if theme_id != None or user_id != None or level != None:
+                    where_sql = " WHERE "  
+                
+            else:
+                select_sql += "u.Navn, g.gruppenavn, u.antall_spm, u.antall_riktige, u.successrate"
+                from_sql += "group_user_view as g, user_view as u"
+                where_sql += " WHERE g.userId = u.BrukerId AND g.group_id = (%s)"
+                values_sql.append(group_id)
+                
+                if theme_id != None or user_id != None or level != None:
+                    where_sql += " AND "
+             
             
+        #Role=Lærer
+        elif role == 2:
+            select_sql += "u.Navn, g.gruppenavn, u.antall_spm, u.antall_riktige, u.successrate"
+            from_sql += "group_user_view as g, user_view as u"
+            where_sql += " WHERE g.userId = u.BrukerId AND g.teacher_id = (%s)"
+            if teacher_user_id != None:
+                values_sql.append(teacher_user_id)
+            else:
+                print("Missing user_teacher_id")
+                return None
+                
+            if theme_id != None or user_id != None or level != None:
+                where_sql += " AND "
+        
+        #Role=?
+        else:
+            print("User_view in database.py has not received a correct role value.")
+            return None
+        
+        if theme_id != None:
+            select_sql += ", u.Kurs"
+            where_sql += "u.Kurs = (%s) "
+            values_sql.append(theme_id)
+        if user_id != None:
+            select_sql += ", u.BrukerId"
+            if theme_id != None:
+                where_sql += "AND "
+                where_sql += "u.userId = (%s) "
+                values_sql.append(user_id)
+        if level != None:
+            select_sql += ", u.current_level"
+        if user_id != None or theme_id != None:
+            where_sql += "AND "
+            where_sql += "u.current_level = (%s) "
+            values_sql.append(level)
+        
+        query = select_sql+from_sql+where_sql 
+        return query, values_sql
+     
+     
+    #report - skal fjernes etterhvert!
+        
     def get_all_tasks_report_view(self):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -635,6 +685,9 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
+            
+            
+
 
 
 def main():

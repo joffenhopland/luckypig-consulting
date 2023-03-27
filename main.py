@@ -777,7 +777,7 @@ def report():
     level = request.args.get('level')
     userID = request.args.get('userID')
     if report_type == "user_reports":
-        result = database.get_user_view()
+        result = database.user_view(role=3) #role=session["role"]!!!
     elif report_type == "difficult_tasks":
         result = database.get_all_tasks_report_view()
     else:
