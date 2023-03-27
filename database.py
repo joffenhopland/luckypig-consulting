@@ -105,7 +105,7 @@ class db:
             if result == None:
                 return result
             else:
-                users = []
+                users = [(0,"-")]
                 for user in result:
                     users.append(user)
                 return users
