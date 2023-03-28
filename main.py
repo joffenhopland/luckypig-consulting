@@ -260,6 +260,8 @@ def skipExercise():
     database = db()
     success = 0
     database.question_done(session['exerciseId'], success, session["level"], session["courseId"])
+    database.question_history(session['exerciseId'], success, session["level"], session["courseId"])
+
     return redirect(url_for("course"))
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
@@ -282,6 +284,7 @@ def multiple_choice():
             success = 1
             print(f'questino_done: {exerciseId}, {success}, {session["level"]}, {session["courseId"]}')
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
             # need to update user score
             # get current score from course_status
             # add exercise.score to the current score
@@ -296,6 +299,7 @@ def multiple_choice():
             flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
         
         exercise.number_asked += 1
         exercise.updateExercise()
@@ -337,15 +341,18 @@ def dropdown():
             exercise.number_succeed += 1
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
             # Increase users current level points
             level_points = database.get_level_points(session["courseId"])
             level_points += 1
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
+
         else:
             flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
 
             # flash(f'Sorry, that is wrong. The answer was "{right_answer}".', "danger")
         exercise.number_asked += 1
@@ -412,6 +419,7 @@ def drag_and_drop():
             print("ok")
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
             # Increase users current level points
             level_points = database.get_level_points(session["courseId"])
             level_points += 1
@@ -421,6 +429,7 @@ def drag_and_drop():
             flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
         exercise.updateExercise()
         return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"])
