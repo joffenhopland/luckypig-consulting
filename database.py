@@ -545,8 +545,8 @@ class db:
         except mysql.connector.Error as err:
             print(err)
           
-    # report - flytsskjema
-    
+          
+    # report - user
     def user_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
         query, values_sql = self.get_sql_query_for_user_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, user_id=user_id, level=level)
         try:
@@ -561,24 +561,6 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
-    def all_tasks_report_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, level=None):
-        query, values_sql = self.get_sql_query_for_all_tasks_report_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, level=level)
-        n_rows = 10
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            if values_sql != []:
-                cursor.execute(query, (values_sql))
-            else:
-                cursor.execute(query, (values_sql))
-            result = cursor.fetchall()
-            if len(result) >= n_rows:
-                return result[:n_rows]
-            else:
-                return result
-        except mysql.connector.Error as err:
-            print(err)
-    
     def get_sql_query_for_user_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
         select_sql = "SELECT "
         from_sql = " FROM "
@@ -646,6 +628,26 @@ class db:
         
         query = select_sql+from_sql+where_sql 
         return query, values_sql
+    
+    
+    # report - tasks     
+    def all_tasks_report_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, level=None):
+        query, values_sql = self.get_sql_query_for_all_tasks_report_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, level=level)
+        n_rows = 10
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            if values_sql != []:
+                cursor.execute(query, (values_sql))
+            else:
+                cursor.execute(query, (values_sql))
+            result = cursor.fetchall()
+            if len(result) >= n_rows:
+                return result[:n_rows]
+            else:
+                return result
+        except mysql.connector.Error as err:
+            print(err)
     
     def get_sql_query_for_all_tasks_report_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
         select_sql = "SELECT "
