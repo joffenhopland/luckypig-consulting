@@ -596,6 +596,10 @@ class db:
             else:
                 print("Missing user_teacher_id")
                 return None
+            
+            if group_id != None:
+                where_sql += " AND g.group_id = (%s)"
+                values_sql.append(group_id)
                 
             if theme_id != None or user_id != None or level != None:
                 where_sql += " AND "
@@ -613,16 +617,17 @@ class db:
             select_sql += ", u.BrukerId"
             if theme_id != None:
                 where_sql += "AND "
-                where_sql += "u.userId = (%s) "
-                values_sql.append(user_id)
+            where_sql += "u.userId = (%s) "
+            values_sql.append(user_id)
         if level != None:
             select_sql += ", u.current_level"
-        if user_id != None or theme_id != None:
-            where_sql += "AND "
+            if user_id != None or theme_id != None:
+                where_sql += "AND "
             where_sql += "u.current_level = (%s) "
             values_sql.append(level)
         
         query = select_sql+from_sql+where_sql 
+        print(query)
         return query, values_sql
      
      
@@ -693,6 +698,8 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.getAllUser())
+    #print(database.getAllUser())
     #print(database.get_filtered_theme_on_user_view('kokk'))
+    #print(database.user_view(role=2, teacher_user_id=7,group_id=2, level=1))
+    
 main()
