@@ -631,9 +631,8 @@ class db:
     
     
     # report - tasks     
-    def all_tasks_report_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, level=None):
+    def all_tasks_report_view(self,role, n_rows=10, teacher_user_id=None, group_id=None, theme_id=None, level=None):
         query, values_sql = self.get_sql_query_for_all_tasks_report_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, level=level)
-        n_rows = 10
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
