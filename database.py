@@ -676,7 +676,7 @@ class db:
             where_sql += " t.number_asked NOT LIKE 0 "
             if group_id != None:
                 from_sql += ", group_questions AS g"
-                where_sql += "AND g.ID = t.exercise_id AND g.groupId = (%s) "
+                where_sql += "AND g.exerciseId = t.exercise_id AND g.groupId = (%s) "
                 values_sql.append(group_id)
              
             if theme_id != None:
@@ -704,7 +704,7 @@ class db:
             
             if group_id != None:
                 from_sql += ", group_questions AS g"
-                where_sql += "AND g.ID = gt.group_id AND g.groupId = (%s) "
+                where_sql += "AND g.exerciseId= gt.group_id AND g.groupId = (%s) "
                 values_sql.append(group_id)
             
             if theme_id != None or user_id !=None or level != None:
