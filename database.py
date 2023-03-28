@@ -584,16 +584,16 @@ class db:
         #Role=Admin
         if role == 3:
             if group_id == None:
-                select_sql += "u.Navn, u.antall_spm, u.antall_riktige, u.successrate"
+                select_sql += "u.username, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "user_view as u" 
                 
                 if theme_id != None or user_id != None or level != None:
                     where_sql = " WHERE "  
                 
             else:
-                select_sql += "u.Navn, g.gruppenavn, u.antall_spm, u.antall_riktige, u.successrate"
+                select_sql += "u.username, g.gruppenavn, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "group_user_view AS g, user_view AS u"
-                where_sql += " WHERE g.userId = u.BrukerId AND g.group_id = (%s)"
+                where_sql += " WHERE g.userId = u.user_id AND g.group_id = (%s)"
                 values_sql.append(group_id)
                 
                 if theme_id != None or user_id != None or level != None:
@@ -602,9 +602,9 @@ class db:
             
         #Role=Lærer
         elif role == 2:
-            select_sql += "u.Navn, g.gruppenavn, u.antall_spm, u.antall_riktige, u.successrate"
+            select_sql += "u.username, g.gruppenavn, u.number_tasks, u.number_correct, u.successrate"
             from_sql += "group_user_view AS g, user_view AS u"
-            where_sql += " WHERE g.userId = u.BrukerId AND g.teacher_id = (%s)"
+            where_sql += " WHERE g.userId = u.user_id AND g.teacher_id = (%s)"
             if teacher_user_id != None:
                 values_sql.append(teacher_user_id)
             else:
@@ -624,14 +624,14 @@ class db:
             return None
         
         if theme_id != None:
-            select_sql += ", u.Kurs"
-            where_sql += "u.Kurs = (%s) "
+            select_sql += ", u.theme_id"
+            where_sql += "u.theme_id = (%s) "
             values_sql.append(theme_id)
         if user_id != None:
-            select_sql += ", u.BrukerId"
+            select_sql += ", u.user_id"
             if theme_id != None:
                 where_sql += "AND "
-            where_sql += "u.userId = (%s) "
+            where_sql += "u.user_id = (%s) "
             values_sql.append(user_id)
         if level != None:
             select_sql += ", u.current_level"
@@ -725,7 +725,7 @@ def main():
     #database.delete_question_done(25)
     #print(database.getAllUser())
     #print(database.get_filtered_theme_on_user_view('kokk')
-    #print(database.all_tasks_report_view(role=2, teacher_user_id=7, group_id=2))
+    #print(database.user_view(role=3, level=2))
 
    
     
