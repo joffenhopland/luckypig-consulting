@@ -704,7 +704,7 @@ class db:
             
             if group_id != None:
                 from_sql += ", group_questions AS g"
-                where_sql += "AND g.exerciseId= gt.group_id AND g.groupId = (%s) "
+                where_sql += "AND g.groupId= gt.group_id AND g.groupId = (%s) "
                 values_sql.append(group_id)
             
             if theme_id != None or user_id !=None or level != None:
@@ -725,6 +725,7 @@ def main():
     #database.delete_question_done(25)
     #print(database.getAllUser())
     #print(database.get_filtered_theme_on_user_view('kokk')
+    #print(database.all_tasks_report_view(role=2, teacher_user_id=7, group_id=2))
 
    
     
