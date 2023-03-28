@@ -453,6 +453,20 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def question_history(self,exerciseId,success,level, courseId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO question_history (exerciseId, success, courseId, level)
+                VALUES (%s, %s, %s, %s)'''
+            insert = (exerciseId, success, courseId, level)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+
     def get_total_points(self, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
