@@ -785,7 +785,7 @@ def reportgeneration() -> 'html':
         form.groupID.choices = groups
 
         users = [(0, "-")]
-        userDB = database.get_users_teacher(7) #----------------------To be changed to show just the user of the teacher
+        userDB = database.get_users_teacher(teacher_userID)
         if userDB is not None:
             for user in userDB:
                 users.append((user[0],str(user[0]) + " - " + user[1]))
