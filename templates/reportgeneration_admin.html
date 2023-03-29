@@ -39,10 +39,10 @@
                   {{ subfield.label }}
                 </div>
               {% endfor %}
-              <div class="form-group" id="userID" style="display:none;">
+            </div>
+            <div class="form-group" id="userID" style="display:none;">
                 {{ form.userID.label }}
-                {{ form.userID }}
-              </div>
+                {{ form.userID(class_="form-select") }}
             </div>
             <div class="form-check" id="difficult_tasks_sort" style="display:none;">
               {{ form.difficult_tasks_sort.label }}
@@ -61,17 +61,38 @@
                   {{ subfield.label }}
                 </div>
               {% endfor %}
-              <div class="form-group" id="theme_select" style="display:none;">
-                {{ form.theme.label }}
-                {{ form.theme(class_="form-select")  }}
-              </div>
-              <div class="form-group" id="level_select" style="display:none;">
-                {{ form.level.label }}
-                {{ form.level(class_="form-select") }}
-              </div>
             </div>
+            <div class="form-group" id="groupID" style="display:none;">
+              {{ form.groupID.label }}
+              {{ form.groupID(class_="form-select") }}
+            </div>
+            <div class="form-check" id="group_sort" style="display:none;">
+              {{ form.group_sort.label }}
+              {% for subfield in form.group_sort %}
+                <div class="form-check">
+                  {{ subfield }}
+                  {{ subfield.label }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group" id="theme_select" style="display:none;">
+              {{ form.theme.label }}
+              {{ form.theme(class_="form-select")  }}
+            </div>
+            <div class="form-group" id="level_select" style="display:none;">
+              {{ form.level.label }}
+              {{ form.level(class_="form-select") }}
+            </div>
+            <br>
             <div class="form-group">
               {{ form.submit(id='report-submit', class_='btn btn-primary') }}
+            </div>
+          </form>
+          <br>
+          <form action="{{ url_for('viewuser') }}" method="GET">
+            <div class="justify-content-center">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-primary mr-4" type="submit">Tilbake</button>
             </div>
           </form>
         </div>
@@ -81,12 +102,6 @@
 </div>
 
 
-   <form action="{{ url_for('viewuser') }}" method="GET">
-        <div class="justify-content-center">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <button class="btn btn-primary mr-4" type="submit">Tilbake</button>
-          </div>
-    </form>
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -99,6 +114,7 @@ $(document).ready(function() {
       $("#user_reports_sort").show();
       $("#difficult_tasks_sort").hide();
       $("#global_sort").hide();
+      $("#group_sort").hide();
       $("#theme_select").hide();
       $("#level_select").hide();
       $('#report-submit').hide();
@@ -106,6 +122,7 @@ $(document).ready(function() {
       $("#user_reports_sort").hide();
       $("#difficult_tasks_sort").show();
       $("#global_sort").hide();
+      $("#group_sort").hide();
       $("#theme_select").hide();
       $("#level_select").hide();
       $('#report-submit').hide();
@@ -115,18 +132,34 @@ $(document).ready(function() {
   $("input[name='user_reports_sort']").change(function() {
     if ($("input[name='user_reports_sort']:checked").val() == "single_user") {
       $("#userID").show();
+      $("#groupID").hide();
       $('#report-submit').show();
       $("#global_sort").hide();
+      $("#group_sort").hide();
       $("#theme_select").hide();
       $("#level_select").hide();
     } else if ($("input[name='user_reports_sort']:checked").val() == "global"){
       $("#userID").hide();
+      $("#groupID").hide();
       $('#report-submit').hide();
       $("#global_sort").show();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    } else if ($("input[name='user_reports_sort']:checked").val() == "group"){
+      $("#userID").hide();
+      $("#groupID").show();
+      $('#report-submit').hide();
+      $("#global_sort").hide();
+      $("#group_sort").show();
+      $("#theme_select").hide();
+      $("#level_select").hide();
     } else {
       $("#theme_select").hide();
       $("#level_select").hide();
       $("#userID").hide();
+      $("#group_sort").hide();
+      $("#groupID").hide();
       $('#report-submit').hide();
       $("#global_sort").hide();
     }
@@ -135,12 +168,47 @@ $(document).ready(function() {
     $("input[name='difficult_tasks_sort']").change(function() {
       if ($("input[name='difficult_tasks_sort']:checked").val() == "global"){
       $("#userID").hide();
+      $("#groupID").hide();
       $('#report-submit').hide();
       $("#global_sort").show();
-    } else {
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    } else if ($("input[name='difficult_tasks_sort']:checked").val() == "group"){
       $("#userID").hide();
+      $("#groupID").show();
+      $("#group_sort").show();
       $('#report-submit').hide();
       $("#global_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    }else {
+      $("#userID").hide();
+      $("#groupID").hide();
+      $('#report-submit').hide();
+      $("#global_sort").hide();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    }
+  });
+
+  $("input[name='group_sort']").change(function() {
+    if ($("input[name='group_sort']:checked").val() == "theme") {
+      $("#theme_select").show();
+      $('#report-submit').show();
+      $("#level_select").hide();
+      $("#userID").hide();
+    } else if ($("input[name='group_sort']:checked").val() == "level") {
+      $("#level_select").show();
+      $('#report-submit').show();
+      $("#theme_select").hide();
+      $("#userID").hide();
+    } else {
+      $("#theme_select").hide();
+      $("#level_select").hide();
+      $("#userID").hide();
+      $('#report-submit').show();
     }
   });
 

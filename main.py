@@ -742,61 +742,80 @@ def logout() -> 'html':
 def reportgeneration() -> 'html':
     database = db()
     themeId = session["themeId"]
-    print(themeId)
+
     if session["role"] == 3:
-        print("Rendering reportgeneration_admin.html")
+
         form = ReportForm()
+
+        groups =[(0,"-")]
+        groupDB = database.get_group()
+        if groupDB is not None:
+            for group in groupDB:
+                groups.append((group[0],str(group[0]) + " - " + group[1]))
+        form.groupID.choices = groups
+
         users =[(0,"-")]
         userDB = database.getAllUser()
         if userDB is not None:
             for user in userDB:
                 users.append((user[0],str(user[0]) + " - " + user[1]))
         form.userID.choices = users
+
         if form.validate_on_submit():
             report_type = form.report_type.data
-            #groupID = form.groupID.data
+            groupID = form.groupID.data
             theme = form.theme.data
             level = form.level.data
             userID = form.userID.data
-            print(f"Admin report: report-type: {report_type}, theme: {theme}, level: {level},userID: {userID}")
-            url = url_for('report', report_type=report_type, theme=theme, level=level, userID=userID)
+            print(f"Admin report: report-type: {report_type}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
+            url = url_for('report', report_type=report_type, groupID= groupID, theme=theme, level=level, userID=userID)
             return redirect(url)
         return render_template('reportgeneration_admin.html', form=form, themeId=themeId)
+
     elif session["role"] == 2:
-        print("Rendering reportgeneration_teacher.html")
+
         form = ReportForm()
+        teacher_userID = session["idUser"]
+
+        groups =[(0,"-")]
+        groupDB = database.get_group(teacher_userID)
+        if groupDB is not None:
+            for group in groupDB:
+                groups.append((group[0],str(group[0]) + " - " + group[1]))
+        form.groupID.choices = groups
+
         users = [(0, "-")]
-        userDB = database.getAllUser() #----------------------To be changed to show just the user of the teacher
+        userDB = database.get_users_teacher(7) #----------------------To be changed to show just the user of the teacher
         if userDB is not None:
             for user in userDB:
                 users.append((user[0],str(user[0]) + " - " + user[1]))
         form.userID.choices = users
+
         if form.validate_on_submit():
             report_type = form.report_type.data
-            #groupID = form.groupID.data
+            groupID = form.groupID.data
             theme = form.theme.data
             level = form.level.data
             userID = form.userID.data
-            print(f"Teacher report: report-type: {report_type}, theme: {theme}, level: {level},userID: {userID}")
-            url = url_for('report', report_type=report_type, theme=theme, level=level, userID=userID)
+            url = url_for('report', report_type=report_type, groupID=groupID, theme=theme, level=level, userID=userID)
             return redirect(url)
         return render_template('reportgeneration_teacher.html', form=form, themeId=themeId)
     else:
         return render_template("learn.html")
-@app.route('/report') #Currently used to test report.html UI
+@app.route('/report')
 def report():
     database = db()
     report_type = request.args.get('report_type')
     role = session["role"]
-    #groupID = request.args.get('groupID')
-    groupID=None
+    groupID = request.args.get('groupID')
     theme = request.args.get('theme')
     level = request.args.get('level')
     userID = request.args.get('userID')
 
     if userID == "0":
         userID = None
-        print(f"userID = {userID}")
+    if groupID == "0":
+        groupID = None
     if level == "None":
         level = None
     if theme == "None":
@@ -808,16 +827,17 @@ def report():
         teacher_userID = None
 
     if report_type == "user_reports":
-        print(f"This is in report: {role}, {teacher_userID}, {groupID}, {theme}, {userID}, {level}")
-        result = database.user_view(role, teacher_userID, groupID, theme, userID, level) #role=session["role"]!!!
-        print(result)
+        print(
+            f"User report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
+        result = database.user_view(role, teacher_userID, groupID, theme, userID, level)
     elif report_type == "difficult_tasks":
+        print(
+            f"Difficult task report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
         result = database.all_tasks_report_view(role, 10, teacher_userID, groupID, theme, level)
     else:
         print("Error, no valid report type selected")
 
     df = pd.DataFrame(result)
-    df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
     html_table = styled_table.to_html()
     return render_template("report.html", table=html_table)

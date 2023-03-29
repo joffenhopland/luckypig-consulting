@@ -38,10 +38,6 @@
                   {{ subfield.label }}
                 </div>
               {% endfor %}
-              <div class="form-group" id="userID" style="display:none;">
-                {{ form.userID.label }}
-                {{ form.userID }}
-              </div>
             </div>
             <div class="form-check" id="difficult_tasks_sort_teacher" style="display:none;">
               {{ form.difficult_tasks_sort_teacher.label }}
@@ -52,8 +48,41 @@
                 </div>
               {% endfor %}
             </div>
+            <div class="form-group" id="userID" style="display:none;">
+              {{ form.userID.label }}
+              {{ form.userID(class_="form-select") }}
+            </div>
+            <div class="form-group" id="groupID" style="display:none;">
+              {{ form.groupID.label }}
+              {{ form.groupID(class_="form-select") }}
+            </div>
+            <div class="form-check" id="group_sort" style="display:none;">
+              {{ form.group_sort.label }}
+              {% for subfield in form.group_sort %}
+                <div class="form-check">
+                  {{ subfield }}
+                  {{ subfield.label }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group" id="theme_select" style="display:none;">
+              {{ form.theme.label }}
+              {{ form.theme(class_="form-select")  }}
+            </div>
+            <div class="form-group" id="level_select" style="display:none;">
+              {{ form.level.label }}
+              {{ form.level(class_="form-select") }}
+            </div>
+            <br>
             <div class="form-group">
               {{ form.submit(id='report-submit', class_='btn btn-primary') }}
+            </div>
+          </form>
+          <br>
+          <form action="{{ url_for('viewuser') }}" method="GET">
+            <div class="justify-content-center">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-primary mr-4" type="submit">Tilbake</button>
             </div>
           </form>
         </div>
@@ -62,12 +91,6 @@
   </div>
 </div>
 
-    <form action="{{ url_for('viewuser') }}" method="GET">
-        <div class="justify-content-center">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <button class="btn btn-primary mr-4" type="submit">Tilbake</button>
-          </div>
-    </form>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -77,11 +100,19 @@ $(document).ready(function() {
   $("input[name='report_type']").change(function() {
     if ($("input[name='report_type']:checked").val() == "user_reports") {
       $("#user_reports_sort_teacher").show();
-      $("#difficult_tasks_sort_teacher").hide();
+      $("#group_sort").hide();
+      $("#userID").hide();
+      $("#groupID").hide();
       $('#report-submit').hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
     } else if ($("input[name='report_type']:checked").val() == "difficult_tasks"){
       $("#user_reports_sort_teacher").hide();
-      $("#difficult_tasks_sort_teacher").show();
+      $("#group_sort").show();
+      $("#userID").hide();
+      $("#groupID").show();
+      $("#theme_select").hide();
+      $("#level_select").hide();
       $('#report-submit').hide();
     }
   });
@@ -89,13 +120,48 @@ $(document).ready(function() {
   $("input[name='user_reports_sort_teacher']").change(function() {
     if ($("input[name='user_reports_sort_teacher']:checked").val() == "single_user") {
       $("#userID").show();
-      $("#report-submit").show();}
-     else {
+      $("#groupID").hide();
+      $("#group_sort").hide();
+      $("#report-submit").show();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    } else if ($("input[name='user_reports_sort_teacher']:checked").val() == "group") {
      $("#userID").hide();
+     $("#groupID").show();
+     $("#group_sort").show();
      $("#report-submit").hide();
+     $("#theme_select").hide();
+     $("#level_select").hide();
+    } else {
+     $("#userID").hide();
+     $("#groupID").hide();
+     $("#group_sort").hide();
+     $("#report-submit").hide();
+     $("#theme_select").hide();
+     $("#level_select").hide();
+    }
+  });
+
+  $("input[name='group_sort']").change(function() {
+    if ($("input[name='group_sort']:checked").val() == "theme") {
+      $("#theme_select").show();
+      $('#report-submit').show();
+      $("#level_select").hide();
+      $("#userID").hide();
+    } else if ($("input[name='group_sort']:checked").val() == "level") {
+      $("#level_select").show();
+      $('#report-submit').show();
+      $("#theme_select").hide();
+      $("#userID").hide();
+    } else {
+      $("#theme_select").hide();
+      $("#level_select").hide();
+      $("#userID").hide();
+      $('#report-submit').show();
     }
   });
 });
+
 </script>
 
 {% endblock %}

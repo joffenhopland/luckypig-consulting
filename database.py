@@ -561,7 +561,27 @@ class db:
             return result[0]
         except mysql.connector.Error as err:
             print(err)
-          
+    def get_group(self, teacher_userID = None):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            if teacher_userID is None:
+                cursor.execute("SELECT * FROM group_table")
+            else:
+                cursor.execute("SELECT * FROM group_table WHERE userID=(%s)", (teacher_userID,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+    def get_users_teacher(self, teacher_userID):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM group_user_view WHERE teacher_id=(%s)", (teacher_userID,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
           
     # report - user
     def user_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
