@@ -442,7 +442,10 @@ def drag_and_drop():
     question = exercise.question
     choices = exercise.choices
     random.shuffle(choices)
-    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"])
+    order = []
+    for choice in choices:
+        order.append(choice['id'])
+    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"],order=order)
 
 
 

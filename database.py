@@ -391,7 +391,10 @@ class db:
             cursor = conn.cursor()
             cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
             result = cursor.fetchone()
-            if result[0] >= 0.8:
+            print(f'result: {result}')
+            if result[0] is None:
+                return False
+            elif result[0] >= 0.8:
                 return True
             else:
                 return False
