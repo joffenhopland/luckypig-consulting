@@ -744,7 +744,7 @@ def reportgeneration() -> 'html':
     themeId = session["themeId"]
     print(themeId)
     if session["role"] == 3:
-        print("Rendering reportgeneration_teacher.html")
+        print("Rendering reportgeneration_admin.html")
         form = ReportForm()
         users =[(0,"-")]
         userDB = database.getAllUser()
@@ -754,6 +754,7 @@ def reportgeneration() -> 'html':
         form.userID.choices = users
         if form.validate_on_submit():
             report_type = form.report_type.data
+            #groupID = form.groupID.data
             theme = form.theme.data
             level = form.level.data
             userID = form.userID.data
@@ -762,7 +763,7 @@ def reportgeneration() -> 'html':
             return redirect(url)
         return render_template('reportgeneration_admin.html', form=form, themeId=themeId)
     elif session["role"] == 2:
-        print("Rendering reportgeneration_admin.html")
+        print("Rendering reportgeneration_teacher.html")
         form = ReportForm()
         users = [(0, "-")]
         userDB = database.getAllUser() #----------------------To be changed to show just the user of the teacher
@@ -772,6 +773,7 @@ def reportgeneration() -> 'html':
         form.userID.choices = users
         if form.validate_on_submit():
             report_type = form.report_type.data
+            #groupID = form.groupID.data
             theme = form.theme.data
             level = form.level.data
             userID = form.userID.data
@@ -785,13 +787,32 @@ def reportgeneration() -> 'html':
 def report():
     database = db()
     report_type = request.args.get('report_type')
+    role = session["role"]
+    #groupID = request.args.get('groupID')
+    groupID=None
     theme = request.args.get('theme')
     level = request.args.get('level')
     userID = request.args.get('userID')
+
+    if userID == "0":
+        userID = None
+        print(f"userID = {userID}")
+    if level == "None":
+        level = None
+    if theme == "None":
+        theme = None
+
+    if role == 2:
+        teacher_userID = session["idUser"]
+    else:
+        teacher_userID = None
+
     if report_type == "user_reports":
-        result = database.user_view(role=3) #role=session["role"]!!!
+        print(f"This is in report: {role}, {teacher_userID}, {groupID}, {theme}, {userID}, {level}")
+        result = database.user_view(role, teacher_userID, groupID, theme, userID, level) #role=session["role"]!!!
+        print(result)
     elif report_type == "difficult_tasks":
-        result = database.get_all_tasks_report_view()
+        result = database.all_tasks_report_view(role, 10, teacher_userID, groupID, theme, level)
     else:
         print("Error, no valid report type selected")
 
