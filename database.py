@@ -594,7 +594,7 @@ class db:
             else:
                 cursor.execute(query, (values_sql))
             result = cursor.fetchall()
-            return result
+            return (result,query)
         except mysql.connector.Error as err:
             print(err)
             
@@ -679,9 +679,9 @@ class db:
                 cursor.execute(query, (values_sql))
             result = cursor.fetchall()
             if len(result) >= n_rows:
-                return result[:n_rows]
+                return (result[:n_rows],query)
             else:
-                return result
+                return (result,query)
         except mysql.connector.Error as err:
             print(err)
     

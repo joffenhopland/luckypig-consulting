@@ -826,31 +826,52 @@ def report():
     else:
         teacher_userID = None
 
+    headers = []
+    resultTable = []
     if report_type == "user_reports":
         print(
             f"User report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
         result = database.user_view(role, teacher_userID, groupID, theme, userID, level)
+        resultTable = result[0]
+        query = result[1]
     elif report_type == "difficult_tasks":
         print(
             f"Difficult task report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
         result = database.all_tasks_report_view(role, 10, teacher_userID, groupID, theme, level)
+        resultTable = result[0]
+        query = result[1]
     else:
         print("Error, no valid report type selected")
 
-    df = pd.DataFrame(result)
+    headers = getHeaders(query)
+    df = pd.DataFrame(data=resultTable,columns=headers)
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
     html_table = styled_table.to_html()
     return render_template("report.html", table=html_table)
 
-# def total_points():
-#     if session["logged in"] == True:
-#         userlogin = UserLogin()
-#         email = session["email"]
-#         user = User(*userlogin.getUserByEmail(email))
-#         userID = user.user_id
-#         database = db()
-#         total_points = database.get_total_points(userID)
-#         return total_points
+def getHeaders(query):
+    #function to extract parameters from sql query to get table headers for report
+    # initializing substrings
+    sub1 = "SELECT"
+    sub2 = "FROM"
+
+    # getting index of substrings
+    idx1 = query.index(sub1)
+    idx2 = query.index(sub2)
+
+    headerString = ''
+    # getting elements in between
+    for idx in range(idx1 + len(sub1) + 1, idx2):
+        headerString = headerString + query[idx]
+
+    headerLst = headerString.split(",")
+    headers = []
+    for header in headerLst:
+        headerTemp1 = header.split(".")
+        headerTemp2=headerTemp1[1].strip().replace("_"," ")
+        headers.append(headerTemp2)
+    return headers
+
 
 
 if __name__ == "__main__":
