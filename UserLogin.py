@@ -8,7 +8,7 @@ from flask_bcrypt import Bcrypt
 class UserLogin:
     
     def __init__(self):
-        self.dbconfig = {'host': '10.28.208.3',
+        self.dbconfig = {'host': '34.30.103.41',
                         'user': 'luckypig2023',
                         'password': 'LuckypigProject#1',
                         'database': 'Luckypig database',}

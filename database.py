@@ -3,7 +3,7 @@ import itertools
 
 class db:
     def __init__(self) -> None:
-        dbconfig = {'host': '10.28.208.3',
+        dbconfig = {'host': '34.30.103.41',
                     'user': 'luckypig2023',
                     'password': 'LuckypigProject#1',
                     'database': 'Luckypig database', }
