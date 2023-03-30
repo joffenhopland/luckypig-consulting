@@ -4,6 +4,7 @@ import uuid
 import itertools
 import random
 import pandas as pd
+import os
 
 from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup
 from flask_mail import Mail, Message
@@ -854,6 +855,6 @@ def report():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int("3000"))
+    app.run(port=8080)
 
 
