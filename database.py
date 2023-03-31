@@ -685,56 +685,55 @@ class db:
         except mysql.connector.Error as err:
             print(err)
     
-    def get_sql_query_for_all_tasks_report_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
+    def get_sql_query_for_all_tasks_report_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None): 
         select_sql = "SELECT "
-        from_sql = " FROM "
-        where_sql = " WHERE"
+        from_sql = "FROM "
+        where_sql = ""
         values_sql = []
-        query=""
         
         #Role=Admin
         if role == 3:
-            select_sql += "t.exercise_id, t.question, t.task_type, t.number_asked, t.number_succeed, t.percent"
-            from_sql += "all_tasks_report_view AS t"
-            where_sql += " t.number_asked NOT LIKE 0 "
-            if group_id != None:
-                from_sql += ", group_questions AS g"
-                where_sql += "AND g.exerciseId = t.exercise_id AND g.groupId = (%s) "
-                values_sql.append(group_id)
-             
-            if theme_id != None:
-                #select_sql += ", t.theme"
-                where_sql += "AND t.theme_id = (%s) "
-                values_sql.append(theme_id)
-                    
-            if level != None:
-                #select_sql += ", t.level"
-                where_sql += "AND t.level = (%s) "
-                values_sql.append(level)
+            select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig) as number_asked, sum(g.antall_utført) as number_success, (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, a.level, a.themeId as theme_id "
+            from_sql += "group_questions as g left join all_tasks_view as a ON a.exerciseId = g.exerciseId "
+        
+            if group_id != None or theme_id !=None or level != None:
+                where_sql += "WHERE "
                 
-            query = select_sql+from_sql+where_sql+"ORDER BY t.percent ASC"
+            if group_id != None:
+                where_sql += "g.groupId = (%s) "
+                values_sql.append(group_id)
+            
+            if theme_id != None:
+                if group_id != None:
+                    where_sql += "AND "
+                where_sql += "a.themeId = (%s) "
+                values_sql.append(theme_id)
+                
+            if level != None:
+                if group_id != None or theme_id != None:
+                    where_sql += "AND "
+                where_sql += "a.level = (%s) "
+                values_sql.append(level)
+        
+            query = select_sql+from_sql+where_sql+"GROUP BY g.exerciseId, a.level, a.themeId ORDER BY percent ASC "
                 
         #Role=Lærer
         elif role == 2:
-            select_sql += "gt.*"
-            from_sql += "group_user_view AS gt"
-            where_sql += " gt.teacher_id = (%s) "
-            if teacher_user_id != None:
-                values_sql.append(teacher_user_id)
-            else:
+            select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig) as number_asked, sum(g.antall_utført) as number_success, (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, gv.groupId as group_id, gv.userID as teacher_user_id "
+            from_sql += "group_questions as g, gruppe_view as gv "
+            where_sql += "WHERE g.groupId = gv.groupId AND gv.userId = (%s) "
+            
+            if teacher_user_id == None:
                 print("Missing user_teacher_id")
                 return None
+            values_sql.append(teacher_user_id)
             
             if group_id != None:
-                from_sql += ", group_questions AS g"
-                where_sql += "AND g.groupId= gt.group_id AND g.groupId = (%s) "
+                where_sql += "AND g.groupId = (%s) "
                 values_sql.append(group_id)
             
-            if theme_id != None or user_id !=None or level != None:
-                print("Can¨t filter on theme, user and lever for teachers!")
-            
-            query = select_sql+from_sql+where_sql+"ORDER BY gt.Prosent ASC"
-                
+            query = select_sql+from_sql+where_sql+"GROUP BY g.exerciseId, gv.groupId ORDER BY percent ASC " 
+              
         #Role=?
         else:
             print("User_view in database.py has not received a correct role value.")
@@ -748,8 +747,9 @@ def main():
     #database.delete_question_done(25)
     #print(database.getAllUser())
     #print(database.get_filtered_theme_on_user_view('kokk')
-    #print(database.user_view(role=3, level=2))
-
+    #print(database.user_view(role=3))
+    #print(database.get_sql_query_for_all_tasks_report_view(role=2, teacher_user_id=7, group_id=1))
+    print(database.all_tasks_report_view(role=3))
    
     
 main()
