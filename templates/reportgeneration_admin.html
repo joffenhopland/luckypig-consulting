@@ -20,7 +20,7 @@
       <div class="card shadow-lg">
         <div class="card-body">
           <h1>Rapportgenerering</h1>
-          <form method="post" action="{{ url_for('reportgeneration') }}">
+          <form method="post" action="{{ url_for('reportgeneration') }}" target="_blank">
             {{ form.csrf_token }}
             <div class="form-check">
               {{ form.report_type.label }}

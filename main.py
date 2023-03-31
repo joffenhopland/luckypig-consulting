@@ -690,7 +690,7 @@ def viewuser() -> 'html':
     login_streak = database.get_login_streak(session["idUser"])
     checklevel()
     completedLevel = checkLevelCompleted()
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'], login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
+    return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'], login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
