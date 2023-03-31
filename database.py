@@ -702,12 +702,13 @@ class db:
             if group_id != None:
                 where_sql += "g.groupId = (%s) "
                 values_sql.append(group_id)
-            
+            '''
             if theme_id != None:
                 if group_id != None:
                     where_sql += "AND "
                 where_sql += "a.themeId = (%s) "
                 values_sql.append(theme_id)
+                '''
                 
             if level != None:
                 if group_id != None or theme_id != None:

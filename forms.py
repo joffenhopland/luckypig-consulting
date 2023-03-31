@@ -88,7 +88,7 @@ class ReportForm(FlaskForm):
     difficult_tasks_sort_teacher = RadioField('Sorter på', choices=[('group', 'Gruppe')],
                                       validators=[Optional()])
     global_sort = RadioField('Velg sortering', choices=[('theme', 'Tema'), ('level', 'Nivå'), ('all', 'Alle')], validators=[Optional()])
-    group_sort = RadioField('Velg sortering', choices=[('theme', 'Tema'), ('level', 'Nivå'),('all', 'Alle')], validators=[Optional()])
+    group_sort = RadioField('Velg sortering', choices=[('level', 'Nivå'),('all', 'Alle')], validators=[Optional()])
 
     groupID = SelectField('GruppeID', coerce=int, validators=[Optional()])
     userID = SelectField('BrukerID', coerce=int, validators=[Optional()])
