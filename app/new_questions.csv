@@ -1,0 +1,17 @@
+Type;level;theme;question;answer;score;choice 1;choice 2;choice 3;Choice 4 
+1;2;1;Den franske desserten cr�me br�l�e er kjent for sin vaniljesaus og spr� skorpe : The French dessert cr�me br�l�e is known for its { blank } and crispy crust.;custard;2;yoghurt;pasta;custard;chocolate
+1;2;1;En av de mest brukte krydderiene i indisk matlaging er gurkemeie. : One of the most commonly used spices in Indian cooking is { blank }.;turmeric;2;turmeric;oregano;nutmeg;coriander
+1;3;1;For � skape en perfekt karamellisert skorpe p� kj�tt, m� kokken brune overflaten f�r steking. : To create a perfectly caramelized crust on meat, the chef must { blank } the surface before cooking.;sear;3;salt;sear;brown;butter
+1;3;1;Kokken m� panere fisken. : The chef must { blank } the fish.;bread;3;season;flour;butter;bread
+1;1;2;Ole har en bil.;Ole has a {blank}.;car;1;bike;plane;car;boat											
+1;1;2;Bilen til Ole har fire hjul.;Ole’s car has four {blank}.;wheels;1;deck;wheels;cheese;porridge											
+1;2;2;Ole bruker en verktøykasse når han fikser bilen sin.;Ole uses a {blank} when he fixes his car.;toolbox;2;toolbox;foodbox;workbench;lunchbox										
+1;2;2;Hvis bilen ikke fungerer, så må den til et verksted.;If the car doesn’t work, then it must go to a {blank}.;workshop;2;workforce;workbench;benchmark;workshop											
+1;3;2;Det er viktig at en bil har kjølevæske.;It is important that a car has {blank}.;coolant;3;coolant;liquidate;water cooler;refrigerator										
+1;3;2;Veivaksel trenger å bli smurt kontinuerlig med motorolje.;The {blank} needs to be continuously lubricated with motor oil.;crankshaft;3;wrench;belt;crankshaft;dumbbells										
+1;1;3;Google er et stort selskap.;Google is a large {blank}.;company;1;building;company;business;suits											
+1;1;3;Henry har kjøpt seg aksjer.;Henry has bought himself {blank}.;stocks;1;axis;bank;stocks;coins											
+1;2;3;Det har vært god utvikling på børsen dette kvartalet.;The {blank} has been performing well this quarter.;stock market;2;boast;business market;stock market;food market											
+1;2;3;Susan forhandlet frem en bedre avtale med leverandøren for virksomheten hennes.;Susan {blank} a better deal with the supplier for her business.;negotiated;2;changed;differentiated;negotiated;chose											
+1;3;3;Vår siste produktlansering overgikk salgsprognosene.;Our latest product launch exceeded sales {blank}.;projections;3;prognosis;business;projections;projectors											
+1;3;3;Vi må effektivisere produksjonsprosessen vår for å redusere kostnadene.;We need to {blank} our production process to reduce costs.;streamline;3;streamline;effective;amplify;decrease	
