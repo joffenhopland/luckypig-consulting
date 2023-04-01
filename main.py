@@ -60,8 +60,8 @@ def theme():
     else:
         #the user changes his theme (from dropdown choice)
         if session["themeId"] != themeId:
-            session["courseId"] = -1
-            session["level"] = 1
+            # session["courseId"] = -1
+            # session["level"] = 1
             session["themeId"] = themeId
             session["init_course"] = 1
             session["new_level"] =0
@@ -76,6 +76,8 @@ def learn():
     totalPoints = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     themeId = session["themeId"]
+    session["courseId"] = database.course_status(session["idUser"])
+    session["level"] = database.get_level(session["courseId"])
     checklevel()
     print(f'total point: {totalPoints}')
 
@@ -120,8 +122,8 @@ def course():
             if session["level"] == 4:
                 return redirect(url_for("learn"))
             elif session["level"] < 4:
-                session["courseId"] = -1
-                session["new_level"] = 1
+                # session["courseId"] = -1
+                # session["new_level"] = 1
                 return redirect(url_for("course"))
 
 
@@ -209,9 +211,9 @@ def course():
             #database.setCourseDone(session["courseId"])
 
             #start a new course for the new level
-            session["courseId"] = -1
+            # session["courseId"] = -1
             session["init_course"] = 1
-            session["new_level"] = 1
+            # session["new_level"] = 1
             if session["level"] < 3:
                 flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
                 return redirect(url_for("learn"))
