@@ -320,6 +320,7 @@ class db:
             cursor = conn.cursor()
             cursor.execute("SELECT done FROM course_status WHERE courseId=(%s) ", (courseId,))
             result = cursor.fetchone()
+            print(result[0])
             return result[0]
         except mysql.connector.Error as err:
             print(err)

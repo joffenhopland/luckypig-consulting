@@ -251,6 +251,7 @@ def checklevel():
 
 def checkLevelCompleted():
     database = db()
+    print(session['courseId'])
     if database.checkCourseDone(session['courseId']) == 1:
         return session['level']
     else:
