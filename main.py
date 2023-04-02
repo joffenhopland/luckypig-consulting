@@ -13,7 +13,7 @@ from flask_bcrypt import Bcrypt
 from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm
 from User import User
 import json
 from classes import Exercise, Dropdown, CourseStatus
@@ -60,10 +60,11 @@ def theme():
     else:
         #the user changes his theme (from dropdown choice)
         if session["themeId"] != themeId:
-            session["courseId"] = -1
-            session["level"] = 1
+            # session["courseId"] = -1
+            # session["level"] = 1
             session["themeId"] = themeId
             session["init_course"] = 1
+            session["new_level"] =0
             return redirect(url_for("course"))
         else:
             return redirect(url_for("learn"))
@@ -75,6 +76,9 @@ def learn():
     totalPoints = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     themeId = session["themeId"]
+    session["courseId"] = database.course_status(session["idUser"])
+    session["level"] = database.get_level(session["courseId"])
+    checklevel()
     print(f'total point: {totalPoints}')
 
     return render_template("learn.html", total_points = totalPoints, themeId = themeId, login_streak=login_streak, level=session['level_name'])
@@ -92,7 +96,9 @@ def course():
 
     #find course or create if None. This is needed if user takes courses in several themes
     if session["courseId"] == -1:
+        print(f'95. session["themeId"]: {session["themeId"]}')
         session["courseId"] = database.getCourseIdByUserIdAndTheme(session["idUser"], session['themeId'])
+        print(f'97. session["courseId"]: {session["courseId"]}')
 
 
         #new course
@@ -109,6 +115,19 @@ def course():
             database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
 
         session["level"] = database.get_level(session["courseId"])
+
+        if database.checkCourseDone(session["courseId"]) == 1:
+            print(f'114. session["courseId"]: {session["courseId"]}')
+            session["level"] += 1
+            if session["level"] == 4:
+                return redirect(url_for("learn"))
+            elif session["level"] < 4:
+                # session["courseId"] = -1
+                # session["new_level"] = 1
+                return redirect(url_for("course"))
+
+
+        #session["level"] = database.get_level(session["courseId"])
         session["questions"] = []
         print(f'105. session["courseId"]: {session["courseId"]}')
         print(f'58. session["level"]: {session["level"]}')
@@ -188,13 +207,13 @@ def course():
             level += 1
             session["level"] = level
             print(f'session["level"] if: {session["level"]}')
-            #should we remove the question done once level done?
-            database.delete_question_done(session["courseId"])
+            #Set the course as done
+            #database.setCourseDone(session["courseId"])
 
             #start a new course for the new level
-            session["courseId"] = -1
+            # session["courseId"] = -1
             session["init_course"] = 1
-            session["new_level"] = 1
+            # session["new_level"] = 1
             if session["level"] < 3:
                 flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
                 return redirect(url_for("learn"))
@@ -228,15 +247,24 @@ def checklevel():
     elif session["level"] == 2:
         session["level_name"] = "Sølv"
         # return "Level: Sølv"
-    elif session["level"] == 3:
+    elif session["level"] >= 3:
         session["level_name"] = "Gull"
         # return "Level: Gull"
 
+def checkLevelCompleted():
+    database = db()
+    print(session['courseId'])
+    if database.checkCourseDone(session['courseId']) == 1:
+        return session['level']
+    else:
+        return session['level'] - 1
 @app.route("/skipExercise", methods=['GET'])
 def skipExercise():
     database = db()
     success = 0
     database.question_done(session['exerciseId'], success, session["level"], session["courseId"])
+    database.question_history(session['exerciseId'], success, session["level"], session["courseId"])
+
     return redirect(url_for("course"))
 
 @app.route("/multiple-choice", methods=['GET', 'POST'])
@@ -259,6 +287,7 @@ def multiple_choice():
             success = 1
             print(f'questino_done: {exerciseId}, {success}, {session["level"]}, {session["courseId"]}')
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
             # need to update user score
             # get current score from course_status
             # add exercise.score to the current score
@@ -273,6 +302,7 @@ def multiple_choice():
             flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
         
         exercise.number_asked += 1
         exercise.updateExercise()
@@ -314,15 +344,18 @@ def dropdown():
             exercise.number_succeed += 1
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
             # Increase users current level points
             level_points = database.get_level_points(session["courseId"])
             level_points += 1
             session["level_points"] = level_points
             database.update_levelpoints(session["courseId"], session["level_points"])
+
         else:
             flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
 
             # flash(f'Sorry, that is wrong. The answer was "{right_answer}".', "danger")
         exercise.number_asked += 1
@@ -385,9 +418,11 @@ def drag_and_drop():
 
         if " ".join(user_answer) == right_answer:
             flash(f'Korrekt!', "success")
+            exercise.number_succeed += 1
             print("ok")
             success = 1
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
             # Increase users current level points
             level_points = database.get_level_points(session["courseId"])
             level_points += 1
@@ -397,19 +432,23 @@ def drag_and_drop():
             flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
             success = 0
             database.question_done(exerciseId, success, session["level"], session["courseId"])
+            database.question_history(exerciseId, success, session["level"], session["courseId"])
         exercise.number_asked += 1
-        # exercise.updateExercise()
+        exercise.updateExercise()
         return render_template('drag_and_drop.html', dragdrop=new_dragdrop, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"])
     
     print(f'exerciseId: {exerciseId}')
     exercise = dragAndDropService.getExercise(exerciseId)
 
     # exercise = Exercise(exerciseId, 5)
-    # exercise.getExercise()
+    #exercise.getExercise()
     question = exercise.question
     choices = exercise.choices
     random.shuffle(choices)
-    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"])
+    order = []
+    for choice in choices:
+        order.append(choice['id'])
+    return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"],order=order)
 
 
 
@@ -631,7 +670,7 @@ def updatepassword() -> 'html':
                 flash(f"Passordet er oppdatert!", "success")
                 database = db()
                 total_points = database.getTotalPoints(session["idUser"])
-                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
+                return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
 
             else:
                 flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
@@ -652,7 +691,9 @@ def viewuser() -> 'html':
     database = db()
     total_points = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
-    return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3, login_streak=login_streak)
+    checklevel()
+    completedLevel = checkLevelCompleted()
+    return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'], login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
 def updateuser() -> 'html':
@@ -676,7 +717,7 @@ def updateuser() -> 'html':
         user = User(*userUpdate.getUserByEmail(email))
         database = db()
         total_points = database.getTotalPoints(session["idUser"])
-        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=3)
+        return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
 
     return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
 
@@ -700,32 +741,154 @@ def logout() -> 'html':
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
 
-@app.route('/reportgeneration', methods=["GET", "POST"])    
+@app.route('/reportgeneration', methods=["GET", "POST"])
 def reportgeneration() -> 'html':
-    if session["role"] == 3 or session["role"] == 2:
-        return render_template('reportgeneration.html')
-    else: #if user is not admin or teacher (2 or 3) -> create a logic that handles this problem
-       return render_template("learn.html") #(This is temporary)
+    database = db()
+    themeId = session["themeId"]
 
-@app.route('/report') #Currently used to test report.html UI
+    if session["role"] == 3:
+
+        form = ReportForm()
+
+        groups =[(0,"-")]
+        groupDB = database.get_group()
+        if groupDB is not None:
+            for group in groupDB:
+                groups.append((group[0],str(group[0]) + " - " + group[1]))
+        form.groupID.choices = groups
+
+        users =[(0,"-")]
+        userDB = database.getAllUser()
+        if userDB is not None:
+            for user in userDB:
+                users.append((user[0],str(user[0]) + " - " + user[1]))
+        form.userID.choices = users
+
+        if form.validate_on_submit():
+            report_type = form.report_type.data
+            groupID = form.groupID.data
+            theme = form.theme.data
+            level = form.level.data
+            userID = form.userID.data
+            print(f"Admin report: report-type: {report_type}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
+            url = url_for('report', report_type=report_type, groupID= groupID, theme=theme, level=level, userID=userID)
+            return redirect(url)
+        return render_template('reportgeneration_admin.html', form=form, themeId=themeId)
+
+    elif session["role"] == 2:
+
+        form = ReportForm()
+        teacher_userID = session["idUser"]
+
+        groups =[(0,"-")]
+        groupDB = database.get_group(teacher_userID)
+        if groupDB is not None:
+            for group in groupDB:
+                groups.append((group[0],str(group[0]) + " - " + group[1]))
+        form.groupID.choices = groups
+
+        users = [(0, "-")]
+        userDB = database.get_users_teacher(teacher_userID)
+        if userDB is not None:
+            for user in userDB:
+                users.append((user[0],str(user[0]) + " - " + user[1]))
+        form.userID.choices = users
+
+        if form.validate_on_submit():
+            report_type = form.report_type.data
+            groupID = form.groupID.data
+            theme = form.theme.data
+            level = form.level.data
+            userID = form.userID.data
+            url = url_for('report', report_type=report_type, groupID=groupID, theme=theme, level=level, userID=userID)
+            return redirect(url)
+        return render_template('reportgeneration_teacher.html', form=form, themeId=themeId)
+    else:
+        return render_template("learn.html")
+@app.route('/report')
 def report():
     database = db()
-    result = database.get_user_view()
-    df = pd.DataFrame(result)
-    df = df.drop(columns=['index'], axis=1, errors='ignore')  # Remove the index column
+    report_type = request.args.get('report_type')
+    role = session["role"]
+    groupID = request.args.get('groupID')
+    theme = request.args.get('theme')
+    level = request.args.get('level')
+    userID = request.args.get('userID')
+
+    if userID == "0":
+        userID = None
+    if groupID == "0":
+        groupID = None
+    if level == "None":
+        level = None
+    if theme == "None":
+        theme = None
+
+    if role == 2:
+        teacher_userID = session["idUser"]
+    else:
+        teacher_userID = None
+
+    headers = []
+    resultTable = []
+    if report_type == "user_reports":
+        print(
+            f"User report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
+        result = database.user_view(role, teacher_userID, groupID, theme, userID, level)
+        resultTable = result[0]
+        query = result[1]
+        headers = getHeaders(query,1)
+
+    elif report_type == "difficult_tasks":
+        print(
+            f"Difficult task report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
+        result = database.all_tasks_report_view(role, 10, teacher_userID, groupID, theme, level)
+        resultTable = result[0]
+        query = result[1]
+        headers = getHeaders(query,2)
+    else:
+        print("Error, no valid report type selected")
+
+    df = pd.DataFrame(data=resultTable,columns=headers)
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
     html_table = styled_table.to_html()
     return render_template("report.html", table=html_table)
 
-# def total_points():
-#     if session["logged in"] == True:
-#         userlogin = UserLogin()
-#         email = session["email"]
-#         user = User(*userlogin.getUserByEmail(email))
-#         userID = user.user_id
-#         database = db()
-#         total_points = database.get_total_points(userID)
-#         return total_points
+def getHeaders(query, type):
+    #function to extract parameters from sql query to get table headers for report
+    # initializing substrings
+    sub1 = "SELECT"
+    sub2 = "FROM"
+
+    # getting index of substrings
+    idx1 = query.index(sub1)
+    idx2 = query.index(sub2)
+
+    headerString = ''
+    # getting elements in between
+    for idx in range(idx1 + len(sub1) + 1, idx2):
+        headerString = headerString + query[idx]
+
+    headerLst = headerString.split(",")
+    headers = []
+    if type == 1:
+        for header in headerLst:
+            headerTemp1 = header.split(".")
+            headerTemp2 = headerTemp1[1].strip().replace("_"," ")
+            finalHeader = headerTemp2.capitalize()
+            headers.append(finalHeader)
+    elif type == 2:
+        for header in headerLst:
+            headerTemp1 = header.split(" as ")
+            if len(headerTemp1) == 1:
+                temp = headerTemp1[0]
+                headerTemp1 = temp.split(".")
+            headerTemp2 = headerTemp1[1].strip().replace("_", " ")
+            finalHeader = headerTemp2.capitalize()
+            headers.append(finalHeader)
+
+    return headers
+
 
 
 if __name__ == "__main__":

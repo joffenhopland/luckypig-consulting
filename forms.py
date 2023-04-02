@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField
-from wtforms.validators import Length, EqualTo, DataRequired, Email, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField, RadioField, SelectField
+from wtforms.validators import Length, EqualTo, DataRequired, Email, ValidationError, Optional
 from flask import flash
 import re
 
@@ -79,4 +79,19 @@ class UpdatePasswordForm(FlaskForm):
 
     update = SubmitField("Endre passord")
 
+class ReportForm(FlaskForm):
+    report_type = RadioField('Rapporttype', choices=[('user_reports', 'Brukerrapporter'), ('difficult_tasks', 'Rapport over vanskelige oppgaver')], validators=[DataRequired()])
+    user_reports_sort = RadioField('Sorter på', choices=[('global', 'Globalt'), ('group', 'Gruppe'), ('single_user', 'Enkeltbruker')], validators=[Optional()])
+    user_reports_sort_teacher = RadioField('Sorter på', choices=[('group', 'Gruppe'), ('single_user', 'Enkeltbruker')],
+                                   validators=[Optional()])
+    difficult_tasks_sort = RadioField('Sorter på', choices=[('global', 'Globalt'), ('group', 'Gruppe')], validators=[Optional()])
+    difficult_tasks_sort_teacher = RadioField('Sorter på', choices=[('group', 'Gruppe')],
+                                      validators=[Optional()])
+    global_sort = RadioField('Velg sortering', choices=[('theme', 'Tema'), ('level', 'Nivå'), ('all', 'Alle')], validators=[Optional()])
+    group_sort = RadioField('Velg sortering', choices=[('level', 'Nivå'),('all', 'Alle')], validators=[Optional()])
 
+    groupID = SelectField('GruppeID', coerce=int, validators=[Optional()])
+    userID = SelectField('BrukerID', coerce=int, validators=[Optional()])
+    theme = SelectField('Velg tema', choices=[(None, '-'), ('1', 'Kokk'), ('2', 'Bilmekaniker'), ('3', 'Finans')],validators=[Optional()])
+    level = SelectField('Velg nivå', choices=[(None, '-'), ('1', 'Bronse'), ('2', 'Sølv'), ('3', 'Gull')],validators=[Optional()])
+    submit = SubmitField('Generer rapport')

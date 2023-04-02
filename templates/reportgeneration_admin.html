@@ -1,0 +1,232 @@
+{% extends "layout.html" %}
+
+{% block title %}Rapportgenerering{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.6.1/font/bootstrap-icons.css">
+
+{% endblock %}
+
+{% block content %}
+<div class="container register-page">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-8 col-lg-6">
+      <div class="card shadow-lg">
+        <div class="card-body">
+          <h1>Rapportgenerering</h1>
+          <form method="post" action="{{ url_for('reportgeneration') }}" target="_blank">
+            {{ form.csrf_token }}
+            <div class="form-check">
+              {{ form.report_type.label }}
+              {% for subfield in form.report_type %}
+                <div class="form-check">
+                  {{ subfield }}
+                  {{ subfield.label }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-check" id="user_reports_sort" style="display:none;">
+              {{ form.user_reports_sort.label }}
+              {% for subfield in form.user_reports_sort %}
+                <div class="form-check">
+                  {{ subfield }}
+                  {{ subfield.label }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group" id="userID" style="display:none;">
+                {{ form.userID.label }}
+                {{ form.userID(class_="form-select") }}
+            </div>
+            <div class="form-check" id="difficult_tasks_sort" style="display:none;">
+              {{ form.difficult_tasks_sort.label }}
+              {% for subfield in form.difficult_tasks_sort %}
+                <div class="form-check">
+                  {{ subfield }}
+                  {{ subfield.label }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-check" id="global_sort" style="display:none;">
+              {{ form.global_sort.label }}
+              {% for subfield in form.global_sort %}
+                <div class="form-check">
+                  {{ subfield }}
+                  {{ subfield.label }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group" id="groupID" style="display:none;">
+              {{ form.groupID.label }}
+              {{ form.groupID(class_="form-select") }}
+            </div>
+            <div class="form-check" id="group_sort" style="display:none;">
+              {{ form.group_sort.label }}
+              {% for subfield in form.group_sort %}
+                <div class="form-check">
+                  {{ subfield }}
+                  {{ subfield.label }}
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group" id="theme_select" style="display:none;">
+              {{ form.theme.label }}
+              {{ form.theme(class_="form-select")  }}
+            </div>
+            <div class="form-group" id="level_select" style="display:none;">
+              {{ form.level.label }}
+              {{ form.level(class_="form-select") }}
+            </div>
+            <br>
+            <div class="form-group">
+              {{ form.submit(id='report-submit', class_='btn btn-primary') }}
+            </div>
+          </form>
+          <br>
+          <form action="{{ url_for('viewuser') }}" method="GET">
+            <div class="justify-content-center">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-primary mr-4" type="submit">Tilbake</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+  // Hide and show the form fields based on the selected radio button
+  $('#report-submit').hide();
+  $("input[name='report_type']").change(function() {
+    if ($("input[name='report_type']:checked").val() == "user_reports") {
+      $("#user_reports_sort").show();
+      $("#difficult_tasks_sort").hide();
+      $("#global_sort").hide();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+      $('#report-submit').hide();
+    } else if ($("input[name='report_type']:checked").val() == "difficult_tasks"){
+      $("#user_reports_sort").hide();
+      $("#difficult_tasks_sort").show();
+      $("#global_sort").hide();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+      $('#report-submit').hide();
+    }
+  });
+
+  $("input[name='user_reports_sort']").change(function() {
+    if ($("input[name='user_reports_sort']:checked").val() == "single_user") {
+      $("#userID").show();
+      $("#groupID").hide();
+      $('#report-submit').show();
+      $("#global_sort").hide();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    } else if ($("input[name='user_reports_sort']:checked").val() == "global"){
+      $("#userID").hide();
+      $("#groupID").hide();
+      $('#report-submit').hide();
+      $("#global_sort").show();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    } else if ($("input[name='user_reports_sort']:checked").val() == "group"){
+      $("#userID").hide();
+      $("#groupID").show();
+      $('#report-submit').hide();
+      $("#global_sort").hide();
+      $("#group_sort").show();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    } else {
+      $("#theme_select").hide();
+      $("#level_select").hide();
+      $("#userID").hide();
+      $("#group_sort").hide();
+      $("#groupID").hide();
+      $('#report-submit').hide();
+      $("#global_sort").hide();
+    }
+  });
+
+    $("input[name='difficult_tasks_sort']").change(function() {
+      if ($("input[name='difficult_tasks_sort']:checked").val() == "global"){
+      $("#userID").hide();
+      $("#groupID").hide();
+      $('#report-submit').hide();
+      $("#global_sort").show();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    } else if ($("input[name='difficult_tasks_sort']:checked").val() == "group"){
+      $("#userID").hide();
+      $("#groupID").show();
+      $("#group_sort").show();
+      $('#report-submit').hide();
+      $("#global_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    }else {
+      $("#userID").hide();
+      $("#groupID").hide();
+      $('#report-submit').hide();
+      $("#global_sort").hide();
+      $("#group_sort").hide();
+      $("#theme_select").hide();
+      $("#level_select").hide();
+    }
+  });
+
+  $("input[name='group_sort']").change(function() {
+    if ($("input[name='group_sort']:checked").val() == "theme") {
+      $("#theme_select").show();
+      $('#report-submit').show();
+      $("#level_select").hide();
+      $("#userID").hide();
+    } else if ($("input[name='group_sort']:checked").val() == "level") {
+      $("#level_select").show();
+      $('#report-submit').show();
+      $("#theme_select").hide();
+      $("#userID").hide();
+    } else {
+      $("#theme_select").hide();
+      $("#level_select").hide();
+      $("#userID").hide();
+      $('#report-submit').show();
+    }
+  });
+
+  $("input[name='global_sort']").change(function() {
+    if ($("input[name='global_sort']:checked").val() == "theme") {
+      $("#theme_select").show();
+      $('#report-submit').show();
+      $("#level_select").hide();
+    } else if ($("input[name='global_sort']:checked").val() == "level") {
+      $("#level_select").show();
+      $('#report-submit').show();
+      $("#theme_select").hide();
+    } else {
+      $("#theme_select").hide();
+      $("#level_select").hide();
+      $('#report-submit').show();
+    }
+  });
+});
+</script>
+{% endblock %}

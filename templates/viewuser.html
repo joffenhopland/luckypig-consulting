@@ -47,12 +47,14 @@
                         <button class="btn btn-primary" type="submit">Endre passord</button>
                     </form>
                 </div>
+                {% if role == 3 or role == 2 %}
                 <div>
                   <form action="{{ url_for('reportgeneration') }}" method="GET">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                       <button class="btn btn-secondary" type="submit">Rapportgenerering</button>
                   </form>
               </div>
+              {% endif %}
                 </div>
                     <h5>Statistikk</h5>
                     <div class="row my-3">
@@ -127,6 +129,9 @@
                       </div>
                   </div>
                   {% endif %}
+
+
+                    {% if completedLevel >= 3 %}
                     <div class="card shadow-lg">
                         <div class="card-body">
                             <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/gold_badge.svg') }}" class="d-inline-block">Gull</h5>
@@ -135,6 +140,9 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
+
+
                     {% if total_points >= 10 and total_points < 50 %}
                     <div class="card shadow-lg">
                         <div class="card-body">
@@ -167,17 +175,18 @@
                                         </div>
                                     </div>
                                 {% endif %}
-                    <div class="card shadow-lg">
+                    <!-- <div class="card shadow-lg">
                         <div class="card-body">
                             <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/first_place_badge.svg') }}" class="d-inline-block">Første plass</h5>
                             <div class="card-text text-secondary px-2">
                                 Oppnå første plass på leaderboard
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}
