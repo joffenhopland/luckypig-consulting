@@ -60,11 +60,11 @@ def theme():
     else:
         #the user changes his theme (from dropdown choice)
         if session["themeId"] != themeId:
-            # session["courseId"] = -1
-            # session["level"] = 1
+            session["courseId"] = -1
+            session["level"] = 1
             session["themeId"] = themeId
             session["init_course"] = 1
-            session["new_level"] =0
+            session["new_level"] = 0
             return redirect(url_for("course"))
         else:
             return redirect(url_for("learn"))
@@ -76,8 +76,10 @@ def learn():
     totalPoints = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     themeId = session["themeId"]
-    session["courseId"] = database.course_status(session["idUser"])
-    session["level"] = database.get_level(session["courseId"])
+    #session["courseId"] = database.course_status(session["idUser"])
+    #session["level"] = database.get_level(session["courseId"])
+    print(f'82. session["level"]: {session["level"]}')
+    print(f'83. session["courseId"]: {session["courseId"]}')
     checklevel()
     print(f'total point: {totalPoints}')
 
@@ -119,7 +121,9 @@ def course():
         if database.checkCourseDone(session["courseId"]) == 1:
             print(f'114. session["courseId"]: {session["courseId"]}')
             session["level"] += 1
+            print(f'124. session["level"]: {session["level"]}')
             if session["level"] == 4:
+                print("to learn")
                 return redirect(url_for("learn"))
             elif session["level"] < 4:
                 # session["courseId"] = -1
@@ -258,6 +262,7 @@ def checkLevelCompleted():
         return session['level']
     else:
         return session['level'] - 1
+
 @app.route("/skipExercise", methods=['GET'])
 def skipExercise():
     database = db()
