@@ -90,7 +90,7 @@ def learn():
 def course():
     database = db()
     print(f'58. session["courseId"]: {session["courseId"]}')
-    print(f'58. session["themeId"]: {session["themeId"]}')
+    #print(f'58. session["themeId"]: {session["themeId"]}')
     questions = session["questions"]
    # level_points = database.get_level_points(session["courseId"])
     #session["level_points"] = level_points
