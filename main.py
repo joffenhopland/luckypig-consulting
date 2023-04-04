@@ -126,8 +126,8 @@ def course():
                 print("to learn")
                 return redirect(url_for("learn"))
             elif session["level"] < 4:
-                # session["courseId"] = -1
-                # session["new_level"] = 1
+                session["courseId"] = -1
+                session["new_level"] = 1
                 return redirect(url_for("course"))
 
 
@@ -136,6 +136,8 @@ def course():
         print(f'105. session["courseId"]: {session["courseId"]}')
         print(f'58. session["level"]: {session["level"]}')
         return redirect(url_for("learn"))
+
+
 
 
     # existing course - user returns or new course
@@ -212,13 +214,13 @@ def course():
             session["level"] = level
             print(f'session["level"] if: {session["level"]}')
             #Set the course as done
-            #database.setCourseDone(session["courseId"])
+            database.setCourseDone(session["courseId"])
 
             #start a new course for the new level
-            # session["courseId"] = -1
+            session["courseId"] = -1
             session["init_course"] = 1
-            # session["new_level"] = 1
-            if session["level"] < 3:
+            session["new_level"] = 1
+            if session["level"] < 4:
                 flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
                 return redirect(url_for("learn"))
             else:
@@ -537,6 +539,7 @@ def login() -> 'html':
             session["username"] = user.username
             session["idUser"] = user.user_id
             session["role"] = user.role
+            session["afterlogin"] = 1
             session["language"] = 1
             session["courseId"] = -1
             session["themeId"] = -1
