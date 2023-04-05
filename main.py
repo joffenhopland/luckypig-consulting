@@ -65,7 +65,7 @@ def theme():
             session["themeId"] = themeId
             session["init_course"] = 1
             session["new_level"] = 0
-            return redirect(url_for("course"))
+            return redirect(url_for("course", fromTheme = 1))
         else:
             return redirect(url_for("learn"))
 
@@ -89,6 +89,8 @@ def learn():
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     database = db()
+    fromTheme = request.args.get("fromTheme")
+    print(f'fromTheme: {fromTheme}')
     print(f'58. session["courseId"]: {session["courseId"]}')
     #print(f'58. session["themeId"]: {session["themeId"]}')
     questions = session["questions"]
@@ -106,15 +108,9 @@ def course():
         #new course
         if session["courseId"] == None or session["new_level"] == 1:
             session["new_level"] = 0
-            #Vi lager et nytt active course for brukeren
-            database.initiate_course(session["idUser"])
-            #Vi henter id for det nye kurset
-            #course_status = database.course_status(session["idUser"])
-            session["courseId"] = database.course_status(session["idUser"])
-            print(f'77. course_status: {session["courseId"]}')
-            #Vi setter ny course_status for det kurset
-            #database.new_course_status(session["theme"], session["language"], course_status)
-            database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
+            #vi lager en ny kurs
+            createANewCourse(database)
+
 
         session["level"] = database.get_level(session["courseId"])
 
@@ -122,20 +118,21 @@ def course():
             print(f'114. session["courseId"]: {session["courseId"]}')
             session["level"] += 1
             print(f'124. session["level"]: {session["level"]}')
-            if session["level"] == 4:
-                print("to learn")
-                return redirect(url_for("learn"))
-            elif session["level"] < 4:
-                session["courseId"] = -1
-                session["new_level"] = 1
-                return redirect(url_for("course"))
+
+            if session["level"] < 4:
+                createANewCourse(database)
+            return redirect(url_for("learn"))
+
 
 
         #session["level"] = database.get_level(session["courseId"])
         session["questions"] = []
         print(f'105. session["courseId"]: {session["courseId"]}')
         print(f'58. session["level"]: {session["level"]}')
-        return redirect(url_for("learn"))
+        if fromTheme:
+            return redirect(url_for("learn"))
+        else:
+            return redirect(url_for("course"))
 
 
 
@@ -237,6 +234,14 @@ def course():
         return redirect(url_for("learn"))
     return redirect(url_for("learn"))
 
+def createANewCourse(database):
+    # Vi lager et nytt active course for brukeren
+    database.initiate_course(session["idUser"])
+    # Vi henter id for det nye kurset
+    session["courseId"] = database.course_status(session["idUser"])
+    print(f'77. course_status: {session["courseId"]}')
+    # Vi setter ny course_status for det kurset
+    database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
 
 def checknumber(id):
     if id == 1:
