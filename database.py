@@ -539,6 +539,22 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def checkGoldLevelCompleted(self, userId, themeId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT course_status.courseId FROM course_status 
+                INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                WHERE active_course.userId = (%s) AND course_status.themeId = (%s) 
+                AND course_status.level = (%s) AND course_status.done = (%s)''', (userId, themeId, 3, 1))
+            result = cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                return None
+        except mysql.connector.Error as err:
+            print(err)
+
     def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -747,11 +763,11 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    #print(database.getAllUser())
+    print(database.checkGoldLevelCompleted(1,1))
     #print(database.get_filtered_theme_on_user_view('kokk')
     #print(database.user_view(role=3))
     #print(database.get_sql_query_for_all_tasks_report_view(role=2, teacher_user_id=7, group_id=1))
-    print(database.all_tasks_report_view(role=3))
+    #print(database.all_tasks_report_view(role=3))
    
     
 main()
