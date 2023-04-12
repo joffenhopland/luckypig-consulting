@@ -758,6 +758,53 @@ class db:
             return None
           
         return query, values_sql
+    
+    # Group
+    def get_not_member_users(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT u.userId, u.username FROM user AS u, user_group AS ug WHERE u.userId = ug.userId AND ug.groupId not like (%s)", (group_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+    
+    def add_group_member(self,group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO user_group (groupId, userId)
+                VALUES (%s, %s)'''
+            cursor.execute(sql1, (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def remove_group_member(self,group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM user_group WHERE groupId = (%s) AND userId = (%s)", (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+        
+        
+    def invite_request_group_member(self, group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_invitation (groupId, userId)
+                VALUES (%s, %s)'''
+            cursor.execute(sql1, (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+  
 
 
     def getGroups(self, userId):
@@ -779,11 +826,8 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.getGroups(1))
-    #print(database.get_filtered_theme_on_user_view('kokk')
-    #print(database.user_view(role=3))
-    #print(database.get_sql_query_for_all_tasks_report_view(role=2, teacher_user_id=7, group_id=1))
-    #print(database.all_tasks_report_view(role=3))
+    #print(database.checkGoldLevelCompleted(1,1))
+    database.invite_request_group_member(2,6)
    
     
 main()
