@@ -804,9 +804,39 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
+            
+    def get_invite_request_group_member(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT g.userId, u.username FROM group_invitation AS g, user AS u WHERE u.userId = g.userId AND g.groupId = (%s)", (group_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def answer_invite_request_group_member(self, group_id, request_member_id, accept): #accept: boolean
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM group_invitation WHERE groupId = (%s) AND userId = (%s)", (group_id, request_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+        
+        try:   
+            if accept == True:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                sql1 = '''INSERT INTO user_group (groupId, userId)
+                VALUES (%s, %s)'''
+                cursor.execute(sql1, (group_id, request_member_id,))
+                conn.commit()
+                conn.close()
+        except mysql.connector.Error as err:
+            print(err)
   
-
-
     def getGroups(self, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -827,7 +857,8 @@ def main():
     database = db()
     #database.delete_question_done(25)
     #print(database.checkGoldLevelCompleted(1,1))
-    database.invite_request_group_member(2,6)
+    #database.invite_request_group_member(2,6)
+    #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    
     
 main()
