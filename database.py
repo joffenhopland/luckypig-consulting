@@ -762,9 +762,10 @@ class db:
     def get_leaderboard(self):
         #Implementerer grupper her senere
         all_user_leaderboard = """
-        select username, points
+        select username, SUM(points) as total_points
         from user_view
-        order by points DESC"""
+        group by username
+        order by total_points DESC"""
 
         try:
             conn = mysql.connector.connect(**self.configuration)
