@@ -804,6 +804,16 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
+            
+    def get_invite_request_group_member(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT g.userId, u.username FROM group_invitation AS g, user AS u WHERE u.userId = g.userId AND g.groupId = (%s)", (group_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
   
 
 
@@ -827,7 +837,7 @@ def main():
     database = db()
     #database.delete_question_done(25)
     #print(database.checkGoldLevelCompleted(1,1))
-    database.invite_request_group_member(2,6)
+    print(database.get_invite_request_group_member(1))
    
     
 main()
