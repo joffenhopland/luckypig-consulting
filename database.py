@@ -851,12 +851,37 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-  
+    def createGroup(self, name, userId, group_typeId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_table (name, userId, group_typeId)
+                VALUES (%s, %s, %s)'''
+            insert = (name, userId, group_typeId)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+
+    def getAllGroupName(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM group_table")
+            results = cursor.fetchall()
+            resultlist = []
+            if results is not None:
+                resultlist = [result[0] for result in results]
+            return resultlist
+        except mysql.connector.Error as err:
+            print(err)
 
 def main():
     database = db()
     #database.delete_question_done(25)
-    #print(database.checkGoldLevelCompleted(1,1))
+    print(database.getAllGroupName())
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    

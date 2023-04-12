@@ -13,7 +13,7 @@ from flask_bcrypt import Bcrypt
 from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm, CreateGroupForm
 from User import User
 import json
 from classes import Exercise, Dropdown, Group
@@ -899,9 +899,7 @@ def getHeaders(query, type):
 def viewgroup() -> 'html':
     database = db()
     DBgroups = database.getGroups(session["idUser"])
-    print(f'DBgroups: {DBgroups}')
     groups = [Group(*(DBgroup)) for DBgroup in DBgroups]
-    print(f'groups: {groups}')
     classes = []
     friendgroups = []
     for group in groups:
@@ -910,11 +908,31 @@ def viewgroup() -> 'html':
         elif group.groupTypeId == 2:
             friendgroups.append(group)
 
-    print(f'classes: {classes}')
-    print(f'friends: {friendgroups}')
-
     return render_template('viewgroup.html', title="Mine grupper",classes=classes, friendgroups=friendgroups, role=session['role'], userId = session['idUser'])
 
+@app.route('/creategroup', methods=["GET", "POST"])
+def creategroup() -> 'html':
+    form = CreateGroupForm()
+    if request.method == 'POST':
+        database = db()
+        names = database.getAllGroupName()
+        groupName = form.name.data
+        if groupName in names:
+            flash(f'Gruppenavnet finnes allerede. Velg et nytt gruppenavn', "danger")
+            return render_template('creategroup.html', form=form)
+
+        else:
+            groupAdminId = session["idUser"]
+            if session["role"] == 1:
+                groupe_typeId = 2
+            else:
+                groupe_typeId = 1
+
+            database.createGroup(groupName,groupAdminId,groupe_typeId)
+            return redirect(url_for('viewgroup'))
+
+    else:
+        return render_template('creategroup.html', form=form)
 
 
 

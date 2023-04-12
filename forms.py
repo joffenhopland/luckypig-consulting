@@ -95,3 +95,8 @@ class ReportForm(FlaskForm):
     theme = SelectField('Velg tema', choices=[(None, '-'), ('1', 'Kokk'), ('2', 'Bilmekaniker'), ('3', 'Finans')],validators=[Optional()])
     level = SelectField('Velg nivå', choices=[(None, '-'), ('1', 'Bronse'), ('2', 'Sølv'), ('3', 'Gull')],validators=[Optional()])
     submit = SubmitField('Generer rapport')
+
+
+class CreateGroupForm(FlaskForm):
+    name = StringField(label="Gruppenavn:", validators=[Length(min=1, max=70), DataRequired()])
+    submit = SubmitField(label="Opprette gruppen")
