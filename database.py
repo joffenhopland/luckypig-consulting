@@ -793,15 +793,24 @@ class db:
             print(err)
         
         
-        
-    
+    def invite_request_group_member(self, group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_invitation (groupId, userId)
+                VALUES (%s, %s)'''
+            cursor.execute(sql1, (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
   
 
 def main():
     database = db()
     #database.delete_question_done(25)
     #print(database.checkGoldLevelCompleted(1,1))
-    database.remove_group_member(2,6)
+    database.invite_request_group_member(2,6)
    
     
 main()
