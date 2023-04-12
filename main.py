@@ -894,6 +894,45 @@ def getHeaders(query, type):
 
     return headers
 
+@app.route('/viewgroup', methods=["GET", "POST"])
+def viewgroup() -> 'html':
+    database = db()
+    DBgroups = database.getGroups(session["idUser"])
+    groups = [Group(*(DBgroup)) for DBgroup in DBgroups]
+    classes = []
+    friendgroups = []
+    for group in groups:
+        if group.groupTypeId == 1:
+            classes.append(group)
+        elif group.groupTypeId == 2:
+            friendgroups.append(group)
+
+    return render_template('viewgroup.html', title="Mine grupper",classes=classes, friendgroups=friendgroups, role=session['role'], userId = session['idUser'])
+
+@app.route('/creategroup', methods=["GET", "POST"])
+def creategroup() -> 'html':
+    form = CreateGroupForm()
+    if request.method == 'POST':
+        database = db()
+        names = database.getAllGroupName()
+        groupName = form.name.data
+        if groupName in names:
+            flash(f'Gruppenavnet finnes allerede. Velg et nytt gruppenavn', "danger")
+            return render_template('creategroup.html', form=form)
+
+        else:
+            groupAdminId = session["idUser"]
+            if session["role"] == 1:
+                groupe_typeId = 2
+            else:
+                groupe_typeId = 1
+
+            database.createGroup(groupName,groupAdminId,groupe_typeId)
+            return redirect(url_for('viewgroup'))
+
+    else:
+        return render_template('creategroup.html', form=form)
+
 @app.route('/leaderboard')
 def leaderboard():
     database = db()

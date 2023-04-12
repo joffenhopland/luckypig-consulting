@@ -759,6 +759,125 @@ class db:
           
         return query, values_sql
 
+        # Group
+    def get_not_member_users(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT u.userId, u.username FROM user AS u, user_group AS ug WHERE u.userId = ug.userId AND ug.groupId not like (%s)", (group_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def add_group_member(self, group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO user_group (groupId, userId)
+                   VALUES (%s, %s)'''
+            cursor.execute(sql1, (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def remove_group_member(self, group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM user_group WHERE groupId = (%s) AND userId = (%s)",
+                           (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def invite_request_group_member(self, group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_invitation (groupId, userId)
+                   VALUES (%s, %s)'''
+            cursor.execute(sql1, (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def get_invite_request_group_member(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT g.userId, u.username FROM group_invitation AS g, user AS u WHERE u.userId = g.userId AND g.groupId = (%s)", (group_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def answer_invite_request_group_member(self, group_id, request_member_id, accept):  # accept: boolean
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM group_invitation WHERE groupId = (%s) AND userId = (%s)",
+                           (group_id, request_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+        try:
+            if accept == True:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                sql1 = '''INSERT INTO user_group (groupId, userId)
+                   VALUES (%s, %s)'''
+                cursor.execute(sql1, (group_id, request_member_id,))
+                conn.commit()
+                conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def getGroups(self, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT * FROM group_table WHERE userId=(%s)
+                               UNION
+                               SELECT group_table.* FROM group_table 
+                               INNER JOIN user_group ON group_table.groupId=user_group.groupId 
+                               WHERE user_group.userId = (%s) ''', (userId, userId))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def createGroup(self, name, userId, group_typeId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_table (name, userId, group_typeId)
+                   VALUES (%s, %s, %s)'''
+            insert = (name, userId, group_typeId)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def getAllGroupName(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM group_table")
+            results = cursor.fetchall()
+            resultlist = []
+            if results is not None:
+                resultlist = [result[0] for result in results]
+            return resultlist
+        except mysql.connector.Error as err:
+            print(err)
+
     def get_leaderboard(self):
         #Implementerer grupper her senere
         all_user_leaderboard = """
@@ -777,25 +896,12 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-  
-
 def main():
     database = db()
-    #database.delete_question_done(25)
-    print(database.checkGoldLevelCompleted(1,1))
-    #print(database.get_filtered_theme_on_user_view('kokk')
-    #print(database.user_view(role=3))
-    #print(database.get_sql_query_for_all_tasks_report_view(role=2, teacher_user_id=7, group_id=1))
-    #print(database.all_tasks_report_view(role=3))
-    result, query = database.all_tasks_report_view(role=3, level=3)
-    print("Filtered tasks with level 3:")
-    for task in result:
-        print(task)
+    # database.delete_question_done(25)
+    print(database.getAllGroupName())
+    # database.invite_request_group_member(2,6)
+    # database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True
 
-    teacher_user_id = 7  # Replace this with the actual teacher's user ID
-    # Filter tasks for a specific teacher
-    result, query = database.all_tasks_report_view(role=2, teacher_user_id=teacher_user_id)
-    print(f"Filtered tasks for teacher with user ID {teacher_user_id}:")
-    for task in result:
-        print(task)
+
 main()
