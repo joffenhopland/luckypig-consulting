@@ -806,6 +806,23 @@ class db:
             print(err)
   
 
+
+    def getGroups(self, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT * FROM group_table WHERE userId=(%s)
+                            UNION
+                            SELECT group_table.* FROM group_table 
+                            INNER JOIN user_group ON group_table.groupId=user_group.groupId 
+                            WHERE user_group.userId = (%s) ''', (userId, userId))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+  
+
 def main():
     database = db()
     #database.delete_question_done(25)
