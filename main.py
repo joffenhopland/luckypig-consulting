@@ -894,6 +894,12 @@ def getHeaders(query, type):
 
     return headers
 
+@app.route('/leaderboard')
+def leaderboard():
+    database = db()
+    global_leaderboard = database.get_leaderboard()
+    print(global_leaderboard)
+    return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
 
 
 if __name__ == "__main__":

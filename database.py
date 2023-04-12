@@ -758,6 +758,24 @@ class db:
             return None
           
         return query, values_sql
+
+    def get_leaderboard(self):
+        #Implementerer grupper her senere
+        all_user_leaderboard = """
+        select username, points
+        from user_view
+        order by points DESC"""
+
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(all_user_leaderboard)
+            result = cursor.fetchall()
+            leaderboard_data = [{'username': row[0], 'points': row[1]} for row in result]
+            return leaderboard_data
+        except mysql.connector.Error as err:
+            print(err)
+
   
 
 def main():
@@ -768,6 +786,15 @@ def main():
     #print(database.user_view(role=3))
     #print(database.get_sql_query_for_all_tasks_report_view(role=2, teacher_user_id=7, group_id=1))
     #print(database.all_tasks_report_view(role=3))
-   
-    
+    result, query = database.all_tasks_report_view(role=3, level=3)
+    print("Filtered tasks with level 3:")
+    for task in result:
+        print(task)
+
+    teacher_user_id = 7  # Replace this with the actual teacher's user ID
+    # Filter tasks for a specific teacher
+    result, query = database.all_tasks_report_view(role=2, teacher_user_id=teacher_user_id)
+    print(f"Filtered tasks for teacher with user ID {teacher_user_id}:")
+    for task in result:
+        print(task)
 main()
