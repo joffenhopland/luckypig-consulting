@@ -5,7 +5,7 @@ import itertools
 import random
 import pandas as pd
 
-from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup
+from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup, jsonify
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
@@ -13,7 +13,7 @@ from flask_bcrypt import Bcrypt
 from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm, CreateGroupForm
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm, CreateGroupForm, CreateContestForm
 from User import User
 import json
 from classes import Exercise, Dropdown, Group
@@ -934,7 +934,24 @@ def creategroup() -> 'html':
     else:
         return render_template('creategroup.html', form=form)
 
+@app.route('/createcontest', methods=["GET", "POST"])
+def createcontest() -> 'html':
+    form = CreateContestForm()
+    if request.method == 'POST':
+        return render_template('create_contest.html', form=form)
+    else:
+        return render_template('create_contest.html', form=form)
+@app.route('/get_dynamic_data', methods=['POST'])
+def get_dynamic_data():
+    print("get dynamic data is called")
+    question_type = request.form.get('question_type', '', type=str)
+    level = request.form.get('level', '', type=int)
+    theme = request.form.get('theme', '', type=int)
+    database = db()
+    questions = database.getQuestionsForContest(question_type, level,theme)
+    print(questions)
 
+    return jsonify(questions)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int("3000"))

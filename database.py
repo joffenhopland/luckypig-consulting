@@ -878,6 +878,20 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def getQuestionsForContest(self, question_type, level, theme):
+        try:
+            print(f"Im in the database with question_type: {question_type} and level: {level}")
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            query = "SELECT exerciseID, question FROM `{}` WHERE level = %s AND themeID = %s".format(question_type)
+            cursor.execute(query, (level,theme,))
+            result = cursor.fetchall()
+            choices = [(str(row[0]), row[1]) for row in result]
+            return choices
+        except mysql.connector.Error as err:
+            print(err)
+
+
 def main():
     database = db()
     #database.delete_question_done(25)
