@@ -758,12 +758,28 @@ class db:
             return None
           
         return query, values_sql
+
+
+    def getGroups(self, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT * FROM group_table WHERE userId=(%s)
+                            UNION
+                            SELECT group_table.* FROM group_table 
+                            INNER JOIN user_group ON group_table.groupId=user_group.groupId 
+                            WHERE user_group.userId = (%s) ''', (userId, userId))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
   
 
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.checkGoldLevelCompleted(1,1))
+    print(database.getGroups(1))
     #print(database.get_filtered_theme_on_user_view('kokk')
     #print(database.user_view(role=3))
     #print(database.get_sql_query_for_all_tasks_report_view(role=2, teacher_user_id=7, group_id=1))

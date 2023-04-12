@@ -141,3 +141,12 @@ class DragAndDropExercise:
         database = db()
         database.updateExerciseByExerciseIdandType(self.exerciseID, self.type, str(self.number_asked),
                                                         str(self.number_succeed))
+
+
+
+class Group:
+    def __init__(self,groupId,name, adminId, groupTypeId):
+        self.groupId = groupId
+        self.name = name
+        self.adminId = adminId
+        self.groupTypeId = groupTypeId

@@ -16,7 +16,7 @@ from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm
 from User import User
 import json
-from classes import Exercise, Dropdown, CourseStatus
+from classes import Exercise, Dropdown, Group
 
 import json
 import urllib.parse
@@ -205,6 +205,7 @@ def course():
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]):
         print(f'session["level"]: {session["level"]}')
         # print(f'level_points: {level_points}')
+        database.delete_question_done(session["courseId"])
         if session["level"] < 4:
             level = session["level"]
             level += 1
@@ -893,6 +894,27 @@ def getHeaders(query, type):
             headers.append(finalHeader)
 
     return headers
+
+@app.route('/viewgroup', methods=["GET", "POST"])
+def viewgroup() -> 'html':
+    database = db()
+    DBgroups = database.getGroups(session["idUser"])
+    print(f'DBgroups: {DBgroups}')
+    groups = [Group(*(DBgroup)) for DBgroup in DBgroups]
+    print(f'groups: {groups}')
+    classes = []
+    friendgroups = []
+    for group in groups:
+        if group.groupTypeId == 1:
+            classes.append(group)
+        elif group.groupTypeId == 2:
+            friendgroups.append(group)
+
+    print(f'classes: {classes}')
+    print(f'friends: {friendgroups}')
+
+    return render_template('viewgroup.html', title="Mine grupper",classes=classes, friendgroups=friendgroups, role=session['role'], userId = session['idUser'])
+
 
 
 
