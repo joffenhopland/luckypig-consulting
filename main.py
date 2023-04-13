@@ -978,15 +978,30 @@ def admin_group() -> 'html':
     groupName = request.args.get('name')
     memberId = request.args.get("id")
     accept = bool(request.args.get("accept"))
+    add = request.args.get('add')
+    userId = request.args.get('userId')
+    members = database.get_group_members(groupId)
     if memberId:
         memberId = int(memberId)
         database.answer_invite_request_group_member(groupId, memberId, accept)
         invites = database.get_invite_request_group_member(groupId)
-        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId)
+        members = database.get_group_members(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
     
+    elif add:
+        all_users = database.all_user_name()
+        invites = database.get_invite_request_group_member(groupId)
+        members = database.get_group_members(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users)
+    
+    elif userId:
+        database.add_group_member(groupId, userId)
+        invites = database.get_invite_request_group_member(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
+
     else:
         invites = database.get_invite_request_group_member(groupId)
-        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
 
 
 

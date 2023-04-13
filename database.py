@@ -908,9 +908,36 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def get_group_members(self, groupId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT user.username, user.userId from user, group_table, user_group \
+                        where group_table.groupId = user_group.groupId \
+                        and user_group.userId = user.userId \
+                        and group_table.groupId = (%s)", (groupId,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def all_user_name(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT username, userId from user")
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+
 
 def main():
     database = db()
+    z = database.get_group_members(1)
+    print(z)
     #database.delete_question_done(25)
     #z = database.get_invite_request_group_member(1)
     #print(len(z))

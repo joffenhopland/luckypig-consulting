@@ -3,11 +3,44 @@
 {% block title %} Din gruppe {% endblock %}
 
 {% block content %}
+
 <div class="container register-page">
     <div class="container text-center">
         <h1> {{ name }}</h1>
         <div class="row">
           <div class="col-8">
+            <div>
+              <a href="#" class="btn btn-primary"> grupperesultater</a>
+            </div>
+            <div>
+              <a href="#" class="btn btn-primary"> Opprett ny konkurranse</a>
+            </div>
+            {% if allusers %}
+            <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr class="table-success">
+                  <th scope="col">Bruker</th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in allusers %}
+                <tr class="table-light">
+                  <td>{{ user[0] }}</td>
+                  <td></td>
+                  <td><a href="{{ url_for('admin_group', groupId=groupId, name=name, userId=user[1]) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div>
+              <a href="{{ url_for('admin_group', groupId=groupId, name=name) }}" class="btn btn-primary"> Ferdig</a>
+            </div>
+            {% endif %}
+          </div>
+          </div>
           </div>
 
           <div class="col-4">
@@ -31,10 +64,33 @@
               </tbody>
             </table>
             {% endif %}
+
+            <table class="table">
+              <thead>
+                <tr class="table-success">
+                  <th scope="col">Medlemmer</th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for member in members %}
+                <tr class="table-light">
+                  <td>{{ member[0] }}</td>
+                  <td></td>
+                  <td><img src="{{ url_for('static', filename='assets/cancel.png') }}"></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div>
+              <a href="{{ url_for('admin_group', groupId=groupId, name=name, add=1) }}" class="btn btn-primary">Legg til medlemmer </a>
+            </div>
           </div>
 
         </div>
       </div>
-</div>
+
+
 
 {% endblock %}
