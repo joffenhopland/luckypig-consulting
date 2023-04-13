@@ -903,12 +903,17 @@ def viewgroup() -> 'html':
     classes = []
     friendgroups = []
     for group in groups:
+        #chek role (Admin/Medlem) in group
+        if group.adminId == session['idUser']:
+            group.role = "Admin"
+
+        #check group type and append to the appropriate list
         if group.groupTypeId == 1:
             classes.append(group)
         elif group.groupTypeId == 2:
             friendgroups.append(group)
 
-    return render_template('viewgroup.html', title="Mine grupper",classes=classes, friendgroups=friendgroups, role=session['role'], userId = session['idUser'])
+    return render_template('viewgroup.html', title="Mine grupper",classes=classes, friendgroups=friendgroups, role=session['role'])
 
 @app.route('/creategroup', methods=["GET", "POST"])
 def creategroup() -> 'html':
