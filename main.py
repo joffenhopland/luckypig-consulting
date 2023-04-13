@@ -939,6 +939,13 @@ def creategroup() -> 'html':
     else:
         return render_template('creategroup.html', form=form)
 
+@app.route('/leaderboard')
+def leaderboard():
+    database = db()
+    global_leaderboard = database.get_leaderboard()
+    print(global_leaderboard)
+    return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
+
 
 
 if __name__ == "__main__":

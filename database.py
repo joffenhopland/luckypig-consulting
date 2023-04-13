@@ -878,6 +878,24 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def get_leaderboard(self):
+        #Implementerer grupper her senere
+        all_user_leaderboard = """
+        select username, SUM(points) as total_points
+        from user_view
+        group by username
+        order by total_points DESC"""
+
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(all_user_leaderboard)
+            result = cursor.fetchall()
+            leaderboard_data = [{'username': row[0], 'points': row[1]} for row in result]
+            return leaderboard_data
+        except mysql.connector.Error as err:
+            print(err)
+
 def main():
     database = db()
     #database.delete_question_done(25)
