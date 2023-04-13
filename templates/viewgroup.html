@@ -66,9 +66,9 @@
 
                       <div class="col-4 d-flex justify-content-end">
                         {% if classe.role == "Admin" %}
-                          <a href="#" class="btn btn-primary">Kom in</a>
+                          <a href="{{ url_for('admin_group', groupId=classe.groupId, name=classe.name) }}" class="btn btn-primary"> Administrer gruppe </a>
                         {% else %}
-                          <a href="#" class="btn btn-primary">Kom in</a>
+                          <a href="#" class="btn btn-primary">Kom inn</a>
                         {% endif %}
                       </div>
 
@@ -94,7 +94,7 @@
 
                       <div class="col-4 d-flex justify-content-end">
                         {% if group.role == "Admin" %}
-                          <a href="#" class="btn btn-primary">Kom in</a>
+                          <a href="{{ url_for('admin_group', groupId=group.groupId, name=group.name) }}" class="btn btn-primary"> Administrer </a>
                         {% else %}
                           <a href="#" class="btn btn-primary">Kom in</a>
                         {% endif %}

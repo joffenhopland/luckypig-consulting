@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+
+{% block title %} Din gruppe {% endblock %}
+
+{% block content %}
+<div class="container register-page">
+    <div class="container text-center">
+        <h1> {{ name }}</h1>
+        <div class="row">
+          <div class="col-8">
+          </div>
+
+          <div class="col-4">
+            {% if invites %}
+            <table class="table">
+              <thead>
+                <tr class="table-success">
+                  <th scope="col">Invitasjoner</th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for invite in invites %}
+                <tr class="table-light">
+                  <td>{{ invite[1] }}</td>
+                  <td><a href="{{ url_for('admin_group', id=invite[0], accept=True, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
+                  <td><a href="{{ url_for('admin_group', id=invite[0], accept=False, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/cancel.png') }}"></a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+</div>
+
+{% endblock %}

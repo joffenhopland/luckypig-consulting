@@ -961,6 +961,7 @@ def createcontest() -> 'html':
     else:
         print(form.errors)
         return render_template('create_contest.html', form=form)
+
 @app.route('/get_dynamic_data', methods=['POST'])
 def get_dynamic_data():
     question_type = request.form.get('question_type', '', type=str)
@@ -969,6 +970,25 @@ def get_dynamic_data():
     database = db()
     questions = database.getQuestionsForContest(question_type, level,theme)
     return jsonify(questions)
+
+@app.route('/admin_group', methods=["GET", "POST"])
+def admin_group() -> 'html':
+    database = db()
+    groupId = request.args.get('groupId')
+    groupName = request.args.get('name')
+    memberId = request.args.get("id")
+    accept = bool(request.args.get("accept"))
+    if memberId:
+        memberId = int(memberId)
+        database.answer_invite_request_group_member(groupId, memberId, accept)
+        invites = database.get_invite_request_group_member(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId)
+    
+    else:
+        invites = database.get_invite_request_group_member(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int("3000"))

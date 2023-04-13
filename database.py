@@ -912,7 +912,8 @@ class db:
 def main():
     database = db()
     #database.delete_question_done(25)
-    print(database.getAllGroupName())
+    #z = database.get_invite_request_group_member(1)
+    #print(len(z))
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    
