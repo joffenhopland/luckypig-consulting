@@ -880,7 +880,6 @@ class db:
 
     def getQuestionsForContest(self, question_type, level, theme):
         try:
-            print(f"Im in the database with question_type: {question_type} and level: {level}")
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             query = "SELECT exerciseID, question FROM `{}` WHERE level = %s AND themeID = %s".format(question_type)

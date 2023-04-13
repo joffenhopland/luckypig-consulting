@@ -15,58 +15,72 @@
 
 {% block content %}
 <div class="container register-page">
-  <div class="row justify-content-center">
-    <div class="col-sm-12 col-md-8 col-lg-6">
-      <div class="card shadow-lg">
-        <div class="card-body">
-          <h1>Opprett konkurranse</h1>
-          <form method="POST" action="{{ url_for('createcontest') }}">
-          {{ form.hidden_tag() }}
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <h1>Opprett konkurranse</h1>
+                    <form method="POST" action="{{ url_for('createcontest') }}">
+                        {{ form.hidden_tag() }}
+                        <div class="form-control" id="first_choices">
+                            <div class="form-group" id="name">
+                                {{ form.name.label }}
+                                {{ form.name(class_="form-control") }}
+                            </div>
 
-  <div class="form-group" id="name">
-    {{ form.name.label }}
-    {{ form.name(class_="form-control") }}
-  </div>
+                            <div class="form-group" id="theme">
+                                {{ form.theme.label }}
+                                {{ form.theme(class_="form-select") }}
+                            </div>
 
-  <div class="form-group" id="theme">
-    {{ form.theme.label }}
-    {{ form.theme(class_="form-select") }}
-  </div>
+                            <div class="form-group" id="time">
+                                {{ form.time.label }}
+                                {{ form.time(class_="form-select") }}
+                            </div>
+                            <br>
+                            <button class="btn btn-primary" type="button" id="next-btn1" disabled>Neste</button>
+                        </div>
+                        <div class="form-control" id="second_choices">
+                            <div class="form-group" id="question_type">
+                                {{ form.question_type.label }}
+                                {{ form.question_type(class_="form-select", id="question_type") }}
+                            </div>
 
-  <div class="form-group" id="time">
-    {{ form.time.label }}
-    {{ form.time(class_="form-select") }}
-  </div>
+                            <div class="form-group" id="level">
+                                {{ form.level.label }}
+                                {{ form.level(class_="form-select", id="level") }}
+                            </div>
 
-  <div class="form-group" id="question_type">
-    {{ form.question_type.label }}
-    {{ form.question_type(class_="form-select", id="question_type") }}
-  </div>
+                            <div id="dynamic-select"></div>
+                                <div id="selected-questions">
+                                    <p>Selected questions:</p>
+                                    <ul id="question-list"></ul>
+                                </div>
 
-  <div class="form-group" id="level">
-    {{ form.level.label }}
-    {{ form.level(class_="form-select", id="level") }}
-  </div>
+                                {{ form.selected_questions(class_="form-select", multiple="multiple", id="selected-questions-input", style="display: none") }}
+                            <br>
+                            <button class="btn btn-primary" type="button" id="next-btn2" disabled>Neste</button>
+                            <button class="btn btn-primary" type="button" id="back-btn">Tilbake</button>
+                        </div>
+                        <div class="form-control" id="third_choices">
+                            <div class="form-group" id="number_tries">
+                                {{ form.number_tries.label }}
+                                {{ form.number_tries(class_="form-select") }}
+                            </div>
+                            <br>
 
-  <div id="dynamic-select"></div>
+                            <div class="form-group">
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                            <br>
+                            <button class="btn btn-primary" type="button" id="back-btn2">Tilbake</button>
+                        </div>
+                    </form>
 
-
-            <div class="form-group" id="number_tries">
-    {{ form.number_tries.label }}
-    {{ form.number_tries(class_="form-select") }}
-  </div>
-<br>
-            <br>
-  <div class="form-group">
-    {{ form.submit(class="btn btn-primary") }}
-  </div>
-
-</form>
-
-      </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 </div>
 <script>
 $(function() {
@@ -82,6 +96,7 @@ $(function() {
             dynamicSelectHtml += '<div class="form-group">';
             dynamicSelectHtml += '<label for="dynamic_select">Select question:</label>';
             dynamicSelectHtml += '<select id="dynamic_select" name="dynamic_select" class="form-select">';
+            dynamicSelectHtml += '<option disabled selected>Choose a question</option>'; // Added placeholder option
             for (var i = 0; i < data.length; i++) {
                 var questionId = data[i][0]; // assume the first item in each sub-array is the question ID
                 var question = data[i][1]; // assume the second item in each sub-array is the question string
@@ -112,6 +127,7 @@ $(function() {
                 dynamicSelectHtml += '<div class="form-group">';
                 dynamicSelectHtml += '<label for="dynamic_select">Select question:</label>';
                 dynamicSelectHtml += '<select id="dynamic_select" name="dynamic_select" class="form-select">';
+                dynamicSelectHtml += '<option disabled selected>Choose a question</option>'; // Added placeholder option
                 for (var i = 0; i < data.length; i++) {
                     var questionId = data[i][0]; // assume the first item in each sub-array is the question ID
                     var question = data[i][1]; // assume the second item in each sub-array is the question string
@@ -130,8 +146,112 @@ $(function() {
         });
     });
 });
-</script>
 
+</script>
+<script>
+  $(document).ready(function() {
+    // Hide second_choices and third_choices by default
+    $("#second_choices").hide();
+    $("#third_choices").hide();
+
+    // When next-btn1 is clicked, show second_choices and hide first_choices
+    $("#next-btn1").click(function() {
+      $("#first_choices").hide();
+      $("#second_choices").show();
+    });
+
+    // When next-btn2 is clicked, show third_choices and hide second_choices
+    $("#next-btn2").click(function() {
+      $("#second_choices").hide();
+      $("#third_choices").show();
+    });
+
+    // When back-btn is clicked, show first_choices and hide second_choices
+    $("#back-btn").click(function() {
+      $("#second_choices").hide();
+      $("#first_choices").show();
+    });
+
+    // When back-btn2 is clicked, show second_choices and hide third_choices
+    $("#back-btn2").click(function() {
+      $("#third_choices").hide();
+      $("#second_choices").show();
+    });
+  });
+</script>
+<script>
+$(document).ready(function() {
+  // Define a list to store selected questions and their IDs
+  const selectedQuestions = [];
+
+  // Add a listener to the dynamic select
+  $("#dynamic-select").change(function() {
+    // Get the selected question and its ID, and add it to the list if it's not already there
+    const questionId = $("#dynamic-select option:selected").val();
+    const questionText = $("#dynamic-select option:selected").text();
+    if (!selectedQuestions.some(q => q.id === questionId)) {
+      selectedQuestions.push({ id: questionId, text: questionText });
+
+      // Update the list of selected questions
+      const questionList = $("#question-list");
+      const questionItem = $(`<li class="list-group-item d-flex justify-content-between align-items-center">${questionText}<button type="button" class="btn-close text-primary"></button></li>`);
+      questionList.append(questionItem);
+
+      // Add the selected question IDs to the selected_questions field
+      const selectedQuestionsInput = $("#selected-questions-input");
+      const questionIds = selectedQuestions.map(q => q.id);
+      selectedQuestionsInput.val(questionIds.join(", "));
+
+      // Add a listener to the close button for this question
+      const closeBtn = questionItem.find(".btn-close");
+      closeBtn.click(function() {
+        // Remove the question from the list and the UI
+        const index = selectedQuestions.findIndex(q => q.id === questionId);
+        selectedQuestions.splice(index, 1);
+        questionItem.remove();
+
+        // Remove the question ID from the selected_questions field
+        const questionIds = selectedQuestions.map(q => q.id);
+        selectedQuestionsInput.val(questionIds.join(", "));
+
+        // Check if the number of selected questions is at least two, and enable or disable the "Next" button accordingly
+        const nextBtn2 = $("#next-btn2");
+        if (selectedQuestions.length >= 2) {
+          nextBtn2.prop("disabled", false);
+        } else {
+          nextBtn2.prop("disabled", true);
+        }
+      });
+
+      // Check if the number of selected questions is at least two, and enable or disable the "Next" button accordingly
+      const nextBtn2 = $("#next-btn2");
+      if (selectedQuestions.length >= 2) {
+        nextBtn2.prop("disabled", false);
+      } else {
+        nextBtn2.prop("disabled", true);
+      }
+    }
+  });
+});
+</script>
+<script>
+$(document).ready(function() {
+  // Disable the "Next" button for the first form section initially
+  $("#next-btn1").prop("disabled", true);
+
+  // Add a listener to the name input field
+  const nameInput = $("#name input");
+  nameInput.keyup(function() {
+    // Check if the name input field has a valid value, and enable or disable the "Next" button accordingly
+    const nextBtn1 = $("#next-btn1");
+    if (nameInput.val().trim() !== "") {
+      nextBtn1.prop("disabled", false);
+    } else {
+      nextBtn1.prop("disabled", true);
+    }
+  });
+});
+</script>
 {% endblock %}
 
 

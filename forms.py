@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField, RadioField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField, RadioField, SelectField, TextAreaField
 from wtforms.validators import Length, EqualTo, DataRequired, Email, ValidationError, Optional
 from flask import flash
 import re
@@ -111,8 +111,8 @@ class CreateContestForm(FlaskForm):
                         validators=[DataRequired()])
     level = SelectField('Velg nivå', choices=[('1', 'Enkel/bronse'), ('2', 'Medium/sølv'), ('3', 'Vanskelig/gull')],
                         validators=[DataRequired()])
-    dynamic_select = SelectField('Velg spørsmål', validators=[DataRequired()])
-    number_tries = SelectField('Velg antall forsøk', choices=[(None, 'Uendelig'),('1', '1'), ('2', '2'), ('3', '3'), ('5', '5'), ('10', '10')],
+    selected_questions = TextAreaField('Valgte spørsmål', validators=[DataRequired()])
+    number_tries = SelectField('Velg antall forsøk', choices=[('0', 'Uendelig'),('1', '1'), ('2', '2'), ('3', '3'), ('5', '5'), ('10', '10')],
                         validators=[DataRequired()])
     submit = SubmitField('Opprett konkurranse')
 

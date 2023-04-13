@@ -937,20 +937,25 @@ def creategroup() -> 'html':
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
     form = CreateContestForm()
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
+        name = request.form.get('name')
+        theme = request.form.get('theme')
+        time = request.form.get('time')
+        selected_questions = request.form.get('selected_questions')
+        number_tries = request.form.get('number_tries')
+
+        print(f"The data in the contest form is name: {name}, theme: {theme}, time: {time}, selected questions: {selected_questions}, number tries: {number_tries}")
         return render_template('create_contest.html', form=form)
     else:
+        print(form.errors)
         return render_template('create_contest.html', form=form)
 @app.route('/get_dynamic_data', methods=['POST'])
 def get_dynamic_data():
-    print("get dynamic data is called")
     question_type = request.form.get('question_type', '', type=str)
     level = request.form.get('level', '', type=int)
     theme = request.form.get('theme', '', type=int)
     database = db()
     questions = database.getQuestionsForContest(question_type, level,theme)
-    print(questions)
-
     return jsonify(questions)
 
 if __name__ == "__main__":
