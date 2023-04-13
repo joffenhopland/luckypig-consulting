@@ -631,7 +631,7 @@ class db:
                     where_sql = " WHERE "  
                 
             else:
-                select_sql += "u.username, g.gruppenavn, u.number_tasks, u.number_correct, u.successrate"
+                select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "group_user_view AS g, user_view AS u"
                 where_sql += " WHERE g.userId = u.user_id AND g.group_id = (%s)"
                 values_sql.append(group_id)
@@ -642,7 +642,7 @@ class db:
             
         #Role=Lærer
         elif role == 2:
-            select_sql += "u.username, g.gruppenavn, u.number_tasks, u.number_correct, u.successrate"
+            select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
             from_sql += "group_user_view AS g, user_view AS u"
             where_sql += " WHERE g.userId = u.user_id AND g.teacher_id = (%s)"
             if teacher_user_id != None:
