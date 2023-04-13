@@ -883,7 +883,7 @@ class db:
         all_user_leaderboard = """
         select username, SUM(points) as total_points
         from user_view
-        group by username
+        group by user_id
         order by total_points DESC"""
 
         try:

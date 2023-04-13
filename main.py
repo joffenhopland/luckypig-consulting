@@ -227,7 +227,7 @@ def course():
 
     # user has done alle questions in one level and successrate is NOT good
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]) == False:
-        # level_points = 0
+        level_points = 0
         database.update_levelpoints(session["courseId"], level_points)
         database.delete_question_done(session["courseId"])
         session["init_course"] = 1
