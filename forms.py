@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField, RadioField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField, RadioField, SelectField, TextAreaField
 from wtforms.validators import Length, EqualTo, DataRequired, Email, ValidationError, Optional
 from flask import flash
 import re
@@ -99,4 +99,20 @@ class ReportForm(FlaskForm):
 
 class CreateGroupForm(FlaskForm):
     name = StringField(label="Gruppenavn:", validators=[Length(min=1, max=70), DataRequired()])
-    submit = SubmitField(label="Opprette gruppen")
+    submit = SubmitField(label="Opprett gruppen")
+
+class CreateContestForm(FlaskForm):
+    name = StringField(label="Konkurransenavn:", validators=[Length(min=1, max=70), DataRequired()])
+    theme = SelectField('Velg tema', choices=[('1', 'Kokk'), ('2', 'Bilmekaniker'), ('3', 'Finans')],
+                        validators=[DataRequired()])
+    time = SelectField('Velg tidsramme', choices=[('3600', '1 time'), ('7200', '2 timer'), ('10800', '3 timer'), ('86400', '1 dag'), ('172800', '2 dager'), ('259200', '3 dager')],
+                        validators=[DataRequired()])
+    question_type = SelectField('Velg spørsmålstype', choices=[('drop_down', 'Nedtrekk'), ('drag_and_drop', 'Dra og slipp'), ('multiple_choice', 'Flervalg')],
+                        validators=[DataRequired()])
+    level = SelectField('Velg nivå', choices=[('1', 'Enkel/bronse'), ('2', 'Medium/sølv'), ('3', 'Vanskelig/gull')],
+                        validators=[DataRequired()])
+    selected_questions = TextAreaField('Valgte spørsmål', validators=[DataRequired()])
+    number_tries = SelectField('Velg antall forsøk', choices=[('0', 'Uendelig'),('1', '1'), ('2', '2'), ('3', '3'), ('5', '5'), ('10', '10')],
+                        validators=[DataRequired()])
+    submit = SubmitField('Opprett konkurranse')
+
