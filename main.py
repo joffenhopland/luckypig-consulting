@@ -1018,6 +1018,39 @@ def admin_group() -> 'html':
         return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
 
 
+@app.route('/member_group', methods=["GET", "POST"])
+def member_group() -> 'html':
+    database = db()
+    groupId = request.args.get('groupId')
+    groupName = request.args.get('name')
+    invite = request.args.get('invite')
+    userId = request.args.get('userId')
+    leave = request.args.get("leave")
+
+    if invite:
+        # Member invite another member from user list
+        all_users = database.all_user_name_memberinvitation(groupId)
+        members = database.get_group_members(groupId)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members,
+                               allusers=all_users)
+
+    elif userId:
+        # Member invite another member from user list
+        database.invite_request_group_member(groupId,userId)
+        members = database.get_group_members(groupId)
+        all_users = database.all_user_name_memberinvitation(groupId)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, allusers=all_users)
+
+    elif leave:
+        # leave the group
+        print("leave -----------")
+        database.remove_group_member(groupId, session["idUser"])
+        return redirect(url_for('viewgroup'))
+
+    else:
+        members = database.get_group_members(groupId)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members)
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int("3000"))

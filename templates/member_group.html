@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+
+{% block title %} Din gruppe {% endblock %}
+
+{% block content %}
+
+<div class="container register-page">
+  <div class="container text-center">
+    <h1 style="padding-top: 1em; margin-bottom: 1em;">{{ name }}</h1>
+    <div class="row">
+      <div class="col text-bg-light p-3">
+        <div class="list-group">
+        <a href="{{ url_for('member_group', groupId=groupId, name=name, invite=1) }}" class="list-group-item list-group-item-action list-group-item-primary"> Sende invitasjon forespørsel </a>
+        <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Grupperesultater</a>
+        <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Aktive konkurranser</a>
+        <a href="{{ url_for('member_group', groupId=groupId, name=name, leave=1) }}" class="list-group-item list-group-item-action list-group-item-primary"> Melde seg ut</a>
+        </div>
+      </div>
+      <div class="col">
+        {% if allusers %}
+        <div class="table-wrapper-scroll-y my-custom-scrollbar">
+
+          <table class="table table-bordered table-striped mb-0">
+            <thead>
+              <tr class="table-success" >
+                <th scope="col">Invitere en bruker</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in allusers %}
+              <tr class="table-light">
+                <td>{{ user[0] }}</td>
+                <td><a href="{{ url_for('member_group', groupId=groupId, name=name, userId=user[1]) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
+              </tr>
+            </tbody>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="d-block gap-2">
+          <a href="{{ url_for('member_group', groupId=groupId, name=name) }}" class="d-block w-100">
+            <button class="btn btn-success" type="button">Ferdig</button>
+          </a>
+        </div>
+        {% else %}
+        <img src="{{ url_for('static', filename='assets/shutterstock_158869706.jpg') }}" class="img-fluid" alt="...">
+        {% endif %}
+      </div>
+      <div class="col">
+
+        <table class="table">
+          <thead>
+            <tr class="table-success">
+              <th scope="col">Medlemmer</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in members %}
+            <tr class="table-light">
+              <td>{{ member[0] }}</td>
+              <td></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+
+{% endblock %}

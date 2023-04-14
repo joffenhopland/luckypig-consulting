@@ -932,15 +932,41 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def invite_request_group_member(self, groupId, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_invitation (groupId, userId, confirmed)
+                            VALUES (%s, %s, %s)'''
+            insert = (groupId, userId, 0)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
 
+    def all_user_name_memberinvitation(self, groupId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                '''SELECT username, userId FROM user 
+                    WHERE NOT (userId IN (SELECT userId from user_group WHERE user_group.groupId = (%s)))
+                        AND NOT (userId IN (SELECT userId FROM group_invitation WHERE groupId = (%s)))
+                        AND NOT (userId = (SELECT userId FROM group_table WHERE groupId = (%s)))
+                ''', (groupId, groupId, groupId))
+
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
 
 def main():
     database = db()
-    z = database.get_group_members(1)
-    print(z)
+    #z = database.get_group_members(1)
+    #print(z)
     #database.delete_question_done(25)
-    #z = database.get_invite_request_group_member(1)
-    #print(len(z))
+    print(database.all_user_name_memberinvitation(1))
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    
