@@ -5,92 +5,92 @@
 {% block content %}
 
 <div class="container register-page">
-    <div class="container text-center">
-        <h1> {{ name }}</h1>
-        <div class="row">
-          <div class="col-8">
-            <div>
-              <a href="#" class="btn btn-primary"> grupperesultater</a>
-            </div>
-            <div>
-              <a href="#" class="btn btn-primary"> Opprett ny konkurranse</a>
-            </div>
-            {% if allusers %}
-            <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr class="table-success">
-                  <th scope="col">Bruker</th>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for user in allusers %}
-                <tr class="table-light">
-                  <td>{{ user[0] }}</td>
-                  <td></td>
-                  <td><a href="{{ url_for('admin_group', groupId=groupId, name=name, userId=user[1]) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            <div>
-              <a href="{{ url_for('admin_group', groupId=groupId, name=name) }}" class="btn btn-primary"> Ferdig</a>
-            </div>
-            {% endif %}
-          </div>
-          </div>
-          </div>
-
-          <div class="col-4">
-            {% if invites %}
-            <table class="table">
-              <thead>
-                <tr class="table-success">
-                  <th scope="col">Invitasjoner</th>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for invite in invites %}
-                <tr class="table-light">
-                  <td>{{ invite[1] }}</td>
-                  <td><a href="{{ url_for('admin_group', id=invite[0], accept=True, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
-                  <td><a href="{{ url_for('admin_group', id=invite[0], accept=False, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/cancel.png') }}"></a></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            {% endif %}
-
-            <table class="table">
-              <thead>
-                <tr class="table-success">
-                  <th scope="col">Medlemmer</th>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for member in members %}
-                <tr class="table-light">
-                  <td>{{ member[0] }}</td>
-                  <td></td>
-                  <td><img src="{{ url_for('static', filename='assets/cancel.png') }}"></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            <div>
-              <a href="{{ url_for('admin_group', groupId=groupId, name=name, add=1) }}" class="btn btn-primary">Legg til medlemmer </a>
-            </div>
-          </div>
-
+  <div class="container text-center">
+    <h1 style="padding-top: 1em; margin-bottom: 1em;">{{ name }}</h1>
+    <div class="row">
+      <div class="col text-bg-light p-3">
+        <h3> Administrer din gruppe </h3>
+        <div class="list-group">
+        <a href="{{ url_for('admin_group', groupId=groupId, name=name, add=1) }}" class="list-group-item list-group-item-action list-group-item-primary"> Legg til medlem</a>
+        <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Grupperesultater</a>
+        <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Aktive konkurranser</a>
+        <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Lag ny konkurranse</a>
+        {% if session["role"] == 2 %}
+        <a href="{{ url_for('reportgeneration') }}"  class="list-group-item list-group-item-action list-group-item-primary"> Rapportgenerering </a>
+        {% endif %}
+        {% if allusers %}
+        <a href="{{ url_for('admin_group', groupId=groupId, name=name) }}"  class="list-group-item list-group-item-action list-group-item-danger"> FERDIG </a>
+        {% endif %}
         </div>
       </div>
+      <div class="col">
+        {% if allusers %}
+        <table class="table">
+          <thead>
+            <tr class="table-success">
+              <th scope="col">Bruker</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in allusers %}
+            <tr class="table-light">
+              <td>{{ user[0] }}</td>
+              <td></td>
+              <td><a href="{{ url_for('admin_group', groupId=groupId, name=name, userId=user[1]) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <img src="{{ url_for('static', filename='assets/shutterstock_158869706.jpg') }}" class="img-fluid" alt="...">
+        {% endif %}
+      </div>
+      <div class="col">
+        {% if invites %}
+        <table class="table">
+          <thead>
+            <tr class="table-success">
+              <th scope="col">Invitasjoner</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for invite in invites %}
+            <tr class="table-light">
+              <td>{{ invite[1] }}</td>
+              <td><a href="{{ url_for('admin_group', id=invite[0], accept=True, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
+              <td><a href="{{ url_for('admin_group', id=invite[0], accept=False, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/cancel.png') }}"></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
 
+        <table class="table">
+          <thead>
+            <tr class="table-success">
+              <th scope="col">Medlemmer</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in members %}
+            <tr class="table-light">
+              <td>{{ member[0] }}</td>
+              <td></td>
+              <td><a href="{{ url_for('admin_group', groupId=groupId, name=name, delete=member[1]) }}"><img src="{{ url_for('static', filename='assets/cancel.png') }}"></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+    
 
 
 {% endblock %}
