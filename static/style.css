@@ -6,3 +6,21 @@
   .border-question-alert {
     border-radius: 0;
   }
+
+  .my-custom-scrollbar {
+    position: relative;
+    height: 400px;
+    overflow: auto;
+    }
+
+    .table-wrapper-scroll-y {
+      display: block;
+      max-height: 500px; /* set a maximum height for the table */
+      overflow-y: auto; /* add a scrollbar to the table body */
+    }
+    
+    .table thead th {
+      position: sticky;
+      top: 0;
+      background-color: #fff; /* set a background color for the sticky header */
+    }
