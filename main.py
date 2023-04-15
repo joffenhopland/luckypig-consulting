@@ -29,12 +29,12 @@ csrf.init_app(app)
 bcrypt = Bcrypt(app)
 
 mail_settings = {
-    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_SERVER": 'smtp.sendgrid.net',
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": 'luckypig2023@gmail.com',
-    "MAIL_PASSWORD":'iskbnfrukwlvwjfk'
+    "MAIL_USERNAME": 'apikey',
+    "MAIL_PASSWORD":'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'
 }
 
 app.config.update(mail_settings)
@@ -480,7 +480,7 @@ def register():
         database.newUser(new_user)
         mail = Mail(app)
         msg = Message("Verifisere konto",
-                      sender=app.config.get("MAIL_USERNAME"), recipients=[email])
+                      sender="Luckypig2023@gmail.com", recipients=[email])
         msg.body = "Velkommen som bruker til vår nettside. Vennligst verifisere din konto for å kunne tilgang til språkkurset."
         verification_link = url_for('verify', code=verificationId, token=app.secret_key, _external=True)
         msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(verification_link)
@@ -596,7 +596,7 @@ def forgetpassword() -> 'html':
             verification_link = url_for('verifyResetPassword', code=verificationId, token=app.secret_key, _external=True)
 
             msg = Message("Verifiserings kode: ",
-                          sender=app.config.get("MAIL_USERNAME"), recipients=[email])
+                          sender="Luckypig2023@gmail.com", recipients=[email])
             msg.body = "Vennligst trykk på linken for å tilbakestill passordet ditt."
             msg.html = f'<b> Reset password </b>' + '<a href="{}"> RESET </a>'.format(verification_link)
             with app.app_context():
