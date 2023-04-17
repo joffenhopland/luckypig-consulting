@@ -1069,7 +1069,7 @@ def member_group() -> 'html':
         search = form.search.data
         members = database.get_group_members(groupId)
         all_users = database.search_user(search)
-        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=all_users,)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=all_users)
 
     else:
         members = database.get_group_members(groupId)
