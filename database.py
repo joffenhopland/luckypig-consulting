@@ -1015,6 +1015,17 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def getAllContestExercises(self, contestId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT exercise_id FROM contest_exercise WHERE contest_id=(%s)", (contestId,))
+            result = cursor.all()
+            if result == None:
+                return []
+            return result
+        except mysql.connector.Error as err:
+            print(err)
 def main():
     database = db()
     #z = database.get_group_members(1)

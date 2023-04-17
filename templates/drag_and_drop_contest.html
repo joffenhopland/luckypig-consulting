@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+
+<head>
+    {% block head %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+              crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.6.1/font/bootstrap-icons.css">
+
+        <title>{% block title %} Drag and Drop{% endblock %}</title>
+        <script src="../static/jquery.sortable.js"></script>
+        <!--jquery.sortable.js. This file contains code that enables drag-and-drop sorting functionality on HTML elements using jQuery.-->
+        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"> -->
+
+
+
+    {% endblock %}
+</head>
+
+
+<body>
+{% block content %}
+    <!--style the areal for drag and drop-->
+    <style>
+        .table-sortable {
+            position: relative;
+        }
+
+        .table-sortable .sortable-placeholder {
+            height: 37px;
+        }
+
+        .table-sortable .sortable-placeholder:after {
+            position: absolute;
+            z-index: 10;
+            content: " ";
+            height: 37px;
+            background: #f9f9f9;
+            left: 0;
+            right: 0;
+        }
+    </style>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert" role="alert">
+                {% for category, message in messages %}
+                    <div class="container fixed-bottom mb-3">
+                        <div class="alert alert-{{ category }} alert-dismissible fade show border-question-alert justify-content-between align-items-center"
+                             role="alert">
+                            <div class="d-flex justify-content-around">
+                                <p>
+                                    {{ message }}
+                                </p>
+                                <a href="{{ url_for('participate_contest') }}" class="btn btn-{{ category }}">Fortsett</a>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+    <div class="d-flex justify-content-center px-5 py-5 vh-100">
+        <div class="container m-2">
+            <div class="card" style="border: none">
+                <a href="{{ url_for('participate_contest', terminate = 1) }}">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                <div class="card-header bg-transparent text-center px-5 mx-5 vh-100" style="border: none">
+                    <div class="pb-4"><h2>Sorter ordene i riktig rekkefølge</h2></div>
+                    <div class="d-flex container">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <h5 class="pb-5">{{ question }}</h5>
+                            </div>
+
+                            <form class="vh-100" method="POST"
+                                  action="{{ url_for('drag_and_drop_contest') }}">
+
+                                <ul id="list" class="list-group list-group-sortable">
+                                    {% for q in dragdrop %}
+                                        <li class="list-group-item" draggable="true" id="{{ q['id'] }}">{{ q['text'] }}</li>
+                                    {% endfor %}
+                                </ul>
+
+
+
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="answer" id="order_form" value="{{ order | join(',') }}">
+
+
+                                <div class="d-flex justify-content-around pt-4">
+                                    <a href="{{ url_for('participate_contest') }}" class="btn btn-outline-secondary">Hopp over</a>
+                                     <div id="answer-display">
+                                  <p></p>
+                                </div>
+                                    <button
+                                            disabled
+                                            id="submit-btn"
+                                            type="submit"
+                                            class="btn btn-primary">Sjekk
+                                    </button>
+                                </div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    <div class="alert" role="alert">
+                                    {% for category, message in messages %}
+                                    <div class="container fixed-bottom mb-3">
+
+                                        <div class="alert alert-{{ category }} alert-dismissible fade show border-question-alert justify-content-between align-items-center" role="alert">
+                                        <div class="d-flex justify-content-around">
+                                            <p>
+                                                {{ message }}
+                                            </p>
+                                            <a href="{{ url_for('participate_contest') }}" class="btn btn-{{ category }}">Fortsett</a>
+                                        </div>
+                                        </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                {% endwith %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('"order_form"');
+        const submitBtn = document.getElementById('submit-btn');
+        list.addEventListener('dragstart', () => {
+            submitBtn.disabled = false;
+        });
+      </script>
+
+
+
+    {# drag and drop script #}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+    <script src="../static/jquery.sortable.js"></script>
+    <script>
+        function updateAnswer() {
+            let answerArray = $('#order_form').val().split(',');
+            let answerString = answerArray.map(id => $('#' + id).text().trim()).join(' ');
+            console.log('Answer string:', answerString); // log answerString til konsollen
+            document.querySelector('#answer-display p').textContent = answerString;
+            return answerString;
+}
+
+        $(function () {
+            $('.list-group-sortable').sortable({
+                placeholderClass: 'list-group-item'
+            }).bind('sortupdate', function (e, ui) {
+                currentOrder = []
+                for (let choice of e.target.children) {
+                    currentOrder.push(choice.id)
+                }
+                document.getElementById('order_form').value = currentOrder
+                updateAnswer();
+                //ui.item contains the current dragged element.
+                //Triggered when the user stopped sorting and the DOM position has changed.
+            });
+        });
+    </script>
+
+
+{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+</body>
+
+
+</html>
