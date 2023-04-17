@@ -19,6 +19,10 @@
         <a href="{{ url_for('reportgeneration') }}"  class="list-group-item list-group-item-action list-group-item-primary"> Rapportgenerering </a>
         {% endif %}
         </div>
+        <div class="list-group">
+          <a href="{{ url_for('admin_group', groupId=groupId, name=name, deletegroup=groupId) }}" class="list-group-item list-group-item-action list-group-item-danger"> Slett gruppe</a>
+          </div>
+          
       </div>
       <div class="col">
         {% if allusers %}

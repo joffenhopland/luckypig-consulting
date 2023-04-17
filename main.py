@@ -981,6 +981,7 @@ def admin_group() -> 'html':
     add = request.args.get('add')
     userId = request.args.get('userId')
     delete = request.args.get("delete")
+    delete_group = request.args.get("deletegroup")
     if memberId:
         #admin has accept or declines invitation
         memberId = int(memberId)
@@ -1011,6 +1012,10 @@ def admin_group() -> 'html':
         members = database.get_group_members(groupId)
         invites = database.get_invite_request_group_member(groupId)
         return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
+    
+    elif delete_group:
+        database.delete_group(delete_group)
+        return url_for('viewgroup')
 
     else:
         invites = database.get_invite_request_group_member(groupId)

@@ -961,6 +961,16 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def delete_group(self, group_id): 
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM group_table WHERE groupId = (%s)", (group_id, ))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
 def main():
     database = db()
     #z = database.get_group_members(1)
