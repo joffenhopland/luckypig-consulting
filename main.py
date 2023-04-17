@@ -1027,7 +1027,7 @@ def admin_group() -> 'html':
         members = database.get_group_members(groupId)
         invites = database.get_invite_request_group_member(groupId)
         all_users = database.search_user(search)
-        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, form=form, allusers = all_users,)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, form=form, allusers = all_users)
 
     else:
         invites = database.get_invite_request_group_member(groupId)
