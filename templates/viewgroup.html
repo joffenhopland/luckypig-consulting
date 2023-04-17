@@ -96,7 +96,7 @@
                         {% if group.role == "Admin" %}
                           <a href="{{ url_for('admin_group', groupId=group.groupId, name=group.name) }}" class="btn btn-primary"> Administrer gruppe </a>
                         {% else %}
-                          <a href="{{ url_for('member_group', groupId=classe.groupId, name=classe.name) }}" class="btn btn-primary">Bli med i gruppen</a>
+                          <a href="{{ url_for('member_group', groupId=group.groupId, name=group.name) }}" class="btn btn-primary">Bli med i gruppen</a>
                         {% endif %}
                       </div>
 
