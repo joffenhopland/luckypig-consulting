@@ -1076,6 +1076,189 @@ def member_group() -> 'html':
         return render_template('member_group.html', name=groupName, groupId=groupId, members=members)
 
 
+#delta i konkurranse
+@app.route('/participate_contest', methods=["GET", "POST"])
+def participate_contest() -> 'html':
+
+    start = request.args.get('start')
+    terminate = request.args.get('terminate')
+    contestId = request.args.get('contestId')
+    database = db()
+
+    #start contest and get the exercises list
+    if start:
+        #get the list of exercises from the database
+        session["contest_exercises"] = [1006,3002,5000] #----to be changed with the next line
+        #session["contest_exercises"] = database.getAllContestExercises(contestId)
+        session["contest_points"] = 0
+        return redirect(url_for('participate_contest'))
+
+    # start contest and get the exercises list
+    if terminate:
+        print(f'Total result: {session["contest_points"]}')
+        # return redirect(url_for('contest_result'))
+        return redirect(url_for('viewgroup'))
+
+    #go to the next exercise
+    elif len(session["contest_exercises"]) > 0:
+        session["exerciseId"] = session["contest_exercises"].pop(0)
+        first = int(str(session["exerciseId"])[0])
+        view = checknumber(first) + "_contest"
+        print(f'Result: {session["contest_points"]}')
+        return redirect(url_for(view))
+
+    #contest is done and go to the result side
+    else:
+        print(f'Total result: {session["contest_points"]}')
+        #return redirect(url_for('contest_result'))
+        return redirect(url_for('viewgroup'))
+
+
+
+@app.route("/multiple-choice_contest", methods=['GET', 'POST'])
+def multiple_choice_contest():
+    database = db()
+    exerciseId = session['exerciseId']
+    print(f'exerciseId in /multiple-choice: {exerciseId}')
+
+    if request.method == 'POST':
+        exercise = Exercise(exerciseId, 3)
+        exercise.getExercise()
+        question = exercise.question
+        choices = exercise.choices
+        right_answer = exercise.answer
+        answer = request.form['answer']
+
+        if answer == right_answer:
+            flash(f'Korrekt', "success")
+            exercise.number_succeed += 1
+            #success = 1
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # Increase users current contest points
+            session["contest_points"] += 1
+        else:
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
+            #success = 0
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+        exercise.number_asked += 1
+        exercise.updateExercise()
+        return render_template('multiple_choice_contest.html', question=question, choices=choices)
+        #return redirect(url_for('contest_result'))
+
+    print(f'exerciseId: {exerciseId}')
+    exercise = Exercise(exerciseId, 3)
+    exercise.getExercise()
+    question = exercise.question
+    choices = exercise.choices
+    return render_template('multiple_choice_contest.html', question=question, choices=choices)
+
+@app.route('/dropdown_contest', methods=['GET', 'POST'])
+def dropdown_contest():
+    database = db()
+    exerciseId = session['exerciseId']
+
+
+    if request.method == 'POST':
+        exercise = Dropdown(exerciseId, 1)
+        exercise.getExercise()
+        norwegian_question = exercise.question
+        english_question = exercise.question_translated
+        choices = exercise.choices
+        right_answer = exercise.answer
+        answer = request.form['answer']
+
+        if answer == right_answer:
+            flash(f'Korrekt!', "success")
+            exercise.number_succeed += 1
+            #success = 1
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # Increase users current contest points
+            session["contest_points"] += 1
+        else:
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
+            #success = 0
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # flash(f'Sorry, that is wrong. The answer was "{right_answer}".', "danger")
+        exercise.number_asked += 1
+        exercise.updateExercise()
+        # to remove indicators of placement for the dropdown manu
+        blank_placeholders = '{ blank }', '{blank}'
+        for blank_placeholder in blank_placeholders:
+            if blank_placeholder in english_question:
+                # identify the position of the placeholder
+                placeholder_index = english_question.find(blank_placeholder)
+        return render_template('dropdown_contest.html', choices=choices, nortext=norwegian_question,
+                               text=english_question, placeholder_index=placeholder_index)
+        #return redirect(url_for('contest_result'))
+
+    exercise = Dropdown(exerciseId, 1)
+    exercise.getExercise()
+    norwegian_question = exercise.question
+    english_question = exercise.question_translated
+    choices = exercise.choices
+    # to remove indicators of placement for the dropdown manu
+    blank_placeholders = '{ blank }', '{blank}'
+    for blank_placeholder in blank_placeholders:
+        if blank_placeholder in english_question:
+            # identify the position of the placeholder
+            placeholder_index = english_question.find(blank_placeholder)
+    return render_template('dropdown_contest.html', choices=choices, nortext=norwegian_question, text=english_question,
+                           placeholder_index=placeholder_index)
+
+dragAndDropService = DragAndDropService()
+
+@app.route('/drag-and-drop_contest', methods=["GET", 'POST'])
+def drag_and_drop_contest():
+    database = db()
+
+    exerciseId = session['exerciseId']
+
+    if request.method == 'POST':
+        exercise = dragAndDropService.getExercise(exerciseId)
+
+        question = exercise.question
+        right_answer = exercise.answer
+        order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
+        new_dragdrop = []
+        user_answer = []
+        for item in order:
+            for elem in exercise.choices:
+                if elem['id'] == item:
+                    new_dragdrop.append(elem)
+                    user_answer.append(elem['text'])
+
+        if " ".join(user_answer) == right_answer:
+            flash(f'Korrekt!', "success")
+            exercise.number_succeed += 1
+            #success = 1
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # Increase users current contest points
+            session["contest_points"] += 1
+        else:
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
+            #success = 0
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+        exercise.number_asked += 1
+        exercise.updateExercise()
+        return render_template('drag_and_drop_contest.html', dragdrop=new_dragdrop, question=question,exerciseId=exerciseId)
+        #return redirect(url_for('contest_result'))
+
+    print(f'exerciseId: {exerciseId}')
+    exercise = dragAndDropService.getExercise(exerciseId)
+    question = exercise.question
+    choices = exercise.choices
+    random.shuffle(choices)
+    order = []
+    for choice in choices:
+        order.append(choice['id'])
+    return render_template('drag_and_drop_contest.html', dragdrop=choices, question=question, exerciseId=exerciseId, order=order)
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=int("3000"))
 
