@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+  {% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+
+  <title>{% block title %} Grupper {% endblock %}</title>
+  {% endblock %}
+</head>
+<body>
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="alert" role="alert">
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+    </button>
+    {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="container register-page">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-8 col-lg-6">
+      <div class="card shadow-lg">
+        <div class="card-body">
+          <div class="text-center">
+            <h1 class="mb-3">Opprett en gruppe</h1>
+            </div>
+
+          <form action="{{url_for('creategroup')}}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                {{form.name.label}}<br>
+                {{form.name(class_="wt") }}
+                <br>
+                <br>
+
+                <div class="button-place">
+                {{form.submit(class_="submit-form")}}
+                </div>
+            </form>
+
+            <a href="{{ url_for('viewgroup') }}"> Tilbake </a>
+
+
+         </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+</div>
+
+    
+</body>
+
+
+</html>

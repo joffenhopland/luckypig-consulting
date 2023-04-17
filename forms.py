@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField, RadioField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, EmailField, HiddenField, RadioField, SelectField, TextAreaField
 from wtforms.validators import Length, EqualTo, DataRequired, Email, ValidationError, Optional
 from flask import flash
 import re
@@ -95,3 +95,27 @@ class ReportForm(FlaskForm):
     theme = SelectField('Velg tema', choices=[(None, '-'), ('1', 'Kokk'), ('2', 'Bilmekaniker'), ('3', 'Finans')],validators=[Optional()])
     level = SelectField('Velg nivå', choices=[(None, '-'), ('1', 'Bronse'), ('2', 'Sølv'), ('3', 'Gull')],validators=[Optional()])
     submit = SubmitField('Generer rapport')
+
+
+class CreateGroupForm(FlaskForm):
+    name = StringField(label="Gruppenavn:", validators=[Length(min=1, max=70), DataRequired()])
+    submit = SubmitField(label="Opprett gruppen")
+
+class CreateContestForm(FlaskForm):
+    name = StringField(label="Konkurransenavn:", validators=[Length(min=1, max=70), DataRequired()])
+    theme = SelectField('Velg tema', choices=[('1', 'Kokk'), ('2', 'Bilmekaniker'), ('3', 'Finans')],
+                        validators=[DataRequired()])
+    time = SelectField('Velg tidsramme', choices=[('1', '1 dag'), ('2', '2 dager'), ('3', '3 dager'), ('4', '4 dager'), ('5', '5 dager'), ('6', '6 dager'), ('7', '7 dager'), ('8', '8 dager'), ('9', '9 dager'), ('10', '10 dager')],
+                        validators=[DataRequired()])
+    question_type = SelectField('Velg spørsmålstype', choices=[('drop_down', 'Nedtrekk'), ('drag_and_drop', 'Dra og slipp'), ('multiple_choice', 'Flervalg')],
+                        validators=[DataRequired()])
+    level = SelectField('Velg nivå', choices=[('1', 'Enkel/bronse'), ('2', 'Medium/sølv'), ('3', 'Vanskelig/gull')],
+                        validators=[DataRequired()])
+    selected_questions = TextAreaField('Valgte spørsmål', validators=[DataRequired()])
+    submit = SubmitField('Opprett konkurranse')
+
+class SearchForm(FlaskForm):
+    search = StringField(label="Search", validators=[
+                         Length(min=3, max=40), DataRequired()])
+    submit = SubmitField(label="Søk")
+

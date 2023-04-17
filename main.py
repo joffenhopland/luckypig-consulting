@@ -4,8 +4,10 @@ import uuid
 import itertools
 import random
 import pandas as pd
+import os
+from dotenv import load_dotenv
 
-from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup
+from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup, jsonify
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
@@ -13,15 +15,18 @@ from flask_bcrypt import Bcrypt
 from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm, CreateGroupForm, CreateContestForm, SearchForm
 from User import User
 import json
-from classes import Exercise, Dropdown, CourseStatus
+from classes import Exercise, Dropdown, Group
 
 import json
 import urllib.parse
 
 from datetime import datetime, timedelta
+
+load_dotenv()  # load environment variables from .flaskenv file
+
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -33,8 +38,8 @@ mail_settings = {
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": 'luckypig2023@gmail.com',
-    "MAIL_PASSWORD":'iskbnfrukwlvwjfk'
+    "MAIL_USERNAME": os.environ.get("MAIL_USERNAME"),
+    "MAIL_PASSWORD": os.environ.get("MAIL_PASSWORD")
 }
 
 app.config.update(mail_settings)
@@ -60,12 +65,12 @@ def theme():
     else:
         #the user changes his theme (from dropdown choice)
         if session["themeId"] != themeId:
-            # session["courseId"] = -1
-            # session["level"] = 1
+            session["courseId"] = -1
+            session["level"] = 1
             session["themeId"] = themeId
             session["init_course"] = 1
-            session["new_level"] =0
-            return redirect(url_for("course"))
+            session["new_level"] = 0
+            return redirect(url_for("course", fromTheme = 1))
         else:
             return redirect(url_for("learn"))
 
@@ -76,8 +81,10 @@ def learn():
     totalPoints = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     themeId = session["themeId"]
-    session["courseId"] = database.course_status(session["idUser"])
-    session["level"] = database.get_level(session["courseId"])
+    #session["courseId"] = database.course_status(session["idUser"])
+    #session["level"] = database.get_level(session["courseId"])
+    print(f'82. session["level"]: {session["level"]}')
+    print(f'83. session["courseId"]: {session["courseId"]}')
     checklevel()
     print(f'total point: {totalPoints}')
 
@@ -87,8 +94,10 @@ def learn():
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     database = db()
+    fromTheme = request.args.get("fromTheme")
+    print(f'fromTheme: {fromTheme}')
     print(f'58. session["courseId"]: {session["courseId"]}')
-    print(f'58. session["themeId"]: {session["themeId"]}')
+    #print(f'58. session["themeId"]: {session["themeId"]}')
     questions = session["questions"]
    # level_points = database.get_level_points(session["courseId"])
     #session["level_points"] = level_points
@@ -104,34 +113,33 @@ def course():
         #new course
         if session["courseId"] == None or session["new_level"] == 1:
             session["new_level"] = 0
-            #Vi lager et nytt active course for brukeren
-            database.initiate_course(session["idUser"])
-            #Vi henter id for det nye kurset
-            #course_status = database.course_status(session["idUser"])
-            session["courseId"] = database.course_status(session["idUser"])
-            print(f'77. course_status: {session["courseId"]}')
-            #Vi setter ny course_status for det kurset
-            #database.new_course_status(session["theme"], session["language"], course_status)
-            database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
+            #vi lager en ny kurs
+            createANewCourse(database)
+
 
         session["level"] = database.get_level(session["courseId"])
 
         if database.checkCourseDone(session["courseId"]) == 1:
             print(f'114. session["courseId"]: {session["courseId"]}')
             session["level"] += 1
-            if session["level"] == 4:
-                return redirect(url_for("learn"))
-            elif session["level"] < 4:
-                # session["courseId"] = -1
-                # session["new_level"] = 1
-                return redirect(url_for("course"))
+            print(f'124. session["level"]: {session["level"]}')
+
+            if session["level"] < 4:
+                createANewCourse(database)
+            return redirect(url_for("learn"))
+
 
 
         #session["level"] = database.get_level(session["courseId"])
         session["questions"] = []
         print(f'105. session["courseId"]: {session["courseId"]}')
         print(f'58. session["level"]: {session["level"]}')
-        return redirect(url_for("learn"))
+        if fromTheme:
+            return redirect(url_for("learn"))
+        else:
+            return redirect(url_for("course"))
+
+
 
 
     # existing course - user returns or new course
@@ -202,19 +210,20 @@ def course():
     if session["courseId"] > -1 and len(questions) == 0 and database.success_rate(session["courseId"]):
         print(f'session["level"]: {session["level"]}')
         # print(f'level_points: {level_points}')
+        database.delete_question_done(session["courseId"])
         if session["level"] < 4:
             level = session["level"]
             level += 1
             session["level"] = level
             print(f'session["level"] if: {session["level"]}')
             #Set the course as done
-            #database.setCourseDone(session["courseId"])
+            database.setCourseDone(session["courseId"])
 
             #start a new course for the new level
-            # session["courseId"] = -1
+            session["courseId"] = -1
             session["init_course"] = 1
-            # session["new_level"] = 1
-            if session["level"] < 3:
+            session["new_level"] = 1
+            if session["level"] < 4:
                 flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
                 return redirect(url_for("learn"))
             else:
@@ -231,6 +240,14 @@ def course():
         return redirect(url_for("learn"))
     return redirect(url_for("learn"))
 
+def createANewCourse(database):
+    # Vi lager et nytt active course for brukeren
+    database.initiate_course(session["idUser"])
+    # Vi henter id for det nye kurset
+    session["courseId"] = database.course_status(session["idUser"])
+    print(f'77. course_status: {session["courseId"]}')
+    # Vi setter ny course_status for det kurset
+    database.new_course_status(session["themeId"], session["language"], session["courseId"], session["level"])
 
 def checknumber(id):
     if id == 1:
@@ -243,21 +260,12 @@ def checknumber(id):
 def checklevel():
     if session["level"] == 1:
         session["level_name"] = "Bronse"
-        # return "Level: Bronze"
     elif session["level"] == 2:
         session["level_name"] = "Sølv"
-        # return "Level: Sølv"
     elif session["level"] >= 3:
         session["level_name"] = "Gull"
-        # return "Level: Gull"
 
-def checkLevelCompleted():
-    database = db()
-    print(session['courseId'])
-    if database.checkCourseDone(session['courseId']) == 1:
-        return session['level']
-    else:
-        return session['level'] - 1
+
 @app.route("/skipExercise", methods=['GET'])
 def skipExercise():
     database = db()
@@ -692,7 +700,10 @@ def viewuser() -> 'html':
     total_points = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     checklevel()
-    completedLevel = checkLevelCompleted()
+    if database.checkGoldLevelCompleted(session['idUser'], session['themeId']):
+        completedLevel = 1
+    else:
+        completedLevel = 0
     return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'], login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
 @app.route('/updateuser', methods=["GET", "POST"])    
@@ -889,6 +900,373 @@ def getHeaders(query, type):
 
     return headers
 
+@app.route('/viewgroup', methods=["GET", "POST"])
+def viewgroup() -> 'html':
+    database = db()
+    DBgroups = database.getGroups(session["idUser"])
+    groups = [Group(*(DBgroup)) for DBgroup in DBgroups]
+    classes = []
+    friendgroups = []
+    for group in groups:
+        #chek role (Admin/Medlem) in group
+        if group.adminId == session['idUser']:
+            group.role = "Admin"
+
+        #check group type and append to the appropriate list
+        if group.groupTypeId == 1:
+            classes.append(group)
+        elif group.groupTypeId == 2:
+            friendgroups.append(group)
+    return render_template('viewgroup.html', title="Mine grupper",classes=classes, friendgroups=friendgroups, role=session['role'])
+
+@app.route('/creategroup', methods=["GET", "POST"])
+def creategroup() -> 'html':
+    form = CreateGroupForm()
+    if request.method == 'POST':
+        database = db()
+        names = database.getAllGroupName()
+        groupName = form.name.data
+        if groupName in names:
+            flash(f'Gruppenavnet finnes allerede. Velg et nytt gruppenavn', "danger")
+            return render_template('creategroup.html', form=form)
+
+        else:
+            groupAdminId = session["idUser"]
+            if session["role"] == 1:
+                groupe_typeId = 2
+            else:
+                groupe_typeId = 1
+
+            database.createGroup(groupName,groupAdminId,groupe_typeId)
+            return redirect(url_for('viewgroup'))
+
+    else:
+        return render_template('creategroup.html', form=form)
+
+@app.route('/leaderboard')
+def leaderboard():
+    database = db()
+    global_leaderboard = database.get_leaderboard()
+    print(global_leaderboard)
+    return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
+
+@app.route('/leaderboard-group')
+def leaderboard_group():
+    database = db()
+    # spørringen er ikke implementert enda
+    # group_leaderboard = database.get_group_leaderboard()
+    return render_template('leaderboard_group.html')
+
+@app.route('/createcontest', methods=["GET", "POST"])
+def createcontest() -> 'html':
+    group_id = 7 ##########################################################session['groupId']?
+    form = CreateContestForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        name = request.form.get('name')
+        time = request.form.get('time')
+        selected_questions = request.form.get('selected_questions').split(",")
+        
+        date = datetime.now().date() + timedelta(days=int(time))
+        deadline_date = date.strftime("%Y-%m-%d")
+        
+        database = db()
+        database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions) #GROUP ID!!!!!!!!!!!!!!!!!!!
+        return redirect(url_for('viewgroup'))
+    else:
+        print(form.errors)
+        return render_template('create_contest.html', form=form)
+
+@app.route('/get_dynamic_data', methods=['POST'])
+def get_dynamic_data():
+    question_type = request.form.get('question_type', '', type=str)
+    level = request.form.get('level', '', type=int)
+    theme = request.form.get('theme', '', type=int)
+    database = db()
+    questions = database.getQuestionsForContest(question_type, level,theme)
+    return jsonify(questions)
+
+@app.route('/admin_group', methods=["GET", "POST"])
+def admin_group() -> 'html':
+    database = db()
+    form = SearchForm(request.form)
+    groupId = request.args.get('groupId')
+    groupName = request.args.get('name')
+    memberId = request.args.get("id")
+    accept = bool(request.args.get("accept"))
+    add = request.args.get('add')
+    userId = request.args.get('userId')
+    delete = request.args.get("delete")
+    delete_group = request.args.get("deletegroup")
+    if memberId:
+        #admin has accept or declines invitation
+        memberId = int(memberId)
+        database.answer_invite_request_group_member(groupId, memberId, accept)
+        invites = database.get_invite_request_group_member(groupId)
+        members = database.get_group_members(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
+    
+    elif add:
+        #Admin added a member from user list
+        all_users = database.all_user_name_memberinvitation(groupId)
+        invites = database.get_invite_request_group_member(groupId)
+        members = database.get_group_members(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users, form=form)
+    
+    elif userId:
+        #Adds the user 
+        database.add_group_member(groupId, userId)
+        members = database.get_group_members(groupId)
+        invites = database.get_invite_request_group_member(groupId)
+        all_users = database.all_user_name_memberinvitation(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users, form=form)
+    
+    elif delete:
+        #deletes a member from the member-list
+        print("delete -----------")
+        database.remove_group_member(groupId, delete)
+        members = database.get_group_members(groupId)
+        invites = database.get_invite_request_group_member(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
+    
+    elif delete_group:
+        database.delete_group(delete_group)
+        return url_for('viewgroup')
+    
+    elif request.method == 'POST' and form.validate_on_submit():
+        search = form.search.data
+        members = database.get_group_members(groupId)
+        invites = database.get_invite_request_group_member(groupId)
+        all_users = database.search_user(search)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, form=form, allusers = all_users)
+
+    else:
+        invites = database.get_invite_request_group_member(groupId)
+        members = database.get_group_members(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
+
+
+@app.route('/member_group', methods=["GET", "POST"])
+def member_group() -> 'html':
+    database = db()
+    form = SearchForm(request.form)
+    groupId = request.args.get('groupId')
+    groupName = request.args.get('name')
+    invite = request.args.get('invite')
+    userId = request.args.get('userId')
+    leave = request.args.get("leave")
+
+    if invite:
+        # Member invite another member from user list
+        all_users = database.all_user_name_memberinvitation(groupId)
+        members = database.get_group_members(groupId)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members,
+                               allusers=all_users, form=form)
+
+    elif userId:
+        # Member invite another member from user list
+        database.invite_request_group_member(groupId,userId)
+        members = database.get_group_members(groupId)
+        all_users = database.all_user_name_memberinvitation(groupId)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, allusers=all_users, form=form)
+
+    elif leave:
+        # leave the group
+        print("leave -----------")
+        database.remove_group_member(groupId, session["idUser"])
+        return redirect(url_for('viewgroup'))
+    
+    elif request.method == 'POST' and form.validate_on_submit():
+        search = form.search.data
+        members = database.get_group_members(groupId)
+        all_users = database.search_user(search)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=all_users)
+
+    else:
+        members = database.get_group_members(groupId)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members)
+
+
+#delta i konkurranse
+@app.route('/participate_contest', methods=["GET", "POST"])
+def participate_contest() -> 'html':
+
+    start = request.args.get('start')
+    terminate = request.args.get('terminate')
+    contestId = request.args.get('contestId')
+    database = db()
+
+    #start contest and get the exercises list
+    if start:
+        #get the list of exercises from the database
+        session["contest_exercises"] = [1006,3002,5000] #----to be changed with the next line
+        #session["contest_exercises"] = database.getAllContestExercises(contestId)
+        session["contest_points"] = 0
+        return redirect(url_for('participate_contest'))
+
+    # start contest and get the exercises list
+    if terminate:
+        print(f'Total result: {session["contest_points"]}')
+        # return redirect(url_for('contest_result'))
+        return redirect(url_for('viewgroup'))
+
+    #go to the next exercise
+    elif len(session["contest_exercises"]) > 0:
+        session["exerciseId"] = session["contest_exercises"].pop(0)
+        first = int(str(session["exerciseId"])[0])
+        view = checknumber(first) + "_contest"
+        print(f'Result: {session["contest_points"]}')
+        return redirect(url_for(view))
+
+    #contest is done and go to the result side
+    else:
+        print(f'Total result: {session["contest_points"]}')
+        #return redirect(url_for('contest_result'))
+        return redirect(url_for('viewgroup'))
+
+
+
+@app.route("/multiple-choice_contest", methods=['GET', 'POST'])
+def multiple_choice_contest():
+    database = db()
+    exerciseId = session['exerciseId']
+    print(f'exerciseId in /multiple-choice: {exerciseId}')
+
+    if request.method == 'POST':
+        exercise = Exercise(exerciseId, 3)
+        exercise.getExercise()
+        question = exercise.question
+        choices = exercise.choices
+        right_answer = exercise.answer
+        answer = request.form['answer']
+
+        if answer == right_answer:
+            flash(f'Korrekt', "success")
+            exercise.number_succeed += 1
+            #success = 1
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # Increase users current contest points
+            session["contest_points"] += 1
+        else:
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
+            #success = 0
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+        exercise.number_asked += 1
+        exercise.updateExercise()
+        return render_template('multiple_choice_contest.html', question=question, choices=choices)
+        #return redirect(url_for('contest_result'))
+
+    print(f'exerciseId: {exerciseId}')
+    exercise = Exercise(exerciseId, 3)
+    exercise.getExercise()
+    question = exercise.question
+    choices = exercise.choices
+    return render_template('multiple_choice_contest.html', question=question, choices=choices)
+
+@app.route('/dropdown_contest', methods=['GET', 'POST'])
+def dropdown_contest():
+    database = db()
+    exerciseId = session['exerciseId']
+
+
+    if request.method == 'POST':
+        exercise = Dropdown(exerciseId, 1)
+        exercise.getExercise()
+        norwegian_question = exercise.question
+        english_question = exercise.question_translated
+        choices = exercise.choices
+        right_answer = exercise.answer
+        answer = request.form['answer']
+
+        if answer == right_answer:
+            flash(f'Korrekt!', "success")
+            exercise.number_succeed += 1
+            #success = 1
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # Increase users current contest points
+            session["contest_points"] += 1
+        else:
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
+            #success = 0
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # flash(f'Sorry, that is wrong. The answer was "{right_answer}".', "danger")
+        exercise.number_asked += 1
+        exercise.updateExercise()
+        # to remove indicators of placement for the dropdown manu
+        blank_placeholders = '{ blank }', '{blank}'
+        for blank_placeholder in blank_placeholders:
+            if blank_placeholder in english_question:
+                # identify the position of the placeholder
+                placeholder_index = english_question.find(blank_placeholder)
+        return render_template('dropdown_contest.html', choices=choices, nortext=norwegian_question,
+                               text=english_question, placeholder_index=placeholder_index)
+        #return redirect(url_for('contest_result'))
+
+    exercise = Dropdown(exerciseId, 1)
+    exercise.getExercise()
+    norwegian_question = exercise.question
+    english_question = exercise.question_translated
+    choices = exercise.choices
+    # to remove indicators of placement for the dropdown manu
+    blank_placeholders = '{ blank }', '{blank}'
+    for blank_placeholder in blank_placeholders:
+        if blank_placeholder in english_question:
+            # identify the position of the placeholder
+            placeholder_index = english_question.find(blank_placeholder)
+    return render_template('dropdown_contest.html', choices=choices, nortext=norwegian_question, text=english_question,
+                           placeholder_index=placeholder_index)
+
+dragAndDropService = DragAndDropService()
+
+@app.route('/drag-and-drop_contest', methods=["GET", 'POST'])
+def drag_and_drop_contest():
+    database = db()
+
+    exerciseId = session['exerciseId']
+
+    if request.method == 'POST':
+        exercise = dragAndDropService.getExercise(exerciseId)
+
+        question = exercise.question
+        right_answer = exercise.answer
+        order = [int(q) for q in request.form.getlist('answer')[0].split(',')]
+        new_dragdrop = []
+        user_answer = []
+        for item in order:
+            for elem in exercise.choices:
+                if elem['id'] == item:
+                    new_dragdrop.append(elem)
+                    user_answer.append(elem['text'])
+
+        if " ".join(user_answer) == right_answer:
+            flash(f'Korrekt!', "success")
+            exercise.number_succeed += 1
+            #success = 1
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+
+            # Increase users current contest points
+            session["contest_points"] += 1
+        else:
+            flash(Markup(f"Du svarte feil. Riktig svar er:  {right_answer}"), "danger")
+            #success = 0
+            #database.question_history(exerciseId, success, session["level"], session["courseId"])
+        exercise.number_asked += 1
+        exercise.updateExercise()
+        return render_template('drag_and_drop_contest.html', dragdrop=new_dragdrop, question=question,exerciseId=exerciseId)
+        #return redirect(url_for('contest_result'))
+
+    print(f'exerciseId: {exerciseId}')
+    exercise = dragAndDropService.getExercise(exerciseId)
+    question = exercise.question
+    choices = exercise.choices
+    random.shuffle(choices)
+    order = []
+    for choice in choices:
+        order.append(choice['id'])
+    return render_template('drag_and_drop_contest.html', dragdrop=choices, question=question, exerciseId=exerciseId, order=order)
 
 
 if __name__ == "__main__":

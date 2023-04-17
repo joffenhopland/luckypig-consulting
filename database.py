@@ -1,11 +1,15 @@
 import mysql.connector
 import itertools
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # load environment variables from .flaskenv file
 
 class db:
     def __init__(self) -> None:
-        dbconfig = {'host': '34.30.103.41',
+        dbconfig = {'host': os.environ.get('HOST'),
                     'user': 'luckypig2023',
-                    'password': 'LuckypigProject#1',
+                    'password': os.environ.get('PASSWORD'),
                     'database': 'Luckypig database', }
         self.configuration = dbconfig
 
@@ -539,6 +543,22 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def checkGoldLevelCompleted(self, userId, themeId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT course_status.courseId FROM course_status 
+                INNER JOIN active_course ON course_status.courseId=active_course.courseId 
+                WHERE active_course.userId = (%s) AND course_status.themeId = (%s) 
+                AND course_status.level = (%s) AND course_status.done = (%s)''', (userId, themeId, 3, 1))
+            result = cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                return None
+        except mysql.connector.Error as err:
+            print(err)
+
     def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -615,7 +635,7 @@ class db:
                     where_sql = " WHERE "  
                 
             else:
-                select_sql += "u.username, g.gruppenavn, u.number_tasks, u.number_correct, u.successrate"
+                select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "group_user_view AS g, user_view AS u"
                 where_sql += " WHERE g.userId = u.user_id AND g.group_id = (%s)"
                 values_sql.append(group_id)
@@ -626,7 +646,7 @@ class db:
             
         #Role=Lærer
         elif role == 2:
-            select_sql += "u.username, g.gruppenavn, u.number_tasks, u.number_correct, u.successrate"
+            select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
             from_sql += "group_user_view AS g, user_view AS u"
             where_sql += " WHERE g.userId = u.user_id AND g.teacher_id = (%s)"
             if teacher_user_id != None:
@@ -742,16 +762,278 @@ class db:
             return None
           
         return query, values_sql
+    
+    # Group
+    def get_not_member_users(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT u.userId, u.username FROM user AS u, user_group AS ug WHERE u.userId = ug.userId AND ug.groupId not like (%s)", (group_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+    
+    def add_group_member(self,group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO user_group (groupId, userId)
+                VALUES (%s, %s)'''
+            cursor.execute(sql1, (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def remove_group_member(self,group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM user_group WHERE groupId = (%s) AND userId = (%s)", (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+        
+        
+    def invite_request_group_member(self, group_id, group_member_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_invitation (groupId, userId)
+                VALUES (%s, %s)'''
+            cursor.execute(sql1, (group_id, group_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_invite_request_group_member(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT g.userId, u.username FROM group_invitation AS g, user AS u WHERE u.userId = g.userId AND g.groupId = (%s)", (group_id,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def answer_invite_request_group_member(self, group_id, request_member_id, accept): #accept: boolean
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM group_invitation WHERE groupId = (%s) AND userId = (%s)", (group_id, request_member_id,))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+        
+        try:   
+            if accept == True:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                sql1 = '''INSERT INTO user_group (groupId, userId)
+                VALUES (%s, %s)'''
+                cursor.execute(sql1, (group_id, request_member_id,))
+                conn.commit()
+                conn.close()
+        except mysql.connector.Error as err:
+            print(err)
   
+    def getGroups(self, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT * FROM group_table WHERE userId=(%s)
+                            UNION
+                            SELECT group_table.* FROM group_table 
+                            INNER JOIN user_group ON group_table.groupId=user_group.groupId 
+                            WHERE user_group.userId = (%s) ''', (userId, userId))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
 
+    def createGroup(self, name, userId, group_typeId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_table (name, userId, group_typeId)
+                VALUES (%s, %s, %s)'''
+            insert = (name, userId, group_typeId)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+
+    def getAllGroupName(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM group_table")
+            results = cursor.fetchall()
+            resultlist = []
+            if results is not None:
+                resultlist = [result[0] for result in results]
+            return resultlist
+        except mysql.connector.Error as err:
+            print(err)
+
+    def get_leaderboard(self):
+        #Implementerer grupper her senere
+        all_user_leaderboard = """
+        select username, SUM(points) as total_points
+        from user_view
+        group by user_id
+        order by total_points DESC"""
+
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(all_user_leaderboard)
+            result = cursor.fetchall()
+            leaderboard_data = [{'username': row[0], 'points': row[1]} for row in result]
+            return leaderboard_data
+        except mysql.connector.Error as err:
+            print(err)
+
+    def getQuestionsForContest(self, question_type, level, theme):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            query = "SELECT exerciseID, question FROM `{}` WHERE level = %s AND themeID = %s".format(question_type)
+            cursor.execute(query, (level,theme,))
+            result = cursor.fetchall()
+            choices = [(str(row[0]), row[1]) for row in result]
+            return choices
+        except mysql.connector.Error as err:
+            print(err)
+
+    def get_group_members(self, groupId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT user.username, user.userId from user, group_table, user_group \
+                        where group_table.groupId = user_group.groupId \
+                        and user_group.userId = user.userId \
+                        and group_table.groupId = (%s)", (groupId,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def all_user_name(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT username, userId from user")
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def invite_request_group_member(self, groupId, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO group_invitation (groupId, userId, confirmed)
+                            VALUES (%s, %s, %s)'''
+            insert = (groupId, userId, 0)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def all_user_name_memberinvitation(self, groupId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                '''SELECT username, userId FROM user 
+                    WHERE NOT (userId IN (SELECT userId from user_group WHERE user_group.groupId = (%s)))
+                        AND NOT (userId IN (SELECT userId FROM group_invitation WHERE groupId = (%s)))
+                        AND NOT (userId = (SELECT userId FROM group_table WHERE groupId = (%s)))
+                ''', (groupId, groupId, groupId))
+
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def delete_group(self, group_id): 
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM group_table WHERE groupId = (%s)", (group_id, ))
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def search_user(self, search):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                    "select username, userId from user where username = (%s)  \
+                    union \
+                    select username, userId from user where email = (%s)  \
+                    union \
+                    select username, userId from user where lower(username) like (%s) or lower(username) like (%s) \
+                    union \
+                    select username, userId from user where lower(email) like (%s) or lower(email) like (%s)", (search, search, f'{search}%', f'%{search}', f'{search}%', f'%{search}'))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def add_contest(self, group_id, name, deadline_date, selected_questions):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO contest (deadline_date, contest_name, group_id)
+                            VALUES (%s, %s, %s)'''
+            insert = (deadline_date, name, group_id)
+            cursor.execute(sql1, insert)
+            contest_id = cursor.lastrowid
+            conn.commit()
+            
+            for selected_question in selected_questions:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                sql1 = '''INSERT INTO contest_exercise (exercise_id, contest_id)
+                            VALUES (%s, %s)'''
+                insert = (selected_question, contest_id)
+                cursor.execute(sql1, insert)
+                conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def getAllContestExercises(self, contestId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT exercise_id FROM contest_exercise WHERE contest_id=(%s)", (contestId,))
+            result = cursor.all()
+            if result == None:
+                return []
+            return result
+        except mysql.connector.Error as err:
+            print(err)
 def main():
     database = db()
+    #z = database.get_group_members(1)
+    #print(z)
     #database.delete_question_done(25)
-    #print(database.getAllUser())
-    #print(database.get_filtered_theme_on_user_view('kokk')
-    #print(database.user_view(role=3))
-    #print(database.get_sql_query_for_all_tasks_report_view(role=2, teacher_user_id=7, group_id=1))
-    print(database.all_tasks_report_view(role=3))
+    #print(database.getGroups(1))
+    #database.invite_request_group_member(2,6)
+    #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    
     
 main()

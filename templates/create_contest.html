@@ -1,0 +1,231 @@
+{% extends "layout.html" %}
+
+{% block title %}Opprett konkurranse{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.6.1/font/bootstrap-icons.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(function() {
+      var questionType = $('#question_type select').val();
+      var level = $('#level select').val();
+      var theme = $('#theme select').val();
+      $.ajax({
+          type: 'POST',
+          url: '{{ url_for("get_dynamic_data") }}',
+          data: { 'question_type': questionType, 'level': level, 'theme': theme,'csrf_token': $('input[name="csrf_token"]').val()},
+          success: function(data) {
+              var dynamicSelectHtml = '';
+              dynamicSelectHtml += '<div class="form-group">';
+              dynamicSelectHtml += '<label for="dynamic_select">Select question:</label>';
+              dynamicSelectHtml += '<select id="dynamic_select" name="dynamic_select" class="form-select">';
+              dynamicSelectHtml += '<option disabled selected>Choose a question</option>'; // Added placeholder option
+              for (var i = 0; i < data.length; i++) {
+                  var questionId = data[i][0]; // assume the first item in each sub-array is the question ID
+                  var question = data[i][1]; // assume the second item in each sub-array is the question string
+                  dynamicSelectHtml += '<option value="' + questionId + '">' + question + '</option>';
+              }
+              dynamicSelectHtml += '</select></div>';
+              if (data.length > 0) {
+                  $('#dynamic-select').html(dynamicSelectHtml);
+              } else {
+                  alert('No questions found for the selected criteria.');
+              }
+          },
+          error: function(xhr, status, error) {
+              alert('An error occurred while retrieving dynamic data.');
+          }
+      });
+  
+      $('#level, #question_type, #theme').change(function() {
+          var questionType = $('#question_type select').val();
+          var level = $('#level select').val();
+          var theme = $('#theme select').val();
+          $.ajax({
+              type: 'POST',
+              url: '{{ url_for("get_dynamic_data") }}',
+              data: { 'question_type': $("#question_type select").val(), 'level': $("#level select").val(), 'theme': $("#theme select").val(), 'csrf_token': $('input[name="csrf_token"]').val()},
+              success: function(data) {
+                  var dynamicSelectHtml = '';
+                  dynamicSelectHtml += '<div class="form-group">';
+                  dynamicSelectHtml += '<label for="dynamic_select">Select question:</label>';
+                  dynamicSelectHtml += '<select id="dynamic_select" name="dynamic_select" class="form-select">';
+                  dynamicSelectHtml += '<option disabled selected>Choose a question</option>'; // Added placeholder option
+                  for (var i = 0; i < data.length; i++) {
+                      var questionId = data[i][0]; // assume the first item in each sub-array is the question ID
+                      var question = data[i][1]; // assume the second item in each sub-array is the question string
+                      dynamicSelectHtml += '<option value="' + questionId + '">' + question + '</option>';
+                  }
+                  dynamicSelectHtml += '</select></div>';
+                  if (data.length > 0) {
+                      $('#dynamic-select').html(dynamicSelectHtml);
+                  } else {
+                      alert('No questions found for the selected criteria.');
+                  }
+              },
+              error: function(xhr, status, error) {
+                  alert('An error occurred while retrieving dynamic data.');
+              }
+          });
+      });
+  });
+  
+  </script>
+  <script>
+    $(document).ready(function() {
+      // Hide second_choices by default
+      $("#second_choices").hide();
+  
+      // When next-btn1 is clicked, show second_choices and hide first_choices
+      $("#next-btn1").click(function() {
+        $("#first_choices").hide();
+        $("#second_choices").show();
+      });
+  
+      // When back-btn is clicked, show first_choices and hide second_choices
+      $("#back-btn").click(function() {
+        $("#second_choices").hide();
+        $("#first_choices").show();
+      });
+    });
+  </script>
+  <script>
+  $(document).ready(function() {
+    // Define a list to store selected questions and their IDs
+    const selectedQuestions = [];
+  
+    // Add a listener to the dynamic select
+    $("#dynamic-select").change(function() {
+      // Get the selected question and its ID, and add it to the list if it's not already there
+      const questionId = $("#dynamic-select option:selected").val();
+      const questionText = $("#dynamic-select option:selected").text();
+      if (!selectedQuestions.some(q => q.id === questionId)) {
+        selectedQuestions.push({ id: questionId, text: questionText });
+  
+        // Update the list of selected questions
+        const questionList = $("#question-list");
+        const questionItem = $(`<li class="list-group-item d-flex justify-content-between align-items-center">${questionText}<button type="button" class="btn-close text-primary"></button></li>`);
+        questionList.append(questionItem);
+  
+        // Add the selected question IDs to the selected_questions field
+        const selectedQuestionsInput = $("#selected-questions-input");
+        const questionIds = selectedQuestions.map(q => q.id);
+        selectedQuestionsInput.val(questionIds.join(", "));
+  
+        // Add a listener to the close button for this question
+        const closeBtn = questionItem.find(".btn-close");
+        closeBtn.click(function() {
+          // Remove the question from the list and the UI
+          const index = selectedQuestions.findIndex(q => q.id === questionId);
+          selectedQuestions.splice(index, 1);
+          questionItem.remove();
+  
+          // Remove the question ID from the selected_questions field
+          const questionIds = selectedQuestions.map(q => q.id);
+          selectedQuestionsInput.val(questionIds.join(", "));
+  
+          // Check if the number of selected questions is at least two, and enable or disable the submit-button accordingly
+          const submitBtn = $("#submit-btn");
+          if (selectedQuestions.length >= 2) {
+            submitBtn.prop("disabled", false);
+          } else {
+            submitBtn.prop("disabled", true);
+          }
+        });
+  
+        // Check if the number of selected questions is at least two, and enable or disable the submit-button accordingly
+        const submitBtn = $("#submit-btn");
+        if (selectedQuestions.length >= 2) {
+          submitBtn.prop("disabled", false);
+        } else {
+          submitBtn.prop("disabled", true);
+        }
+      }
+    });
+  });
+  </script>
+  <script>
+  $(document).ready(function() {
+    // Disable the "Next" button for the first form section initially
+    $("#next-btn1").prop("disabled", true);
+  
+    // Add a listener to the name input field
+    const nameInput = $("#name input");
+    nameInput.keyup(function() {
+      // Check if the name input field has a valid value, and enable or disable the "Next" button accordingly
+      const nextBtn1 = $("#next-btn1");
+      if (nameInput.val().trim() !== "") {
+        nextBtn1.prop("disabled", false);
+      } else {
+        nextBtn1.prop("disabled", true);
+      }
+    });
+  });
+  </script>
+{% endblock %}
+
+{% block content %}
+<div class="container register-page">
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <h1>Opprett konkurranse</h1>
+                    <form method="POST" action="{{ url_for('createcontest') }}">
+                        {{ form.hidden_tag() }}
+                        <div class="form-control" id="first_choices">
+                            <div class="form-group" id="name">
+                                {{ form.name.label }}
+                                {{ form.name(class_="form-control") }}
+                            </div>
+
+                            <div class="form-group" id="theme">
+                                {{ form.theme.label }}
+                                {{ form.theme(class_="form-select") }}
+                            </div>
+
+                            <div class="form-group" id="time">
+                                {{ form.time.label }}
+                                {{ form.time(class_="form-select") }}
+                            </div>
+                            <br>
+                            <button class="btn btn-primary" type="button" id="next-btn1" disabled>Neste</button>
+                        </div>
+                        <div class="form-control" id="second_choices">
+                            <div class="form-group" id="question_type">
+                                {{ form.question_type.label }}
+                                {{ form.question_type(class_="form-select", id="question_type") }}
+                            </div>
+
+                            <div class="form-group" id="level">
+                                {{ form.level.label }}
+                                {{ form.level(class_="form-select", id="level") }}
+                            </div>
+
+                            <div id="dynamic-select"></div>
+                                <div id="selected-questions">
+                                    <p>Selected questions:</p>
+                                    <ul id="question-list"></ul>
+                                </div>
+
+                                {{ form.selected_questions(class_="form-select", multiple="multiple", id="selected-questions-input", style="display: none") }}
+                            <br>
+                            <button class="btn btn-primary" type="button" id="back-btn">Tilbake</button>
+                            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>Opprett konkurranse</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
