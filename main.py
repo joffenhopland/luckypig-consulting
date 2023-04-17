@@ -1050,14 +1050,14 @@ def member_group() -> 'html':
         all_users = database.all_user_name_memberinvitation(groupId)
         members = database.get_group_members(groupId)
         return render_template('member_group.html', name=groupName, groupId=groupId, members=members,
-                               allusers=all_users)
+                               allusers=all_users, form=form)
 
     elif userId:
         # Member invite another member from user list
         database.invite_request_group_member(groupId,userId)
         members = database.get_group_members(groupId)
         all_users = database.all_user_name_memberinvitation(groupId)
-        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, allusers=all_users)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, allusers=all_users, form=form)
 
     elif leave:
         # leave the group
@@ -1069,7 +1069,7 @@ def member_group() -> 'html':
         search = form.search.data
         members = database.get_group_members(groupId)
         all_users = database.search_user(search)
-        return render_template('admin_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=all_users,)
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=all_users,)
 
     else:
         members = database.get_group_members(groupId)
