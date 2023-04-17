@@ -957,6 +957,12 @@ def leaderboard_group():
     # group_leaderboard = database.get_group_leaderboard()
     return render_template('leaderboard_group.html')
 
+@app.route('/contest_result')
+def contest_result():
+    username = "Cuichan"
+    points ="10"
+    return render_template('contest_result.html', username=username,points=points)
+
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
     group_id = 7 ##########################################################session['groupId']?
