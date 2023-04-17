@@ -958,9 +958,7 @@ def createcontest() -> 'html':
         theme = request.form.get('theme')
         time = request.form.get('time')
         selected_questions = request.form.get('selected_questions')
-        number_tries = request.form.get('number_tries')
-
-        print(f"The data in the contest form is name: {name}, theme: {theme}, time: {time}, selected questions: {selected_questions}, number tries: {number_tries}")
+        print(f"The data in the contest form is name: {name}, theme: {theme}, time: {time}, selected questions: {selected_questions}")
         return render_template('create_contest.html', form=form)
     else:
         print(form.errors)
