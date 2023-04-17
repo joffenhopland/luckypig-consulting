@@ -959,9 +959,9 @@ def leaderboard_group():
 
 @app.route('/contest_result')
 def contest_result():
-    username = "Cuichan"
+
     points ="10"
-    return render_template('contest_result.html', username=username,points=points)
+    return render_template('contest_result.html', points=points)
 
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
