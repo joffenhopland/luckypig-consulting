@@ -4,6 +4,8 @@ import uuid
 import itertools
 import random
 import pandas as pd
+import os
+from dotenv import load_dotenv
 
 from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup, jsonify
 from flask_mail import Mail, Message
@@ -23,6 +25,9 @@ import urllib.parse
 
 from datetime import datetime, timedelta
 
+load_dotenv()  # load environment variables from .flaskenv file
+
+
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -33,8 +38,8 @@ mail_settings = {
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": 'luckypig2023@gmail.com',
-    "MAIL_PASSWORD":'cjhfysvonlfcegwm'
+    "MAIL_USERNAME": os.environ.get("MAIL_USERNAME"),
+    "MAIL_PASSWORD": os.environ.get("MAIL_PASSWORD")
 }
 
 app.config.update(mail_settings)
