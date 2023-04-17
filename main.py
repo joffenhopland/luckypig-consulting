@@ -950,6 +950,13 @@ def leaderboard():
     print(global_leaderboard)
     return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
 
+@app.route('/leaderboard-group')
+def leaderboard_group():
+    database = db()
+    # spørringen er ikke implementert enda
+    # group_leaderboard = database.get_group_leaderboard()
+    return render_template('leaderboard_group.html')
+
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
     form = CreateContestForm()
