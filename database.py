@@ -991,6 +991,29 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
+            
+    def add_contest(self, group_id, name, deadline_date, selected_questions):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO contest (deadline_date, contest_name, group_id)
+                            VALUES (%s, %s, %s)'''
+            insert = (deadline_date, name, group_id)
+            cursor.execute(sql1, insert)
+            contest_id = cursor.lastrowid
+            conn.commit()
+            
+            for selected_question in selected_questions:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                sql1 = '''INSERT INTO contest_exercise (exercise_id, contest_id)
+                            VALUES (%s, %s)'''
+                insert = (selected_question, contest_id)
+                cursor.execute(sql1, insert)
+                conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
 
 def main():
     database = db()

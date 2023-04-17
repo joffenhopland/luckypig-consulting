@@ -955,11 +955,15 @@ def createcontest() -> 'html':
     form = CreateContestForm()
     if request.method == 'POST' and form.validate_on_submit():
         name = request.form.get('name')
-        theme = request.form.get('theme')
         time = request.form.get('time')
-        selected_questions = request.form.get('selected_questions')
-        print(f"The data in the contest form is name: {name}, theme: {theme}, time: {time}, selected questions: {selected_questions}")
-        return render_template('create_contest.html', form=form)
+        selected_questions = request.form.get('selected_questions').split(",")
+        
+        date = datetime.now().date() + timedelta(days=int(time))
+        deadline_date = date.strftime("%Y-%m-%d")
+               
+        database = db()
+        database.add_contest(group_id=7 ,name=name, deadline_date=deadline_date, selected_questions = selected_questions) #GROUP ID!!!!!!!!!!!!!!!!!!!
+        return redirect(url_for('viewgroup'))
     else:
         print(form.errors)
         return render_template('create_contest.html', form=form)
