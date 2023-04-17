@@ -952,6 +952,7 @@ def leaderboard():
 
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
+    group_id = 7 ##########################################################session['groupId']?
     form = CreateContestForm()
     if request.method == 'POST' and form.validate_on_submit():
         name = request.form.get('name')
@@ -960,9 +961,9 @@ def createcontest() -> 'html':
         
         date = datetime.now().date() + timedelta(days=int(time))
         deadline_date = date.strftime("%Y-%m-%d")
-               
+        
         database = db()
-        database.add_contest(group_id=7 ,name=name, deadline_date=deadline_date, selected_questions = selected_questions) #GROUP ID!!!!!!!!!!!!!!!!!!!
+        database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions) #GROUP ID!!!!!!!!!!!!!!!!!!!
         return redirect(url_for('viewgroup'))
     else:
         print(form.errors)
