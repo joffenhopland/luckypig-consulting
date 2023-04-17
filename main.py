@@ -904,6 +904,7 @@ def getHeaders(query, type):
 def viewgroup() -> 'html':
     database = db()
     DBgroups = database.getGroups(session["idUser"])
+    print(DBgroups)
     groups = [Group(*(DBgroup)) for DBgroup in DBgroups]
     classes = []
     friendgroups = []
@@ -917,7 +918,7 @@ def viewgroup() -> 'html':
             classes.append(group)
         elif group.groupTypeId == 2:
             friendgroups.append(group)
-
+    print(classes)
     return render_template('viewgroup.html', title="Mine grupper",classes=classes, friendgroups=friendgroups, role=session['role'])
 
 @app.route('/creategroup', methods=["GET", "POST"])

@@ -997,7 +997,7 @@ def main():
     #z = database.get_group_members(1)
     #print(z)
     #database.delete_question_done(25)
-    print(database.search_user("kristoffer"))
+    print(database.getGroups(1))
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    
