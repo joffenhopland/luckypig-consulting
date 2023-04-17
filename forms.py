@@ -116,3 +116,8 @@ class CreateContestForm(FlaskForm):
                         validators=[DataRequired()])
     submit = SubmitField('Opprett konkurranse')
 
+class SearchForm(FlaskForm):
+    search = StringField(label="Search", validators=[
+                         Length(min=3, max=40), DataRequired()])
+    submit = SubmitField(label="Søk")
+

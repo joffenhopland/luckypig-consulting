@@ -971,12 +971,29 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def search_user(self, search):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                    "select username, userId from user where username = (%s)  \
+                    union \
+                    select username, userId from user where email = (%s)  \
+                    union \
+                    select username, userId from user where lower(username) like (%s) or lower(username) like (%s) \
+                    union \
+                    select username, userId from user where lower(email) like (%s) or lower(email) like (%s)", (search, search, f'{search}%', f'%{search}', f'{search}%', f'%{search}'))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
 def main():
     database = db()
     #z = database.get_group_members(1)
     #print(z)
     #database.delete_question_done(25)
-    print(database.all_user_name_memberinvitation(1))
+    print(database.search_user("kristoffer"))
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    

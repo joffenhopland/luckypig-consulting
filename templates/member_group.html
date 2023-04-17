@@ -23,11 +23,18 @@
           <table class="table table-bordered table-striped mb-0">
             <thead>
               <tr class="table-success" >
-                <th scope="col">Invitere en bruker</th>
+                <th scope="col"> Inviter en bruker</th>
                 <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
+              <tr class="table-light">
+                <form class="search-form" method="POST" action="{{ url_for('member_group', groupId=groupId, name=name) }}">
+                  {{ form.csrf_token }}
+                  <td> {{ form.search(class="form-control", placeholder="Søk etter bruker") }} </td>
+                  <td> {{ form.submit(class="button-control")}} </td>
+                </form>
+              </tr>
               {% for user in allusers %}
               <tr class="table-light">
                 <td>{{ user[0] }}</td>
@@ -36,11 +43,11 @@
             </tbody>
             {% endfor %}
           </table>
-        </div>
-        <div class="d-block gap-2">
-          <a href="{{ url_for('member_group', groupId=groupId, name=name) }}" class="d-block w-100">
-            <button class="btn btn-success" type="button">Ferdig</button>
-          </a>
+          <div class="d-block gap-2">
+            <a href="{{ url_for('member_group', groupId=groupId, name=name) }}" class="d-block w-100">
+              <button class="btn btn-success" type="button">Ferdig</button>
+            </a>
+          </div>
         </div>
         {% else %}
         <img src="{{ url_for('static', filename='assets/shutterstock_158869706.jpg') }}" class="img-fluid" alt="...">

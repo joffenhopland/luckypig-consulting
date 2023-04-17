@@ -13,7 +13,7 @@ from flask_bcrypt import Bcrypt
 from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm, CreateGroupForm, CreateContestForm
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm, CreateGroupForm, CreateContestForm, SearchForm
 from User import User
 import json
 from classes import Exercise, Dropdown, Group
@@ -974,6 +974,7 @@ def get_dynamic_data():
 @app.route('/admin_group', methods=["GET", "POST"])
 def admin_group() -> 'html':
     database = db()
+    form = SearchForm(request.form)
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     memberId = request.args.get("id")
@@ -992,18 +993,18 @@ def admin_group() -> 'html':
     
     elif add:
         #Admin added a member from user list
-        all_users = database.all_user_name()
+        all_users = database.all_user_name_memberinvitation(groupId)
         invites = database.get_invite_request_group_member(groupId)
         members = database.get_group_members(groupId)
-        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users, form=form)
     
     elif userId:
         #Adds the user 
         database.add_group_member(groupId, userId)
         members = database.get_group_members(groupId)
         invites = database.get_invite_request_group_member(groupId)
-        all_users = database.all_user_name()
-        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users)
+        all_users = database.all_user_name_memberinvitation(groupId)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users, form=form)
     
     elif delete:
         #deletes a member from the member-list
@@ -1016,6 +1017,13 @@ def admin_group() -> 'html':
     elif delete_group:
         database.delete_group(delete_group)
         return url_for('viewgroup')
+    
+    elif request.method == 'POST' and form.validate_on_submit():
+        search = form.search.data
+        members = database.get_group_members(groupId)
+        invites = database.get_invite_request_group_member(groupId)
+        all_users = database.search_user(search)
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, form=form, allusers = all_users,)
 
     else:
         invites = database.get_invite_request_group_member(groupId)
@@ -1026,6 +1034,7 @@ def admin_group() -> 'html':
 @app.route('/member_group', methods=["GET", "POST"])
 def member_group() -> 'html':
     database = db()
+    form = SearchForm(request.form)
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     invite = request.args.get('invite')
@@ -1051,6 +1060,12 @@ def member_group() -> 'html':
         print("leave -----------")
         database.remove_group_member(groupId, session["idUser"])
         return redirect(url_for('viewgroup'))
+    
+    elif request.method == 'POST' and form.validate_on_submit():
+        search = form.search.data
+        members = database.get_group_members(groupId)
+        all_users = database.search_user(search)
+        return render_template('admin_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=all_users,)
 
     else:
         members = database.get_group_members(groupId)
