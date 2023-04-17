@@ -1,11 +1,15 @@
 import mysql.connector
 import itertools
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # load environment variables from .flaskenv file
 
 class db:
     def __init__(self) -> None:
-        dbconfig = {'host': '34.30.103.41',
+        dbconfig = {'host': os.environ.get('HOST'),
                     'user': 'luckypig2023',
-                    'password': 'LuckypigProject#1',
+                    'password': os.environ.get('PASSWORD'),
                     'database': 'Luckypig database', }
         self.configuration = dbconfig
 
