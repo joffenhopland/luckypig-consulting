@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+
+{% block title %} Endre rolle {% endblock %}
+
+{% block content %}
+    <div class="container py-4">
+        <h1 class="text-center mb-4">Endre rolle</h1>
+                    <thead>
+                <tr class="table-success">
+                    <h3 scope="col">Bruker</h3>
+
+                </tr>
+                </thead>
+    </div>
+
+    <div class="col">
+        <div class="table-wrapper-scroll-y my-custom-scrollbar">
+
+            <table class="table table-bordered table-striped mb-0">
+
+                <tbody>
+                <tr class="table-light">
+                    <form class="search-form" method="POST" action="{{ url_for('change_role',user= user) }}">
+                        {{ form.csrf_token }}
+                    <td> {{ form.search(class="form-control", placeholder="Søk etter bruker") }} </td>
+                        <td> {{ form.submit(class="button-control") }} </td>
+                    </form>
+                        <td>
+                            <div class="form-group">
+                                <select name="user" class="form-control">
+                                    {% for user in allusers %}
+                                        <option value="{{ user[1] }}">{{ user[0] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group" method="POST"action="{{ url_for('change_role',user= user) }}" >
+                                <select name="role" class="form-control">
+                                    <option value=""></option>
+                                    <option value="user">Bruker</option>
+                                    <option value="teacher">Lærer</option>
+                                    <option value="administrator">Administrator</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">Endre rolle</button>
+                            </div>
+                        </td>
+                    </form>
+                </tr>
+                </tbody>
+
+
+            </table>
+
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}
