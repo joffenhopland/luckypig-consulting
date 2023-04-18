@@ -1046,10 +1046,14 @@ class db:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             cursor.execute("SELECT exercise_id FROM contest_exercise WHERE contest_id=(%s)", (contestId,))
-            result = cursor.all()
-            if result == None:
+            results = cursor.fetchall()
+            print(results)
+            print("ici")
+            if results == None:
                 return []
-            return result
+            else:
+                resultList = [result[0] for result in results]
+            return resultList
         except mysql.connector.Error as err:
             print(err)
 def main():
@@ -1057,7 +1061,7 @@ def main():
     #z = database.get_group_members(1)
     #print(z)
     #database.delete_question_done(25)
-    #print(database.getGroups(1))
+    print(database.getAllContestExercises(14))
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
    

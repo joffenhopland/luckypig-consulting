@@ -960,7 +960,10 @@ def leaderboard_group():
 @app.route('/contest_result')
 def contest_result():
 
-    points ="10"
+    #points ="10"
+    points = session["contest_points"]
+    #need to calculate the total points for the user and update in leaderboard
+    #you can also show total points on the result page
     return render_template('contest_result.html', points=points)
 
 @app.route('/createcontest', methods=["GET", "POST"])
@@ -1003,6 +1006,7 @@ def get_dynamic_data():
 def admin_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
+    #session["group_id"] = request.args.get('groupId')
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     memberId = request.args.get("id")
@@ -1063,6 +1067,7 @@ def admin_group() -> 'html':
 def member_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
+    #session["group_id"] = request.args.get('groupId')
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     invite = request.args.get('invite')
@@ -1112,9 +1117,9 @@ def participate_contest() -> 'html':
     #start contest and get the exercises list
     if start:
         #get the list of exercises from the database
-        session["contest_exercises"] = [1006,3002,5000] #----to be changed with the next line
-        #session["contest_exercises"] = database.getAllContestExercises(contestId)
+        session["contest_exercises"] = database.getAllContestExercises(contestId)
         session["contest_points"] = 0
+        print(f'questions in contest: {session["contest_exercises"]}')
         return redirect(url_for('participate_contest'))
 
     # start contest and get the exercises list
@@ -1134,8 +1139,8 @@ def participate_contest() -> 'html':
     #contest is done and go to the result side
     else:
         print(f'Total result: {session["contest_points"]}')
-        #return redirect(url_for('contest_result'))
-        return redirect(url_for('viewgroup'))
+        return redirect(url_for('contest_result'))
+        #return redirect(url_for('viewgroup'))
 
 
 
