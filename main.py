@@ -947,15 +947,25 @@ def creategroup() -> 'html':
 def leaderboard():
     database = db()
     global_leaderboard = database.get_leaderboard()
-    print(global_leaderboard)
     return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
 
 @app.route('/leaderboard-group')
 def leaderboard_group():
     database = db()
-    # spørringen er ikke implementert enda
-    # group_leaderboard = database.get_group_leaderboard()
-    return render_template('leaderboard_group.html')
+    user_id = session["idUser"]
+    groups_for_user = database.get_groups_for_user(user_id)
+
+    group_leaderboards = []
+    for group in groups_for_user:
+        groupId, groupName = group
+        leaderboard = database.get_group_leaderboard(groupId)
+        print (leaderboard)
+        group_leaderboards.append({
+           'group_name': groupName,
+           'group_id': groupId,
+           'leaderboard': leaderboard })
+
+    return render_template('leaderboard_group.html', leaderboards=group_leaderboards)
 
 @app.route('/contest_result')
 def contest_result():
