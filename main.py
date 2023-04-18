@@ -976,11 +976,19 @@ def createcontest() -> 'html':
         deadline_date = date.strftime("%Y-%m-%d")
         
         database = db()
-        database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions) #GROUP ID!!!!!!!!!!!!!!!!!!!
-        return redirect(url_for('viewgroup'))
+        database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions)
+        return redirect(url_for('active_contests'))
     else:
         print(form.errors)
         return render_template('create_contest.html', form=form)
+    
+@app.route('/active_contests')
+def active_contests() -> 'html':
+    group_id = 7 ##########################################################session['groupId']?
+    user_id = session["idUser"]
+    database = db()
+    contests = database.get_all_contests(group_id, user_id)
+    return render_template('active_contests.html', contests=contests)
 
 @app.route('/get_dynamic_data', methods=['POST'])
 def get_dynamic_data():
