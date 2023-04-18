@@ -1074,20 +1074,59 @@ class db:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             cursor.execute("SELECT exercise_id FROM contest_exercise WHERE contest_id=(%s)", (contestId,))
-            result = cursor.all()
-            if result == None:
+            results = cursor.fetchall()
+            print(results)
+            print("ici")
+            if results == None:
                 return []
+            else:
+                resultList = [result[0] for result in results]
+            return resultList
+        except mysql.connector.Error as err:
+            print(err)
+
+    def get_groups_for_user(self, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT group_table.groupId, group_table.name from group_table, user_group \
+                            where group_table.groupId = user_group.groupId \
+                            and user_group.userId = (%s)", (user_id,))
+            result = cursor.fetchall()
             return result
         except mysql.connector.Error as err:
             print(err)
+
+    def get_group_leaderboard(self,group_id):
+        group_user_leaderboard = """
+            SELECT uv.username, sum(uv.points) as totalpoints, any_value(gt.name) AS group_name
+            FROM user_view AS uv, user_group, group_table AS gt
+            WHERE uv.user_id = user_group.userId
+            AND user_group.groupId = %s
+            AND user_group.groupId = gt.groupId
+             GROUP BY uv.user_id
+            ORDER BY totalpoints DESC
+        """
+
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(group_user_leaderboard, (group_id,))
+            result = cursor.fetchall()
+            leaderboard_data = [dict(username=row[0], points=row[1], group_name=row[2]) for row in result]
+            print(leaderboard_data)
+            return leaderboard_data
+        except mysql.connector.Error as err:
+            print(err)
+
 def main():
     database = db()
     #z = database.get_group_members(1)
     #print(z)
     #database.delete_question_done(25)
-    #print(database.getGroups(1))
+    print(database.getAllContestExercises(14))
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
-   
+
     
 main()
