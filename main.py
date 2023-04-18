@@ -1120,28 +1120,26 @@ def participate_contest() -> 'html':
         #get the list of exercises from the database
         session["contest_exercises"] = database.getAllContestExercises(contestId)
         session["contest_points"] = 0
-        print(f'questions in contest: {session["contest_exercises"]}')
+        if len(session["contest_exercises"]) == 0:
+            flash("Konkurransen har ingen oppgave", "danger")
+            return redirect(url_for('participate_contest', terminate=1))
         return redirect(url_for('participate_contest'))
 
     # start contest and get the exercises list
     if terminate:
         print(f'Total result: {session["contest_points"]}')
-        # return redirect(url_for('contest_result'))
-        return redirect(url_for('viewgroup'))
+        return redirect(url_for('contest_result'))
 
     #go to the next exercise
     elif len(session["contest_exercises"]) > 0:
         session["exerciseId"] = session["contest_exercises"].pop(0)
         first = int(str(session["exerciseId"])[0])
         view = checknumber(first) + "_contest"
-        print(f'Result: {session["contest_points"]}')
         return redirect(url_for(view))
 
     #contest is done and go to the result side
     else:
-        print(f'Total result: {session["contest_points"]}')
         return redirect(url_for('contest_result'))
-        #return redirect(url_for('viewgroup'))
 
 
 
