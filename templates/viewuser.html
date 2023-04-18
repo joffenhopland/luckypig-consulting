@@ -3,178 +3,209 @@
 {% block title %}User info{% endblock %}
 
 {% block head %}
-{{ super() }}
- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/register.css') }}">
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/register.css') }}">
 {% endblock %}
 
 {% block content %}
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div class="alert" role="alert">
-  {% for category, message in messages %}
-  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-    </button>
-    {{ message }}
-    </div>
-  {% endfor %}
-{% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert" role="alert">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                    </button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
 <div class="container register-page">
-  <div class="row justify-content-center">
-    <div class="col-sm-12 col-md-8 col-lg-6">
-      <div class="card shadow-lg">
-        <div class="card-body">
-          <div class="text-center">
-            <h1 class="mb-3">{{title}}</h1>
-            </div>
-            <br>
-            <h5 class="text-secondary d-inline-block">Fornavn:</h5><h5 class="d-inline-block px-1">{{user.firstname}}</h5><br>
-            <h5 class="text-secondary d-inline-block">Etternavn:</h5><h5 class="d-inline-block px-1">{{user.lastname}}</h5><br>
-            <h5 class="text-secondary d-inline-block">Brukernavn:</h5><h5 class="d-inline-block px-1">{{user.username}}</h5><br>
-            <h5 class="text-secondary d-inline-block">Epost:</h5><h5 class="d-inline-block px-1">{{user.email}}</h5>
-            <div class="d-flex justify-content-evenly">
-                <div>
-                    <form action="{{ url_for('updateuser') }}" method="GET">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button class="btn btn-primary" type="submit">Redigere</button>
-                    </form>
-                </div>
-                <div>
-                    <form action="{{ url_for('updatepassword') }}" method="GET">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <button class="btn btn-primary" type="submit">Endre passord</button>
-                    </form>
-                </div>
-                {% if role == 3 or role == 2 %}
-                <div>
-                  <form action="{{ url_for('reportgeneration') }}" method="GET">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                      <button class="btn btn-secondary" type="submit">Rapportgenerering</button>
-                  </form>
-              </div>
-              {% endif %}
-                </div>
+    <div class="row justify-content-center">
+        <div class="col-sm-12 col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h1 class="mb-3">{{ title }}</h1>
+                    </div>
+                    <br>
+                    <h5 class="text-secondary d-inline-block">Fornavn:</h5><h5
+                        class="d-inline-block px-1">{{ user.firstname }}</h5><br>
+                    <h5 class="text-secondary d-inline-block">Etternavn:</h5><h5
+                        class="d-inline-block px-1">{{ user.lastname }}</h5><br>
+                    <h5 class="text-secondary d-inline-block">Brukernavn:</h5><h5
+                        class="d-inline-block px-1">{{ user.username }}</h5><br>
+                    <h5 class="text-secondary d-inline-block">Epost:</h5><h5
+                        class="d-inline-block px-1">{{ user.email }}</h5>
+                    <div class="d-flex justify-content-evenly">
+                        <div>
+                            <form action="{{ url_for('updateuser') }}" method="GET">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button class="btn btn-primary" type="submit">Redigere</button>
+                            </form>
+                        </div>
+                        <div>
+                            <form action="{{ url_for('updatepassword') }}" method="GET">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button class="btn btn-primary" type="submit">Endre passord</button>
+                            </form>
+                        </div>
+
+                        {% if role == 3 or role == 2 %}
+                            <div>
+                                <form action="{{ url_for('reportgeneration') }}" method="GET">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button class="btn btn-secondary" type="submit">Rapportgenerering</button>
+                                </form>
+                            </div>
+                            <div>
+                                <form action="{{ url_for('change_role') }}" method="GET">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button class="btn btn-secondary" type="submit">Change Role</button>
+                                </form>
+                            </div>
+
+
+                        {% endif %}
+                    </div>
                     <h5>Statistikk</h5>
                     <div class="row my-3">
                         <div class="col-md-6">
-                          <div class="card shadow-lg">
-                            <div class="card-body">
-                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_fire.svg') }}" class="d-inline-block"> {{ login_streak }}</h5>
-                              <div class="card-text text-secondary px-2">
-                                Daglig login streak
-                              </div>
+                            <div class="card shadow-lg">
+                                <div class="card-body">
+                                    <h5 class="card-title"><img
+                                            src="{{ url_for('static', filename = 'assets/vecteezy_fire.svg') }}"
+                                            class="d-inline-block"> {{ login_streak }}</h5>
+                                    <div class="card-text text-secondary px-2">
+                                        Daglig login streak
+                                    </div>
+                                </div>
                             </div>
-                          </div>
                         </div>
                         <div class="col-md-6">
-                          <div class="card shadow-lg">
-                            <div class="card-body">
-                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/vecteezy_elements_star.svg') }}" class="d-inline-block">{{ total_points }}</h5>
-                              <div class="card-text text-secondary px-2">
-                                Total poeng
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div class="row my-3">
-                        <div class="col-md-6">
-                          <div class="card shadow-lg">
-                            <div class="card-body">
-                              <h5 class="card-title">{% if level == "Bronse" %}
-                                <img src="{{ url_for('static', filename = 'assets/vecteezy_bronze_medal.svg') }}" class="d-inline-block">
-                                {% elif level == "Sølv" %}
-                                <img src="{{ url_for('static', filename = 'assets/vecteezy_silver_medal.svg') }}" class="d-inline-block">
-                                {% elif level == "Gull" %}
-                                <img src="{{ url_for('static', filename = 'assets/vecteezy_gold_medal.svg') }}" class="d-inline-block">
-                                {% endif %}{{ level }}</h5>
-                              <div class="card-text text-secondary px-2">
-                                Nåværende nivå
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="card shadow-lg">
-                            <div class="card-body">
-                              <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/trophy.svg') }}" class="d-inline-block">{{ 0 }}</h5>
-                              <div class="card-text text-secondary px-2">
-                                Plassering
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <h5>Prestasjoner</h5>
-                      {% if login_streak >= 3 and login_streak < 7 %}
-                    <div class="card shadow-lg">
-                        <div class="card-body">
-                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}" class="d-inline-block">Øvelse gjør mester</h5>
-                            <div class="card-text text-secondary px-2">
-                                tre-dagers login streak
+                            <div class="card shadow-lg">
+                                <div class="card-body">
+                                    <h5 class="card-title"><img
+                                            src="{{ url_for('static', filename = 'assets/vecteezy_elements_star.svg') }}"
+                                            class="d-inline-block">{{ total_points }}</h5>
+                                    <div class="card-text text-secondary px-2">
+                                        Total poeng
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="row my-3">
+                        <div class="col-md-6">
+                            <div class="card shadow-lg">
+                                <div class="card-body">
+                                    <h5 class="card-title">{% if level == "Bronse" %}
+                                        <img src="{{ url_for('static', filename = 'assets/vecteezy_bronze_medal.svg') }}"
+                                             class="d-inline-block">
+                                    {% elif level == "Sølv" %}
+                                        <img src="{{ url_for('static', filename = 'assets/vecteezy_silver_medal.svg') }}"
+                                             class="d-inline-block">
+                                    {% elif level == "Gull" %}
+                                        <img src="{{ url_for('static', filename = 'assets/vecteezy_gold_medal.svg') }}"
+                                             class="d-inline-block">
+                                    {% endif %}{{ level }}</h5>
+                                    <div class="card-text text-secondary px-2">
+                                        Nåværende nivå
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-lg">
+                                <div class="card-body">
+                                    <h5 class="card-title"><img
+                                            src="{{ url_for('static', filename = 'assets/trophy.svg') }}"
+                                            class="d-inline-block">{{ 0 }}</h5>
+                                    <div class="card-text text-secondary px-2">
+                                        Plassering
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5>Prestasjoner</h5>
+                    {% if login_streak >= 3 and login_streak < 7 %}
+                        <div class="card shadow-lg">
+                            <div class="card-body">
+                                <h5 class="card-title"><img
+                                        src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}"
+                                        class="d-inline-block">Øvelse gjør mester</h5>
+                                <div class="card-text text-secondary px-2">
+                                    tre-dagers login streak
+                                </div>
+                            </div>
+                        </div>
                     {% elif login_streak >= 7 %}
-                    <div class="card shadow-lg">
-                      <div class="card-body">
-                          <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}" class="d-inline-block">Læremester</h5>
-                          <div class="card-text text-secondary px-2">
-                              syv-dagers login streak
-                          </div>
-                      </div>
-                  </div>
-                  {% endif %}
+                        <div class="card shadow-lg">
+                            <div class="card-body">
+                                <h5 class="card-title"><img
+                                        src="{{ url_for('static', filename = 'assets/three_day_streak.svg') }}"
+                                        class="d-inline-block">Læremester</h5>
+                                <div class="card-text text-secondary px-2">
+                                    syv-dagers login streak
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
 
 
                     {% if completedLevel == 1 %}
-                    <div class="card shadow-lg">
-                        <div class="card-body">
-                            <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/gold_badge.svg') }}" class="d-inline-block">Gull</h5>
-                            <div class="card-text text-secondary px-2">
-                                Fullført gull-nivå
+                        <div class="card shadow-lg">
+                            <div class="card-body">
+                                <h5 class="card-title"><img
+                                        src="{{ url_for('static', filename = 'assets/gold_badge.svg') }}"
+                                        class="d-inline-block">Gull</h5>
+                                <div class="card-text text-secondary px-2">
+                                    Fullført gull-nivå
+                                </div>
                             </div>
                         </div>
-                    </div>
                     {% endif %}
 
 
                     {% if total_points >= 10 and total_points < 50 %}
-                    <div class="card shadow-lg">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <img src="{{ url_for('static', filename = 'assets/number_10.svg') }}" class="d-inline-block">10 points badge</h5>
+                        <div class="card shadow-lg">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <img src="{{ url_for('static', filename = 'assets/number_10.svg') }}"
+                                         class="d-inline-block">10 points badge</h5>
                                 <div class="card-text text-secondary px-2">
                                     Oppnå 10 poeng
                                 </div>
                             </div>
                         </div>
-                                {% elif total_points >= 50 and total_points < 100 %}
-                                <div class="card shadow-lg">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <img src="{{ url_for('static', filename = 'assets/number_50.svg') }}" class="d-inline-block">50 points badge</h5>
-                                            <div class="card-text text-secondary px-2">
-                                                Oppnå 50 poeng
-                                            </div>
-                                        </div>
-                                    </div>
+                    {% elif total_points >= 50 and total_points < 100 %}
+                        <div class="card shadow-lg">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <img src="{{ url_for('static', filename = 'assets/number_50.svg') }}"
+                                         class="d-inline-block">50 points badge</h5>
+                                <div class="card-text text-secondary px-2">
+                                    Oppnå 50 poeng
+                                </div>
+                            </div>
+                        </div>
 
-                                {% elif total_points >= 100 %}
-                                <div class="card shadow-lg">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <img src="{{ url_for('static', filename = 'assets/number_100.svg') }}" class="d-inline-block">100 points badge</h5>
-                                            <div class="card-text text-secondary px-2">
-                                                Oppnå 100 poeng
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
+                    {% elif total_points >= 100 %}
+                        <div class="card shadow-lg">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <img src="{{ url_for('static', filename = 'assets/number_100.svg') }}"
+                                         class="d-inline-block">100 points badge</h5>
+                                <div class="card-text text-secondary px-2">
+                                    Oppnå 100 poeng
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                     <!-- <div class="card shadow-lg">
                         <div class="card-body">
                             <h5 class="card-title"><img src="{{ url_for('static', filename = 'assets/first_place_badge.svg') }}" class="d-inline-block">Første plass</h5>
