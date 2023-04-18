@@ -1014,6 +1014,32 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
+            
+            
+    def get_all_contests(self, group_id, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql = '''
+            SELECT contest_id, contest_name, deadline_date 
+            FROM contest 
+            WHERE group_id = (%s) AND 
+            deadline_date >= CURDATE() AND
+            contest_id NOT IN (
+                SELECT contest_id
+                FROM contest_user_done
+                WHERE user_id = (%s)
+            )'''
+            cursor.execute(sql, (group_id,user_id))
+            result = cursor.fetchall()
+            print(result)
+            if result == []:
+                return None
+            contest_data = [{'id': row[0], 'name': row[1], 'deadline_date': row[2].strftime("%d.%m.%Y")} for row in result]
+            return contest_data
+        except mysql.connector.Error as err:
+            print(err)
+        
 
     def getAllContestExercises(self, contestId):
         try:
