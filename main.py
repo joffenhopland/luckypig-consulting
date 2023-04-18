@@ -59,7 +59,8 @@ def theme():
     if themeId == -1:
         userThemes = database.getUserThemes(session["idUser"])
         themes = database.getThemes()
-        return render_template("theme.html", userThemes = userThemes, themes = themes, newUser = len(userThemes))
+        inactiveThemes = [theme for theme in themes if theme not in userThemes]
+        return render_template("theme.html", userThemes = userThemes, inactiveThemes = inactiveThemes)
 
     # the user choose his theme
     else:
