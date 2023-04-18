@@ -637,54 +637,65 @@ class db:
             else:
                 select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "group_user_view AS g, user_view AS u"
-                where_sql += " WHERE g.userId = u.user_id AND g.group_id = (%s)"
+                where_sql += " WHERE g.user_id = u.user_id AND g.group_id = (%s)"
                 values_sql.append(group_id)
                 
                 if theme_id != None or user_id != None or level != None:
                     where_sql += " AND "
+                    
+            if theme_id != None:
+                select_sql += ", u.theme_id"
+                where_sql += "u.theme_id = (%s) "
+                values_sql.append(theme_id)
+            if user_id != None:
+                select_sql += ", u.user_id"
+                if theme_id != None:
+                    where_sql += "AND "
+                where_sql += "u.user_id = (%s) "
+                values_sql.append(user_id)
+            if level != None:
+                select_sql += ", u.current_level"
+            if user_id != None or theme_id != None:
+                where_sql += "AND "
+                where_sql += "u.current_level = (%s) "
+                values_sql.append(level)
              
-            
         #Role=Lærer
         elif role == 2:
-            select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
-            from_sql += "group_user_view AS g, user_view AS u"
-            where_sql += " WHERE g.userId = u.user_id AND g.teacher_id = (%s)"
+            if theme_id != None or level != None:
+                print("Reportgenrating on theme_id/level are not implemented for teachers")
+                return None
+    
             if teacher_user_id != None:
                 values_sql.append(teacher_user_id)
             else:
                 print("Missing user_teacher_id")
                 return None
             
-            if group_id != None:
-                where_sql += " AND g.group_id = (%s)"
-                values_sql.append(group_id)
+            if user_id != None and group_id == None:
+                select_sql += "DISTINCT user_id, username, oppgaver_utført, riktige_oppgaver, Prosent "
+                from_sql += "group_user_view "
+                where_sql += "WHERE teacher_id = (%s) AND user_id = (%s)"
+                values_sql.append(int(user_id))
+            
+            elif group_id != None and user_id == None:
+                select_sql += "group_name, user_id, username, oppgaver_utført, riktige_oppgaver, Prosent"
+                from_sql += "group_user_view "
+                where_sql += "WHERE teacher_id = (%s) AND group_id = (%s)"
+                values_sql.append(int(group_id))
                 
-            if theme_id != None or user_id != None or level != None:
-                where_sql += " AND "
-        
+            else:
+                print("You can`t reportgenerate on user_id and group_id at the same time")
+                
+                
         #Role=?
         else:
             print("User_view in database.py has not received a correct role value.")
             return None
         
-        if theme_id != None:
-            select_sql += ", u.theme_id"
-            where_sql += "u.theme_id = (%s) "
-            values_sql.append(theme_id)
-        if user_id != None:
-            select_sql += ", u.user_id"
-            if theme_id != None:
-                where_sql += "AND "
-            where_sql += "u.user_id = (%s) "
-            values_sql.append(user_id)
-        if level != None:
-            select_sql += ", u.current_level"
-            if user_id != None or theme_id != None:
-                where_sql += "AND "
-            where_sql += "u.current_level = (%s) "
-            values_sql.append(level)
         
-        query = select_sql+from_sql+where_sql 
+        query = select_sql+from_sql+where_sql
+        print(query, values_sql)##############################################
         return query, values_sql
     
     
