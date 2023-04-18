@@ -18,10 +18,10 @@
 {% endwith %}
 <div class="px-5 py-5">
 <div><h2>Aktive konkurranser</h2></div>
-{% if contests == None %}
+{% if active_contests == None and not_active_contest == None%}
 <p class="card-text">Ingen aktive konkurranser</p>
 {% else %}
-{% for contest in contests %}
+{% for contest in active_contests %}
     <div class="card my-3">
       <div class="card-body">
         <div class="row">
@@ -31,6 +31,21 @@
           </div>
                 <div class="col-4 d-flex justify-content-end">
                     <a href="{{ url_for('course', level=3) }}" class="btn btn-primary" style="background-color:green">Start</a>
+                </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% for contest in not_active_contests %}
+    <div class="card my-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-8">
+            <h5 class="card-title">{{ contest.name }}</h5>
+            <p class="card-text">Tidsfrist: {{ contest.deadline_date }} klokken: 23:59</p>
+          </div>
+                <div class="col-4 d-flex justify-content-end">
+                    <p>Fullført</p>
                 </div>
         </div>
       </div>

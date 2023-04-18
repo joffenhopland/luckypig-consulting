@@ -987,8 +987,8 @@ def active_contests() -> 'html':
     group_id = 7 ##########################################################session['groupId']?
     user_id = session["idUser"]
     database = db()
-    contests = database.get_all_contests(group_id, user_id)
-    return render_template('active_contests.html', contests=contests)
+    active_contests, not_active_contests = database.get_all_contests(group_id, user_id)
+    return render_template('active_contests.html', active_contests=active_contests, not_active_contests=not_active_contests)
 
 @app.route('/get_dynamic_data', methods=['POST'])
 def get_dynamic_data():

@@ -1031,7 +1031,7 @@ class db:
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql = '''
+            sql1 = '''
             SELECT contest_id, contest_name, deadline_date 
             FROM contest 
             WHERE group_id = (%s) AND 
@@ -1041,13 +1041,30 @@ class db:
                 FROM contest_user_done
                 WHERE user_id = (%s)
             )'''
-            cursor.execute(sql, (group_id,user_id))
-            result = cursor.fetchall()
-            print(result)
-            if result == []:
-                return None
-            contest_data = [{'id': row[0], 'name': row[1], 'deadline_date': row[2].strftime("%d.%m.%Y")} for row in result]
-            return contest_data
+            cursor.execute(sql1, (group_id,user_id))
+            result1 = cursor.fetchall()
+            active_contests_data = None
+            if result1 != []:
+                active_contests_data = [{'id': row[0], 'name': row[1], 'deadline_date': row[2].strftime("%d.%m.%Y")} for row in result1]
+            
+            
+            sql2 = '''
+            SELECT contest_id, contest_name, deadline_date 
+            FROM contest 
+            WHERE group_id = (%s) AND 
+            deadline_date >= CURDATE() AND
+            contest_id IN (
+                SELECT contest_id
+                FROM contest_user_done
+                WHERE user_id = (%s)
+            )'''
+            cursor.execute(sql2, (group_id,user_id))
+            result2 = cursor.fetchall()
+            not_active_contests_data = None
+            if result2 != []:
+                not_active_contests_data = [{'id': row[0], 'name': row[1], 'deadline_date': row[2].strftime("%d.%m.%Y")} for row in result2]
+            
+            return active_contests_data, not_active_contests_data
         except mysql.connector.Error as err:
             print(err)
         
