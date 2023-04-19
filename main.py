@@ -912,6 +912,8 @@ def contest_result():
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
     group_id = session["group_id"]
+    database = db()
+    group_name = database.get_group_name(group_id)
     form = CreateContestForm()
     if request.method == 'POST' and form.validate_on_submit():
         name = request.form.get('name')
@@ -921,12 +923,11 @@ def createcontest() -> 'html':
         date = datetime.now().date() + timedelta(days=int(time))
         deadline_date = date.strftime("%Y-%m-%d")
         
-        database = db()
         database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions)
         return redirect(url_for('active_contests'))
     else:
         print(form.errors)
-        return render_template('create_contest.html', form=form)
+        return render_template('create_contest.html', form=form, group_name=group_name)
     
 @app.route('/active_contests')
 def active_contests() -> 'html':
