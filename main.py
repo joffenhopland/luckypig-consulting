@@ -996,7 +996,7 @@ def contest_result():
 
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
-    group_id = 7 ##########################################################session['groupId']?
+    group_id = session["group_id"]
     form = CreateContestForm()
     if request.method == 'POST' and form.validate_on_submit():
         name = request.form.get('name')
@@ -1015,7 +1015,7 @@ def createcontest() -> 'html':
     
 @app.route('/active_contests')
 def active_contests() -> 'html':
-    group_id = 7 ##########################################################session['groupId']?
+    group_id = session["group_id"]
     user_id = session["idUser"]
     database = db()
     active_contests, not_active_contests = database.get_all_contests(group_id, user_id)
@@ -1034,7 +1034,7 @@ def get_dynamic_data():
 def admin_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
-    #session["group_id"] = request.args.get('groupId')
+    session["group_id"] = request.args.get('groupId') #session
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     memberId = request.args.get("id")
@@ -1095,7 +1095,7 @@ def admin_group() -> 'html':
 def member_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
-    #session["group_id"] = request.args.get('groupId')
+    session["group_id"] = request.args.get('groupId') #session
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     invite = request.args.get('invite')
