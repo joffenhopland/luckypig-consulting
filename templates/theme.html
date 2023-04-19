@@ -29,25 +29,33 @@
   </div>
 {% endif %}
 {% endwith %}
+
+
 <div class="container">
+  <h1 class="text-center">Velg tema</h1>
+  <br>
   <div class="row justify-content-center">
     <div class="col-sm-8">
-      {% if newUser == 0 %}
-        <h3 class="text-center">Velg tema</h3>
-        <p class="text-center">Vennligst velg blant følgende tema:</p>
-        <ul class="list-group">
-          {% for theme in themes %}
-            <li class="list-group-item">
-              <button type="button" class="btn btn-primary w-100" onclick="location.href='{{ url_for('theme', themeId=theme[0]) }}'">{{ theme[1] }}</button>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <h3 class="text-center">Fortsett med tema</h3>
+      {% if userThemes %}
+        <h3 class="text-center">Forsett med tema:</h3>
         <ul class="list-group">
           {% for userTheme in userThemes %}
             <li class="list-group-item">
               <button type="button" class="btn btn-primary w-100" onclick="location.href='{{ url_for('theme', themeId=userTheme[0]) }}'">{{ userTheme[1] }}</button>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <br>
+      <br>
+      <br>
+      <br>
+      {% if inactiveThemes %}
+        <h3 class="text-center">Start et nytt tema: </h3>
+        <ul class="list-group">
+          {% for inactiveTheme in inactiveThemes %}
+            <li class="list-group-item">
+              <button type="button" class="btn btn-primary w-100" onclick="location.href='{{ url_for('theme', themeId=inactiveTheme[0]) }}'">{{ inactiveTheme[1] }}</button>
             </li>
           {% endfor %}
         </ul>

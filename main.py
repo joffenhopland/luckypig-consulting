@@ -60,7 +60,8 @@ def theme():
     if themeId == -1:
         userThemes = database.getUserThemes(session["idUser"])
         themes = database.getThemes()
-        return render_template("theme.html", userThemes = userThemes, themes = themes, newUser = len(userThemes))
+        inactiveThemes = [theme for theme in themes if theme not in userThemes]
+        return render_template("theme.html", userThemes = userThemes, inactiveThemes = inactiveThemes)
 
     # the user choose his theme
     else:
@@ -978,20 +979,33 @@ def creategroup() -> 'html':
 def leaderboard():
     database = db()
     global_leaderboard = database.get_leaderboard()
-    print(global_leaderboard)
     return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
 
 @app.route('/leaderboard-group')
 def leaderboard_group():
     database = db()
-    # spørringen er ikke implementert enda
-    # group_leaderboard = database.get_group_leaderboard()
-    return render_template('leaderboard_group.html')
+    user_id = session["idUser"]
+    groups_for_user = database.get_groups_for_user(user_id)
+
+    group_leaderboards = []
+    for group in groups_for_user:
+        groupId, groupName = group
+        leaderboard = database.get_group_leaderboard(groupId)
+        print (leaderboard)
+        group_leaderboards.append({
+           'group_name': groupName,
+           'group_id': groupId,
+           'leaderboard': leaderboard })
+
+    return render_template('leaderboard_group.html', leaderboards=group_leaderboards)
 
 @app.route('/contest_result')
 def contest_result():
 
-    points ="10"
+    #points ="10"
+    points = session["contest_points"]
+    #need to calculate the total points for the user and update in leaderboard
+    #you can also show total points on the result page
     return render_template('contest_result.html', points=points)
 
 @app.route('/createcontest', methods=["GET", "POST"])
@@ -1007,11 +1021,19 @@ def createcontest() -> 'html':
         deadline_date = date.strftime("%Y-%m-%d")
         
         database = db()
-        database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions) #GROUP ID!!!!!!!!!!!!!!!!!!!
-        return redirect(url_for('viewgroup'))
+        database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions)
+        return redirect(url_for('active_contests'))
     else:
         print(form.errors)
         return render_template('create_contest.html', form=form)
+    
+@app.route('/active_contests')
+def active_contests() -> 'html':
+    group_id = 7 ##########################################################session['groupId']?
+    user_id = session["idUser"]
+    database = db()
+    active_contests, not_active_contests = database.get_all_contests(group_id, user_id)
+    return render_template('active_contests.html', active_contests=active_contests, not_active_contests=not_active_contests)
 
 @app.route('/get_dynamic_data', methods=['POST'])
 def get_dynamic_data():
@@ -1026,6 +1048,7 @@ def get_dynamic_data():
 def admin_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
+    #session["group_id"] = request.args.get('groupId')
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     memberId = request.args.get("id")
@@ -1086,6 +1109,7 @@ def admin_group() -> 'html':
 def member_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
+    #session["group_id"] = request.args.get('groupId')
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     invite = request.args.get('invite')
@@ -1135,30 +1159,28 @@ def participate_contest() -> 'html':
     #start contest and get the exercises list
     if start:
         #get the list of exercises from the database
-        session["contest_exercises"] = [1006,3002,5000] #----to be changed with the next line
-        #session["contest_exercises"] = database.getAllContestExercises(contestId)
+        session["contest_exercises"] = database.getAllContestExercises(contestId)
         session["contest_points"] = 0
+        if len(session["contest_exercises"]) == 0:
+            flash("Konkurransen har ingen oppgave", "danger")
+            return redirect(url_for('participate_contest', terminate=1))
         return redirect(url_for('participate_contest'))
 
     # start contest and get the exercises list
     if terminate:
         print(f'Total result: {session["contest_points"]}')
-        # return redirect(url_for('contest_result'))
-        return redirect(url_for('viewgroup'))
+        return redirect(url_for('contest_result'))
 
     #go to the next exercise
     elif len(session["contest_exercises"]) > 0:
         session["exerciseId"] = session["contest_exercises"].pop(0)
         first = int(str(session["exerciseId"])[0])
         view = checknumber(first) + "_contest"
-        print(f'Result: {session["contest_points"]}')
         return redirect(url_for(view))
 
     #contest is done and go to the result side
     else:
-        print(f'Total result: {session["contest_points"]}')
-        #return redirect(url_for('contest_result'))
-        return redirect(url_for('viewgroup'))
+        return redirect(url_for('contest_result'))
 
 
 

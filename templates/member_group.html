@@ -12,7 +12,7 @@
         <div class="list-group">
         <a href="{{ url_for('member_group', groupId=groupId, name=name, invite=1) }}" class="list-group-item list-group-item-action list-group-item-primary"> Sende invitasjon forespørsel </a>
         <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Grupperesultater</a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Aktive konkurranser</a>
+        <a href="{{ url_for('active_contests') }}" class="list-group-item list-group-item-action list-group-item-primary"> Aktive konkurranser</a>
         <a href="{{ url_for('member_group', groupId=groupId, name=name, leave=1) }}" class="list-group-item list-group-item-action list-group-item-primary"> Melde seg ut</a>
         </div>
       </div>

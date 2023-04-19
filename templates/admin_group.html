@@ -12,8 +12,8 @@
         <h3> Administrer din gruppe </h3>
         <div class="list-group">
         <a href="{{ url_for('admin_group', groupId=groupId, name=name, add=1) }}" class="list-group-item list-group-item-action list-group-item-primary"> Legg til medlem</a>
-        <a href="{{url_for('leaderboard_group')}}" class="list-group-item list-group-item-action list-group-item-primary"> Grupperesultater</a>
-        <a href="#" class="list-group-item list-group-item-action list-group-item-primary"> Aktive konkurranser</a>
+        <a href="{{ url_for('leaderboard_group') }}" class="list-group-item list-group-item-action list-group-item-primary"> Grupperesultater</a>
+        <a href="{{ url_for('active_contests') }}" class="list-group-item list-group-item-action list-group-item-primary"> Aktive konkurranser</a>
         <a href="{{ url_for('createcontest') }}"method="GET" class="list-group-item list-group-item-action list-group-item-primary"> Lag ny konkurranse</a>
         {% if session["role"] == 2 %}
         <a href="{{ url_for('reportgeneration') }}"  class="list-group-item list-group-item-action list-group-item-primary"> Rapportgenerering </a>

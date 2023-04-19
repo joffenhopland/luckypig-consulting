@@ -653,54 +653,65 @@ class db:
             else:
                 select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "group_user_view AS g, user_view AS u"
-                where_sql += " WHERE g.userId = u.user_id AND g.group_id = (%s)"
+                where_sql += " WHERE g.user_id = u.user_id AND g.group_id = (%s)"
                 values_sql.append(group_id)
                 
                 if theme_id != None or user_id != None or level != None:
                     where_sql += " AND "
+                    
+            if theme_id != None:
+                select_sql += ", u.theme_id"
+                where_sql += "u.theme_id = (%s) "
+                values_sql.append(theme_id)
+            if user_id != None:
+                select_sql += ", u.user_id"
+                if theme_id != None:
+                    where_sql += "AND "
+                where_sql += "u.user_id = (%s) "
+                values_sql.append(user_id)
+            if level != None:
+                select_sql += ", u.current_level"
+            if user_id != None or theme_id != None:
+                where_sql += "AND "
+                where_sql += "u.current_level = (%s) "
+                values_sql.append(level)
              
-            
         #Role=Lærer
         elif role == 2:
-            select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
-            from_sql += "group_user_view AS g, user_view AS u"
-            where_sql += " WHERE g.userId = u.user_id AND g.teacher_id = (%s)"
+            if theme_id != None or level != None:
+                print("Reportgenrating on theme_id/level are not implemented for teachers")
+                return None
+    
             if teacher_user_id != None:
                 values_sql.append(teacher_user_id)
             else:
                 print("Missing user_teacher_id")
                 return None
             
-            if group_id != None:
-                where_sql += " AND g.group_id = (%s)"
-                values_sql.append(group_id)
+            if user_id != None and group_id == None:
+                select_sql += "DISTINCT user_id, username, oppgaver_utført, riktige_oppgaver, Prosent "
+                from_sql += "group_user_view "
+                where_sql += "WHERE teacher_id = (%s) AND user_id = (%s)"
+                values_sql.append(int(user_id))
+            
+            elif group_id != None and user_id == None:
+                select_sql += "group_name, user_id, username, oppgaver_utført, riktige_oppgaver, Prosent"
+                from_sql += "group_user_view "
+                where_sql += "WHERE teacher_id = (%s) AND group_id = (%s)"
+                values_sql.append(int(group_id))
                 
-            if theme_id != None or user_id != None or level != None:
-                where_sql += " AND "
-        
+            else:
+                print("You can`t reportgenerate on user_id and group_id at the same time")
+                
+                
         #Role=?
         else:
             print("User_view in database.py has not received a correct role value.")
             return None
         
-        if theme_id != None:
-            select_sql += ", u.theme_id"
-            where_sql += "u.theme_id = (%s) "
-            values_sql.append(theme_id)
-        if user_id != None:
-            select_sql += ", u.user_id"
-            if theme_id != None:
-                where_sql += "AND "
-            where_sql += "u.user_id = (%s) "
-            values_sql.append(user_id)
-        if level != None:
-            select_sql += ", u.current_level"
-            if user_id != None or theme_id != None:
-                where_sql += "AND "
-            where_sql += "u.current_level = (%s) "
-            values_sql.append(level)
         
-        query = select_sql+from_sql+where_sql 
+        query = select_sql+from_sql+where_sql
+        print(query, values_sql)##############################################
         return query, values_sql
     
     
@@ -1030,26 +1041,108 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
+            
+            
+    def get_all_contests(self, group_id, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''
+            SELECT contest_id, contest_name, deadline_date 
+            FROM contest 
+            WHERE group_id = (%s) AND 
+            deadline_date >= CURDATE() AND
+            contest_id NOT IN (
+                SELECT contest_id
+                FROM contest_user_done
+                WHERE user_id = (%s)
+            )'''
+            cursor.execute(sql1, (group_id,user_id))
+            result1 = cursor.fetchall()
+            active_contests_data = None
+            if result1 != []:
+                active_contests_data = [{'id': row[0], 'name': row[1], 'deadline_date': row[2].strftime("%d.%m.%Y")} for row in result1]
+            
+            
+            sql2 = '''
+            SELECT contest_id, contest_name, deadline_date 
+            FROM contest 
+            WHERE group_id = (%s) AND 
+            deadline_date >= CURDATE() AND
+            contest_id IN (
+                SELECT contest_id
+                FROM contest_user_done
+                WHERE user_id = (%s)
+            )'''
+            cursor.execute(sql2, (group_id,user_id))
+            result2 = cursor.fetchall()
+            not_active_contests_data = None
+            if result2 != []:
+                not_active_contests_data = [{'id': row[0], 'name': row[1], 'deadline_date': row[2].strftime("%d.%m.%Y")} for row in result2]
+            
+            return active_contests_data, not_active_contests_data
+        except mysql.connector.Error as err:
+            print(err)
+        
 
     def getAllContestExercises(self, contestId):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
             cursor.execute("SELECT exercise_id FROM contest_exercise WHERE contest_id=(%s)", (contestId,))
-            result = cursor.all()
-            if result == None:
+            results = cursor.fetchall()
+            print(results)
+            print("ici")
+            if results == None:
                 return []
+            else:
+                resultList = [result[0] for result in results]
+            return resultList
+        except mysql.connector.Error as err:
+            print(err)
+
+    def get_groups_for_user(self, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT group_table.groupId, group_table.name from group_table, user_group \
+                            where group_table.groupId = user_group.groupId \
+                            and user_group.userId = (%s)", (user_id,))
+            result = cursor.fetchall()
             return result
         except mysql.connector.Error as err:
             print(err)
+
+    def get_group_leaderboard(self,group_id):
+        group_user_leaderboard = """
+            SELECT uv.username, sum(uv.points) as totalpoints, any_value(gt.name) AS group_name
+            FROM user_view AS uv, user_group, group_table AS gt
+            WHERE uv.user_id = user_group.userId
+            AND user_group.groupId = %s
+            AND user_group.groupId = gt.groupId
+             GROUP BY uv.user_id
+            ORDER BY totalpoints DESC
+        """
+
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(group_user_leaderboard, (group_id,))
+            result = cursor.fetchall()
+            leaderboard_data = [dict(username=row[0], points=row[1], group_name=row[2]) for row in result]
+            print(leaderboard_data)
+            return leaderboard_data
+        except mysql.connector.Error as err:
+            print(err)
+
 def main():
     database = db()
     #z = database.get_group_members(1)
     #print(z)
     #database.delete_question_done(25)
-    #print(database.getGroups(1))
+    print(database.getAllContestExercises(14))
     #database.invite_request_group_member(2,6)
     #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
-   
+
     
 main()
