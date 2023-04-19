@@ -753,6 +753,23 @@ def logout() -> 'html':
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
 
+@app.route('/change_role', methods=["GET", "POST"])
+def change_role() -> 'html':
+    form = SearchForm(request.form)
+
+    if request.method == 'POST' and form.validate_on_submit():
+        database = db()
+        username = request.args.get('username')
+        search = form.search.data
+        all_users = database.search_user(search)
+        flash('User role updated successfully!', 'success')
+        return render_template('change_role.html', name=username,form=form,allusers=all_users)
+
+
+
+
+    return render_template("change_role.html",allusers=[], form=form)
+
 @app.route('/reportgeneration', methods=["GET", "POST"])
 def reportgeneration() -> 'html':
     database = db()
