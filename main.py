@@ -861,20 +861,9 @@ def report():
     headers = []
     resultTable = []
     if report_type == "user_reports":
-        print(
-            f"User report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
-        result = database.user_view(role, teacher_userID, groupID, theme, userID, level)
-        resultTable = result[0]
-        query = result[1]
-        headers = getHeaders(query,1)
-
+        headers, resultTable = database.user_view(role, teacher_userID, groupID, theme, userID, level)
     elif report_type == "difficult_tasks":
-        print(
-            f"Difficult task report: report-type: {report_type}, role: {role}, teacher_userID: {teacher_userID}, groupID: {groupID} theme: {theme}, level: {level},userID: {userID}")
-        result = database.all_tasks_report_view(role, 10, teacher_userID, groupID, theme, level)
-        resultTable = result[0]
-        query = result[1]
-        headers = getHeaders(query,2)
+        headers, resultTable = database.all_tasks_report_view(role, 10, teacher_userID, groupID, theme, level)
     else:
         print("Error, no valid report type selected")
 
@@ -882,41 +871,6 @@ def report():
     styled_table = df.style.hide_index().set_table_attributes('class="table table-bordered"')
     html_table = styled_table.to_html()
     return render_template("report.html", table=html_table)
-
-def getHeaders(query, type):
-    #function to extract parameters from sql query to get table headers for report
-    # initializing substrings
-    sub1 = "SELECT"
-    sub2 = "FROM"
-
-    # getting index of substrings
-    idx1 = query.index(sub1)
-    idx2 = query.index(sub2)
-
-    headerString = ''
-    # getting elements in between
-    for idx in range(idx1 + len(sub1) + 1, idx2):
-        headerString = headerString + query[idx]
-
-    headerLst = headerString.split(",")
-    headers = []
-    if type == 1:
-        for header in headerLst:
-            headerTemp1 = header.split(".")
-            headerTemp2 = headerTemp1[1].strip().replace("_"," ")
-            finalHeader = headerTemp2.capitalize()
-            headers.append(finalHeader)
-    elif type == 2:
-        for header in headerLst:
-            headerTemp1 = header.split(" as ")
-            if len(headerTemp1) == 1:
-                temp = headerTemp1[0]
-                headerTemp1 = temp.split(".")
-            headerTemp2 = headerTemp1[1].strip().replace("_", " ")
-            finalHeader = headerTemp2.capitalize()
-            headers.append(finalHeader)
-
-    return headers
 
 @app.route('/viewgroup', methods=["GET", "POST"])
 def viewgroup() -> 'html':

@@ -606,16 +606,13 @@ class db:
           
     # report - user
     def user_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
-        query, values_sql = self.get_sql_query_for_user_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, user_id=user_id, level=level)
+        headers, query, values_sql = self.get_sql_query_for_user_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, user_id=user_id, level=level)
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            if values_sql != []:
-                cursor.execute(query, (values_sql))
-            else:
-                cursor.execute(query, (values_sql))
+            cursor.execute(query, (values_sql))
             result = cursor.fetchall()
-            return (result,query)
+            return headers, result
         except mysql.connector.Error as err:
             print(err)
             
@@ -624,10 +621,12 @@ class db:
         from_sql = " FROM "
         where_sql = ""
         values_sql = []
+        headers = []
         
         #Role=Admin
         if role == 3:
             if group_id == None:
+                headers = ["Username", "Number of attempts", "Number of success", "Succes in %"]
                 select_sql += "u.username, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "user_view as u" 
                 
@@ -635,6 +634,7 @@ class db:
                     where_sql = " WHERE "  
                 
             else:
+                headers = ["Username", "Group name", "Number of attempts", "Number of success", "Succes in %"]
                 select_sql += "u.username, g.group_name, u.number_tasks, u.number_correct, u.successrate"
                 from_sql += "group_user_view AS g, user_view AS u"
                 where_sql += " WHERE g.user_id = u.user_id AND g.group_id = (%s)"
@@ -644,19 +644,22 @@ class db:
                     where_sql += " AND "
                     
             if theme_id != None:
+                headers.append("Theme id")
                 select_sql += ", u.theme_id"
                 where_sql += "u.theme_id = (%s) "
                 values_sql.append(theme_id)
             if user_id != None:
+                headers.append("User id")
                 select_sql += ", u.user_id"
                 if theme_id != None:
                     where_sql += "AND "
                 where_sql += "u.user_id = (%s) "
                 values_sql.append(user_id)
             if level != None:
+                headers.append("Current level")
                 select_sql += ", u.current_level"
-            if user_id != None or theme_id != None:
-                where_sql += "AND "
+                if user_id != None or theme_id != None:
+                    where_sql += "AND "
                 where_sql += "u.current_level = (%s) "
                 values_sql.append(level)
              
@@ -673,12 +676,14 @@ class db:
                 return None
             
             if user_id != None and group_id == None:
+                headers = ["User id", "Username", "Number of attempts", "Number of success", "Succes in %"]
                 select_sql += "DISTINCT user_id, username, oppgaver_utført, riktige_oppgaver, Prosent "
                 from_sql += "group_user_view "
                 where_sql += "WHERE teacher_id = (%s) AND user_id = (%s)"
                 values_sql.append(int(user_id))
             
             elif group_id != None and user_id == None:
+                headers = ["group_name", "User id", "Username","Number of attempts", "Number of success", "Succes in %"]
                 select_sql += "group_name, user_id, username, oppgaver_utført, riktige_oppgaver, Prosent"
                 from_sql += "group_user_view "
                 where_sql += "WHERE teacher_id = (%s) AND group_id = (%s)"
@@ -695,25 +700,22 @@ class db:
         
         
         query = select_sql+from_sql+where_sql
-        print(query, values_sql)##############################################
-        return query, values_sql
+        return headers, query, values_sql
     
     
     # report - tasks     
     def all_tasks_report_view(self,role, n_rows=10, teacher_user_id=None, group_id=None, theme_id=None, level=None):
-        query, values_sql = self.get_sql_query_for_all_tasks_report_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, level=level)
+        headers, query, values_sql = self.get_sql_query_for_all_tasks_report_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, level=level)
+        print(query, values_sql)#####
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            if values_sql != []:
-                cursor.execute(query, (values_sql))
-            else:
-                cursor.execute(query, (values_sql))
+            cursor.execute(query, (values_sql))
             result = cursor.fetchall()
             if len(result) >= n_rows:
-                return (result[:n_rows],query)
+                return headers, result[:n_rows]
             else:
-                return (result,query)
+                return headers, result
         except mysql.connector.Error as err:
             print(err)
     
@@ -722,9 +724,11 @@ class db:
         from_sql = "FROM "
         where_sql = ""
         values_sql = []
+        headers = []
         
         #Role=Admin
         if role == 3:
+            headers = ["Exercice id", "Number of attempts", "Number of success", "Succes in %", "Level", "Theme id"]
             select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig) as number_asked, sum(g.antall_utført) as number_success, (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, a.level, a.themeId as theme_id "
             from_sql += "group_questions as g left join all_tasks_view as a ON a.exerciseId = g.exerciseId "
         
@@ -734,13 +738,12 @@ class db:
             if group_id != None:
                 where_sql += "g.groupId = (%s) "
                 values_sql.append(group_id)
-            '''
+            
             if theme_id != None:
                 if group_id != None:
                     where_sql += "AND "
                 where_sql += "a.themeId = (%s) "
                 values_sql.append(theme_id)
-                '''
                 
             if level != None:
                 if group_id != None or theme_id != None:
@@ -752,6 +755,7 @@ class db:
                 
         #Role=Lærer
         elif role == 2:
+            headers = ["Exercice id", "Number of attempts", "Number of success", "Succes in %", "Group id", "Teacher user id"]
             select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig) as number_asked, sum(g.antall_utført) as number_success, (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, gv.groupId as group_id, gv.userID as teacher_user_id "
             from_sql += "group_questions as g, gruppe_view as gv "
             where_sql += "WHERE g.groupId = gv.groupId AND gv.userId = (%s) "
@@ -772,7 +776,7 @@ class db:
             print("User_view in database.py has not received a correct role value.")
             return None
           
-        return query, values_sql
+        return headers, query, values_sql
     
     # Group
     def get_not_member_users(self, group_id):
