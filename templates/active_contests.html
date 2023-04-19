@@ -18,7 +18,7 @@
 {% endwith %}
 <div class="px-5 py-5">
 <div><h2>Aktive konkurranser</h2></div>
-{% if active_contests == None && active_contests == None %}
+{% if active_contests == None and active_contests == None %}
 <p class="card-text">Ingen konkurranser</p>
 {% else %}
 {% if active_contests%}
@@ -56,6 +56,10 @@
     {% endfor %}
     {% endif %}
     {% endif %}
+
+    <div class="mt-2 d-flex justify-content-center">
+      <a href="{{ url_for('admin_group') }}" class="btn btn-primary mr-2">Tilbake</a>
+  </div>
   </div>
 </div>
   
