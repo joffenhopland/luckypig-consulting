@@ -1087,6 +1087,9 @@ def participate_contest() -> 'html':
         #get the list of exercises from the database
         session["contest_exercises"] = database.getAllContestExercises(contestId)
         session["contest_points"] = 0
+        #set contest as done
+        database.setContestDone(session['idUser'], contestId,session["group_id"])
+
         if len(session["contest_exercises"]) == 0:
             flash("Konkurransen har ingen oppgave", "danger")
             return redirect(url_for('participate_contest', terminate=1))
