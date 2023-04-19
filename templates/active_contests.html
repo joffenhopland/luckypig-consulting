@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Aktive konkurranser{% endblock %}
+{% block title %}Konkurranser{% endblock %}
 {% block head %}
 {{ super() }}
 {% endblock %}
@@ -17,7 +17,7 @@
 {% endif %}
 {% endwith %}
 <div class="px-5 py-5">
-<div><h2>Aktive konkurranser</h2></div>
+<div><h2>Konkurranser</h2></div>
 {% if active_contests == None and active_contests == None %}
 <p class="card-text">Ingen konkurranser</p>
 {% else %}
@@ -57,7 +57,7 @@
     {% endif %}
     {% endif %}
 
-    <div class="mt-2 d-flex justify-content-center">
+    <div class="mt-2 d-flex justify-content-left">
       <a href="{{ url_for('admin_group') }}" class="btn btn-primary mr-2">Tilbake</a>
   </div>
   </div>
