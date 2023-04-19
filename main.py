@@ -1036,10 +1036,15 @@ def admin_group() -> 'html':
     form = SearchForm(request.form)
     groupId = request.args.get('groupId')
     if groupId != None:
-        session["group_id"] = groupId
+        access = database.check_group_id_access(admin_user_id=session["idUser"])
+        if int(groupId) in access: 
+            session["group_id"] = groupId
+        else:
+            print("User does not have access to this group")
+            return url_for('viewgroup')
     else:
         groupId = session["group_id"]
-    database = db()
+        
     groupName = database.get_group_name(groupId)
     memberId = request.args.get("id")
     accept = bool(request.args.get("accept"))
@@ -1103,10 +1108,14 @@ def member_group() -> 'html':
     form = SearchForm(request.form)
     groupId = request.args.get('groupId')
     if groupId != None:
-        session["group_id"] = groupId
+        access = database.check_group_id_access(member_user_id=session["idUser"])
+        if int(groupId) in access: 
+            session["group_id"] = groupId
+        else:
+            print("User does not have access to this group")
+            return url_for('viewgroup')
     else:
         groupId = session["group_id"]
-    database = db()
     groupName = database.get_group_name(groupId)
     invite = request.args.get('invite')
     userId = request.args.get('userId')
