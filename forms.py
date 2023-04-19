@@ -117,5 +117,13 @@ class CreateContestForm(FlaskForm):
 class SearchForm(FlaskForm):
     search = StringField(label="Search", validators=[
                          Length(min=3, max=40), DataRequired()])
-    submit = SubmitField(label="Søk")
+    submit = SubmitField(label="Søk",name='form-submit')
 
+class ChooseRoleForm(FlaskForm):
+    role = SelectField('role', choices=[('', 'Velg rolle'), (1, 'Bruker'), (2, 'Lærer'), (3, 'Administrator')], validators=[DataRequired()])
+    user = SelectField('user', choices=[], validators=[])
+    submit = SubmitField(label='Endre rolle', name='role_form-submit')
+
+    def __init__(self, user_choices, *args, **kwargs):
+        super(ChooseRoleForm, self).__init__(*args, **kwargs)
+        self.user.choices = user_choices

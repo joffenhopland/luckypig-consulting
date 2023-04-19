@@ -158,6 +158,22 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+
+    def update_user_role(self, new_role, userId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE user
+            SET role = (%s) WHERE userId = (%s)'''
+            oppdater = (new_role, userId)
+            cursor.execute(sql1, oppdater)
+            conn.commit()
+            conn.close()
+            print(f'User {userId} role updated to {new_role}')
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+
     def getUserByUUID(self, uuid):
         try:
             conn = mysql.connector.connect(**self.configuration)
