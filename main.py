@@ -15,7 +15,8 @@ from flask_bcrypt import Bcrypt
 from classes import DragAndDropService
 from database import db
 from UserLogin import UserLogin
-from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, validate_password, ReportForm, CreateGroupForm, CreateContestForm, SearchForm
+from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, \
+    validate_password, ReportForm, CreateGroupForm, CreateContestForm, SearchForm, ChooseRoleForm
 from User import User
 import json
 from classes import Exercise, Dropdown, Group
@@ -755,19 +756,32 @@ def logout() -> 'html':
 @app.route('/change_role', methods=["GET", "POST"])
 def change_role() -> 'html':
     form = SearchForm(request.form)
+    role_form = ChooseRoleForm([])
 
-    if request.method == 'POST' and form.validate_on_submit():
-        database = db()
-        username = request.args.get('username')
-        search = form.search.data
-        all_users = database.search_user(search)
-        flash('User role updated successfully!', 'success')
-        return render_template('change_role.html', name=username,form=form,allusers=all_users)
+    if request.method == 'POST':
+        if 'form-submit' in request.form:  # search-form submission
+            if form.validate_on_submit():
+                database = db()
+                search = form.search.data
+                all_users = database.search_user(search)
+                role_form = ChooseRoleForm([(user[1], user[0]) for user in all_users])
+                return render_template('change_role.html', form=form, role_form=role_form, allusers=all_users)
+
+        elif 'role_form-submit' in request.form:  # role-form submission
+            new_role = role_form.role.data
+            database = db()
+            userId = request.form.get('user')
+            print(f'Changing role for user {userId} to {new_role}')
+            database.update_user_role(new_role, userId)
+            return redirect(url_for('change_role'))
+
+    return render_template("change_role.html", allusers=[], form=form, role_form=role_form)
 
 
-
-
-    return render_template("change_role.html",allusers=[], form=form)
+@app.route('/change_role_submit', methods=['POST'])
+def change_role_submit():
+    if request.method == 'POST':
+        return jsonify({'status': 'success'})
 
 @app.route('/reportgeneration', methods=["GET", "POST"])
 def reportgeneration() -> 'html':
