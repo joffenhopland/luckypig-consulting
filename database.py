@@ -1127,6 +1127,33 @@ class db:
             return leaderboard_data
         except mysql.connector.Error as err:
             print(err)
+            
+    def check_group_id_access(self, admin_user_id=None, member_user_id=None):
+        if admin_user_id==None and member_user_id==None:
+            print("Missing admin_user_id or  member_user_id")
+            return None
+        try:
+            if admin_user_id != None:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                cursor.execute("SELECT groupId FROM group_table WHERE userId = (%s)",(admin_user_id,))
+                result = cursor.fetchall()
+                
+            else:
+                conn = mysql.connector.connect(**self.configuration)
+                cursor = conn.cursor()
+                cursor.execute("SELECT groupId FROM user_group WHERE userId = (%s)",(member_user_id,))
+                result = cursor.fetchall()
+            
+            result_lst = []
+            if result != []:
+                for r in result:
+                    result_lst.append(r[0])   
+            return result_lst
+                
+        except mysql.connector.Error as err:
+            print(err)
+            
 
 def main():
     database = db()
