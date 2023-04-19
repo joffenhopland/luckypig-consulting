@@ -1034,7 +1034,6 @@ def get_dynamic_data():
 def admin_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
-    session["group_id"] = request.args.get('groupId') #session
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     memberId = request.args.get("id")
@@ -1043,6 +1042,11 @@ def admin_group() -> 'html':
     userId = request.args.get('userId')
     delete = request.args.get("delete")
     delete_group = request.args.get("deletegroup")
+   
+    if groupId != None:
+        session["group_id"] = groupId
+        print("session: groupId: ", groupId)
+    
     if memberId:
         #admin has accept or declines invitation
         memberId = int(memberId)
@@ -1095,12 +1099,15 @@ def admin_group() -> 'html':
 def member_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
-    session["group_id"] = request.args.get('groupId') #session
     groupId = request.args.get('groupId')
     groupName = request.args.get('name')
     invite = request.args.get('invite')
     userId = request.args.get('userId')
     leave = request.args.get("leave")
+    
+    if groupId != None:
+        session["group_id"] = groupId
+        print("session: groupId: ", groupId)
 
     if invite:
         # Member invite another member from user list
