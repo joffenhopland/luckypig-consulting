@@ -174,83 +174,6 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-#div: ?
-    
-    def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            sql1 = '''UPDATE user
-            SET last_login = (%s), login_streak = (%s) WHERE userId = (%s)'''
-            update = (new_login_date, login_streak, user_id)
-            cursor.execute(sql1, update)
-            conn.commit()
-            conn.close()
-            return True
-        except mysql.connector.Error as err:
-            print(err)
-    
-    def get_login_streak(self, user_id):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT login_streak from user where userId=(%s)", (user_id,))
-            result = cursor.fetchone()
-            return result[0]
-        except mysql.connector.Error as err:
-            print(err)
-            
-    def get_group(self, teacher_userID = None):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            if teacher_userID is None:
-                cursor.execute("SELECT * FROM group_table")
-            else:
-                cursor.execute("SELECT * FROM group_table WHERE userID=(%s)", (teacher_userID,))
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-            
-    def get_users_teacher(self, teacher_userID):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM group_user_view WHERE teacher_id=(%s)", (teacher_userID,))
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-            
-    def all_user_name(self):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT username, userId from user")
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-
-    def search_user(self, search):
-        try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
-                    "select username, userId from user where username = (%s)  \
-                    union \
-                    select username, userId from user where email = (%s)  \
-                    union \
-                    select username, userId from user where lower(username) like (%s) or lower(username) like (%s) \
-                    union \
-                    select username, userId from user where lower(email) like (%s) or lower(email) like (%s)", (search, search, f'{search}%', f'%{search}', f'{search}%', f'%{search}'))
-            result = cursor.fetchall()
-            return result
-        except mysql.connector.Error as err:
-            print(err)
-
 
 # Course functions:
 
@@ -1175,6 +1098,20 @@ class db:
             return resultList
         except mysql.connector.Error as err:
             print(err)
+    
+    #set the contest as done when finished
+    def setContestDone(self, user_id, contest_id, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO contest_user_done (user_id, contest_id, group_id)
+                              VALUES (%s, %s, %s)'''
+            insert = (user_id, contest_id, group_id)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
             
 # Leaderboard-global functionns:
 
@@ -1195,55 +1132,88 @@ class db:
             return leaderboard_data
         except mysql.connector.Error as err:
             print(err)
-            
-    def check_group_id_access(self, admin_user_id=None, member_user_id=None):
-        if admin_user_id==None and member_user_id==None:
-            print("Missing admin_user_id or  member_user_id")
-            return None
-        try:
-            if admin_user_id != None:
-                conn = mysql.connector.connect(**self.configuration)
-                cursor = conn.cursor()
-                cursor.execute("SELECT groupId FROM group_table WHERE userId = (%s)",(admin_user_id,))
-                result = cursor.fetchall()
-                
-            else:
-                conn = mysql.connector.connect(**self.configuration)
-                cursor = conn.cursor()
-                cursor.execute("SELECT groupId FROM user_group WHERE userId = (%s)",(member_user_id,))
-                result = cursor.fetchall()
-            
-            result_lst = []
-            if result != []:
-                for r in result:
-                    result_lst.append(r[0])   
-            return result_lst
-                
-        except mysql.connector.Error as err:
-            print(err)
 
-    #set the contest as done when finished
-    def setContestDone(self, user_id, contest_id, group_id):
+
+#######?
+
+    def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
-            sql1 = '''INSERT INTO contest_user_done (user_id, contest_id, group_id)
-                              VALUES (%s, %s, %s)'''
-            insert = (user_id, contest_id, group_id)
-            cursor.execute(sql1, insert)
+            sql1 = '''UPDATE user
+            SET last_login = (%s), login_streak = (%s) WHERE userId = (%s)'''
+            update = (new_login_date, login_streak, user_id)
+            cursor.execute(sql1, update)
             conn.commit()
             conn.close()
+            return True
+        except mysql.connector.Error as err:
+            print(err)
+    
+    def get_login_streak(self, user_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT login_streak from user where userId=(%s)", (user_id,))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_group(self, teacher_userID = None):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            if teacher_userID is None:
+                cursor.execute("SELECT * FROM group_table")
+            else:
+                cursor.execute("SELECT * FROM group_table WHERE userID=(%s)", (teacher_userID,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def get_users_teacher(self, teacher_userID):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM group_user_view WHERE teacher_id=(%s)", (teacher_userID,))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+            
+    def all_user_name(self):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT username, userId from user")
+            result = cursor.fetchall()
+            return result
         except mysql.connector.Error as err:
             print(err)
 
+    def search_user(self, search):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                    "select username, userId from user where username = (%s)  \
+                    union \
+                    select username, userId from user where email = (%s)  \
+                    union \
+                    select username, userId from user where lower(username) like (%s) or lower(username) like (%s) \
+                    union \
+                    select username, userId from user where lower(email) like (%s) or lower(email) like (%s)", (search, search, f'{search}%', f'%{search}', f'{search}%', f'%{search}'))
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+
+# Testing database results
 def main():
     database = db()
-    #z = database.get_group_members(1)
-    #print(z)
-    #database.delete_question_done(25)
-    print(database.getAllContestExercises(14))
-    #database.invite_request_group_member(2,6)
-    #database.answer_invite_request_group_member(group_id=2, request_member_id=6, accept=True)
-
     
 main()
