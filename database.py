@@ -878,8 +878,17 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
-
-
+            
+    def get_group_name(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM group_table WHERE groupId = (%s)", (group_id,))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+            
     def getAllGroupName(self):
         try:
             conn = mysql.connector.connect(**self.configuration)

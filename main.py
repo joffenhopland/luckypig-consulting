@@ -1035,18 +1035,20 @@ def admin_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
     groupId = request.args.get('groupId')
-    groupName = request.args.get('name')
+    if groupId != None:
+        session["group_id"] = groupId
+    else:
+        groupId = session["group_id"]
+    database = db()
+    groupName = database.get_group_name(groupId)
     memberId = request.args.get("id")
     accept = bool(request.args.get("accept"))
     add = request.args.get('add')
     userId = request.args.get('userId')
     delete = request.args.get("delete")
     delete_group = request.args.get("deletegroup")
-   
-    if groupId != None:
-        session["group_id"] = groupId
-        print("session: groupId: ", groupId)
-    
+
+        
     if memberId:
         #admin has accept or declines invitation
         memberId = int(memberId)
@@ -1100,14 +1102,15 @@ def member_group() -> 'html':
     database = db()
     form = SearchForm(request.form)
     groupId = request.args.get('groupId')
-    groupName = request.args.get('name')
+    if groupId != None:
+        session["group_id"] = groupId
+    else:
+        groupId = session["group_id"]
+    database = db()
+    groupName = database.get_group_name(groupId)
     invite = request.args.get('invite')
     userId = request.args.get('userId')
     leave = request.args.get("leave")
-    
-    if groupId != None:
-        session["group_id"] = groupId
-        print("session: groupId: ", groupId)
 
     if invite:
         # Member invite another member from user list
