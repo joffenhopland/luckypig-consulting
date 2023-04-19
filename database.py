@@ -1177,7 +1177,20 @@ class db:
                 
         except mysql.connector.Error as err:
             print(err)
-            
+
+    #set the contest as done when finished
+    def setContestDone(self, user_id, contest_id, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO contest_user_done (user_id, contest_id, group_id)
+                              VALUES (%s, %s, %s)'''
+            insert = (user_id, contest_id, group_id)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
 
 def main():
     database = db()
