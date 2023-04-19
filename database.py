@@ -100,6 +100,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #get all the user
     def getAllUser(self):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -168,6 +169,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #get the exercise by type and by Id
     def getExerciseByIdandType(self, exerciseID, type):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -187,6 +189,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #get exercise options by exercise type and Id
     def getOptionsByExerciseIdandType(self, exerciseID, type):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -215,6 +218,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #update the number of times the exercise was asked and the number of times the exercise was answered correctly
     def updateExerciseByExerciseIdandType(self, exerciseID, type, number_asked,number_succeed):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -236,7 +240,8 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-        
+
+    #get the course status using the courseId
     def getCourseStatusByCourseId(self, courseId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -248,6 +253,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #calculate the total number of points for a user (based on the course points)
     def getTotalPoints(self, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -275,6 +281,7 @@ class db:
             print(err)
 
 
+    #get the last courseId for a theme and a user (highest level)
     def getCourseIdByUserIdAndTheme(self, userId, themeId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -318,6 +325,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #check if the course is done or not
     def checkCourseDone(self, courseId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -329,6 +337,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #Set the course as done
     def setCourseDone(self, courseId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -502,6 +511,8 @@ class db:
                 return result[0]
         except mysql.connector.Error as err:
             print(err)
+
+    #get all the themes where the user has started a course
     def getUserThemes(self, userId):
             try:
                 conn = mysql.connector.connect(**self.configuration)
@@ -520,6 +531,7 @@ class db:
             except mysql.connector.Error as err:
                 print(err)
 
+    #get all the themes
     def getThemes(self):
             try:
                 conn = mysql.connector.connect(**self.configuration)
@@ -533,6 +545,7 @@ class db:
             except mysql.connector.Error as err:
                 print(err)
 
+    #get the level of a course using the courseId
     def get_level(self, courseId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -543,6 +556,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #check if the user has completed the gold level in a selected theme
     def checkGoldLevelCompleted(self, userId, themeId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -855,7 +869,8 @@ class db:
                 conn.close()
         except mysql.connector.Error as err:
             print(err)
-  
+
+    #get all the groups that the user belongs to
     def getGroups(self, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -870,6 +885,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #create a new group
     def createGroup(self, name, userId, group_typeId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -892,7 +908,8 @@ class db:
             return result[0]
         except mysql.connector.Error as err:
             print(err)
-            
+
+    #get all the group names
     def getAllGroupName(self):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -960,6 +977,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #create an invitation for a group member in a selected group
     def invite_request_group_member(self, groupId, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -973,6 +991,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    #get all invitations related to a selected group
     def all_user_name_memberinvitation(self, groupId):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -1082,6 +1101,7 @@ class db:
             print(err)
         
 
+    #get all the exercises of a contest
     def getAllContestExercises(self, contestId):
         try:
             conn = mysql.connector.connect(**self.configuration)
