@@ -19,8 +19,9 @@
 <div class="px-5 py-5">
 <div><h2>Aktive konkurranser</h2></div>
 {% if active_contests == None and not_active_contest == None%}
-<p class="card-text">Ingen aktive konkurranser</p>
+<p class="card-text">Ingen konkurranser</p>
 {% else %}
+{% if active_contests%}
 {% for contest in active_contests %}
     <div class="card my-3">
       <div class="card-body">
@@ -36,6 +37,8 @@
       </div>
     </div>
     {% endfor %}
+    {% endif %}
+    {% if not_active_contests%}
     {% for contest in not_active_contests %}
     <div class="card my-3">
       <div class="card-body">
@@ -51,6 +54,7 @@
       </div>
     </div>
     {% endfor %}
+    {% endif %}
     {% endif %}
   </div>
 </div>
