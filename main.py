@@ -706,20 +706,7 @@ def updateuser() -> 'html':
 
 @app.route('/logout', methods=["GET", "POST"])
 def logout() -> 'html':
-    session.pop("email", None)
-    session.pop("logged in", None)
-    session.pop("username", None)
-    session.pop("access", None)
-    session.pop("idUser", None)
-    session.pop("role", None)
-    session.pop("courseId", None)
-    session.pop("questions", None)
-    session.pop("exerciseId", None)
-    session.pop("language", None)
-    session.pop("themeId", None)
-    session.pop("level", None)
-    session.pop("init_course", None)
-    session.pop("new_level", None)
+    [session.pop(key) for key in list(session.keys())]
     flash(f'Du er logget ut!', "info")
     return redirect(url_for('home'))
 
