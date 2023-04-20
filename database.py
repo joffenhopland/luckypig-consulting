@@ -13,7 +13,7 @@ class db:
                     'database': 'Luckypig database'}
         self.configuration = dbconfig
         self.conn = mysql.connector.connect(**self.configuration)
-        self.cursor = self.conn.cursor(prepared=True)
+        self.cursor = self.conn.cursor()
 
     def __enter__(self):
         return self
@@ -276,8 +276,10 @@ class db:
 
     def success_rate(self, courseId ):
         try:
-            self.cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
-            result = self.cursor.fetchone()
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
+            result = cursor.fetchone()
             print(f'result: {result}')
             if result[0] is None:
                 return False
@@ -492,15 +494,13 @@ class db:
     #get all the themes where the user has started a course
     def getUserThemes(self, userId):
             try:
-                conn = mysql.connector.connect(**self.configuration)
-                cursor = conn.cursor()
-                cursor.execute(
+                self.cursor.execute(
                 '''SELECT distinct(course_status.themeId), theme.theme FROM course_status 
                     INNER JOIN active_course ON course_status.courseId=active_course.courseId 
                     INNER JOIN theme ON theme.themeId = course_status.themeId
                     WHERE active_course.userId = (%s) ORDER BY theme.theme''',
                     (userId,))
-                result = cursor.fetchall()
+                result = self.cursor.fetchall()
                 themes = []
                 for theme in result:
                     themes.append(theme)
@@ -511,10 +511,8 @@ class db:
     #get all the themes
     def getThemes(self):
             try:
-                conn = mysql.connector.connect(**self.configuration)
-                cursor = conn.cursor()
-                cursor.execute("SELECT * FROM theme")
-                result = cursor.fetchall()
+                self.cursor.execute("SELECT * FROM theme")
+                result = self.cursor.fetchall()
                 themes = []
                 for theme in result:
                     themes.append(theme)

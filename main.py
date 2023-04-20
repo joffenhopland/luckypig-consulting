@@ -84,6 +84,7 @@ def learn():
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     #manage the progress the progress of the course
+    database = db()
     fromTheme = request.args.get("fromTheme")
     questions = session["questions"]
 
@@ -122,6 +123,8 @@ def course():
     if session["courseId"] > -1 and len(questions) == 0 and session["init_course"] == 1:
 
         level_points = database.get_level_points(session["courseId"])
+        print("hei")
+
         session["level_points"] = level_points
         database.update_levelpoints(session["courseId"], level_points)
         session["init_course"] = 0
