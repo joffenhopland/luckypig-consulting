@@ -1,18 +1,12 @@
-import random
-import secrets
-import uuid
-import itertools
-import random
-import pandas as pd
-import os
+import random, secrets, uuid, itertools, random, pandas as pd
 from dotenv import load_dotenv
-
 from flask import Flask, flash, request, redirect, render_template, url_for, session, Markup, jsonify
 from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 
 from classes import DragAndDropService
+from datetime import datetime, timedelta
 from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, \
@@ -21,13 +15,7 @@ from User import User
 import json
 from classes import Exercise, Dropdown, Group
 
-import json
-import urllib.parse
-
-from datetime import datetime, timedelta
-
 load_dotenv()  # load environment variables from .flaskenv file
-
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -37,8 +25,6 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 25200 #7 days
 app.config['SESSION_COOKIE_SECURE'] = False #set to true when app is live
 app.config['SESSION_COOKIE_SAMESITE'] = "Lax" 
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-
-
 mail_settings = {
     "MAIL_SERVER": 'smtp.gmail.com',
     "MAIL_PORT": 465,
@@ -52,8 +38,8 @@ mail_settings = {
 
 app.config.update(mail_settings)
 mail = Mail(app)
-
 app.secret_key = secrets.token_urlsafe(16)
+
 
 @app.route("/")
 def home():
