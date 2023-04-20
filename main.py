@@ -40,6 +40,8 @@ app.config.update(mail_settings)
 mail = Mail(app)
 app.secret_key = secrets.token_urlsafe(16)
 
+# Create an instance of the Db class
+database = db()
 
 @app.route("/")
 def home():
@@ -47,7 +49,6 @@ def home():
 
 @app.route("/theme")
 def theme():
-    database = db()
     themeId = int(request.args.get("themeId"))
     #the user has just logged in and the program get the active and inactive (not started) courses
     if themeId == -1:
@@ -73,7 +74,6 @@ def theme():
 @app.route("/learn")
 def learn():
     #open the learn page (home page for course) with the right parameters (totalPoints, login_streak, theme)
-    database = db()
     totalPoints = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     themeId = session["themeId"]
@@ -84,7 +84,6 @@ def learn():
 @app.route("/course", methods=['GET', 'POST'])
 def course():
     #manage the progress the progress of the course
-    database = db()
     fromTheme = request.args.get("fromTheme")
     questions = session["questions"]
 
@@ -231,7 +230,6 @@ def checklevel():
 @app.route("/skipExercise", methods=['GET'])
 def skipExercise():
     #skip the exercise
-    database = db()
     success = 0
     database.question_done(session['exerciseId'], success, session["level"], session["courseId"])
     database.question_history(session['exerciseId'], success, session["level"], session["courseId"])
@@ -241,7 +239,6 @@ def skipExercise():
 @app.route("/multiple-choice", methods=['GET', 'POST'])
 def multiple_choice():
     #Mulitple choice exercise: show the exercise and check the answer
-    database = db()
     #get the exerciseId
     exerciseId = session['exerciseId']
 
@@ -287,7 +284,6 @@ def multiple_choice():
 def dropdown():
     #Dropdown exercise: show the exercise and check the answer
 
-    database = db()
     #get the exerciseId
     exerciseId = session['exerciseId']
 
@@ -352,7 +348,6 @@ dragAndDropService = DragAndDropService()
 def drag_and_drop():
     #Drag and drop exercise: show the exercise and check the answer
 
-    database = db()
     #get the exerciseId
     exerciseId = session['exerciseId']
 
@@ -409,7 +404,6 @@ def drag_and_drop():
 def register():
     #New user joins the platform
     form = RegistrerForm(request.form)
-    database = db()
     #Checks forms and checks if the email exist in the system
     if form.validate_on_submit and database.attemptedUser(form.email.data):
         flash("Epost-adressen er allerede registrert. Vennligst bruk en annen epost-adresse.", "danger")
@@ -455,7 +449,6 @@ def register_landing_page():
 @ app.route('/verified/<code>')
 def verify(code):
     #When user press link in mail for verify. We check that is exist and set verify = true in database.
-    database = db()
     if database.verify(code) == True:
         flash(f"Vellykket! Din konto er verifisert. Vennligst logge inn.", "success")
         return redirect(url_for('login'))
@@ -467,7 +460,6 @@ def verify(code):
 @app.route('/login', methods=["GET", "POST"])
 def login() -> 'html':
     #login
-    database = db()
     form = LoginForm()
 
     #user sends login info
@@ -544,7 +536,6 @@ def forgetpassword() -> 'html':
     form = forgetPasswordForm()
     if request.method == "POST":
         email: object = form.email.data
-        database = db()
         usr = database.getUser(email)
 
         if not usr:
@@ -570,7 +561,6 @@ def forgetpassword() -> 'html':
     
 @ app.route('/verifyResetPassword/<code>')
 def verifyResetPassword(code):
-    database = db()
     if database.verify(code) == True:
         form = resetPasswordForm()
         form.verificationId.data = code
@@ -585,7 +575,6 @@ def verifyResetPassword(code):
 def resetpassword() -> 'html':
     form = resetPasswordForm()
     uuid = form.verificationId.data
-    database = db()
     user = database.getUserByUUID(uuid)
     
 
@@ -632,7 +621,6 @@ def updatepassword() -> 'html':
                 userUpdatePW.updateUserPassword(email,password_hash)
                 message += "Passordet er oppdatert!"
                 flash(f"Passordet er oppdatert!", "success")
-                database = db()
                 total_points = database.getTotalPoints(session["idUser"])
                 return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
 
@@ -652,7 +640,6 @@ def viewuser() -> 'html':
     userView = UserLogin()
     email = session["email"]
     user = User(*userView.getUserByEmail(email))
-    database = db()
     total_points = database.getTotalPoints(session["idUser"])
     login_streak = database.get_login_streak(session["idUser"])
     checklevel()
@@ -683,7 +670,6 @@ def updateuser() -> 'html':
         session["username"] = username
         flash(f'Brukerinformasjonen er oppdatert!', "success")
         user = User(*userUpdate.getUserByEmail(email))
-        database = db()
         total_points = database.getTotalPoints(session["idUser"])
         return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
 
@@ -704,7 +690,6 @@ def change_role() -> 'html':
     if request.method == 'POST':
         if 'form-submit' in request.form:  # search-form submission
             if form.validate_on_submit():
-                database = db()
                 search = form.search.data
                 all_users = database.search_user(search)
                 role_form = ChooseRoleForm([(user[1], user[0]) for user in all_users])
@@ -712,7 +697,6 @@ def change_role() -> 'html':
 
         elif 'role_form-submit' in request.form:  # role-form submission
             new_role = role_form.role.data
-            database = db()
             userId = request.form.get('user')
             print(f'Changing role for user {userId} to {new_role}')
             database.update_user_role(new_role, userId)
@@ -728,7 +712,6 @@ def change_role_submit():
 
 @app.route('/reportgeneration', methods=["GET", "POST"])
 def reportgeneration() -> 'html':
-    database = db()
     themeId = session["themeId"]
 
     if session["role"] == 3:
@@ -792,7 +775,6 @@ def reportgeneration() -> 'html':
         return render_template("learn.html")
 @app.route('/report')
 def report():
-    database = db()
     report_type = request.args.get('report_type')
     role = session["role"]
     groupID = request.args.get('groupID')
@@ -831,7 +813,6 @@ def report():
 @app.route('/viewgroup', methods=["GET", "POST"])
 def viewgroup() -> 'html':
     #return an overview of the user's list of groups
-    database = db()
     DBgroups = database.getGroups(session["idUser"])
     groups = [Group(*(DBgroup)) for DBgroup in DBgroups]
     classes = []
@@ -855,7 +836,6 @@ def creategroup() -> 'html':
 
     #user send info of the new group and the database is updated
     if request.method == 'POST':
-        database = db()
         names = database.getAllGroupName()
         groupName = form.name.data
 
@@ -881,7 +861,6 @@ def creategroup() -> 'html':
 @app.route('/leaderboard')
 def leaderboard():
     # Global leaderboard: show a leaderboard of the total points of all users in the app
-    database = db()
     global_leaderboard = database.get_leaderboard()
     print(global_leaderboard)
     return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
@@ -890,7 +869,6 @@ def leaderboard():
 def leaderboard_group():
     # Group leaderboard: show a leaderboard for a particular group. The points are the total points for a user of all contests in the group 
     groupId = int(request.args.get('groupId'))
-    database = db()
     group_leaderboard = database.get_group_leaderboard(groupId)
     print(group_leaderboard)
     return render_template('leaderboard_group.html', group_leaderboard=group_leaderboard)
@@ -898,7 +876,6 @@ def leaderboard_group():
 @app.route('/contest_result')
 def contest_result():
     #show the contest result and update the database
-    database = db()
     points = session["contest_points"]
     leaderboardPoints = database.getLeaderboardPoints(session["idUser"], session['group_id'])
     if leaderboardPoints == None:
@@ -917,7 +894,6 @@ def contest_result():
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
     group_id = session["group_id"]
-    database = db()
     group_name = database.get_group_name(group_id)
     form = CreateContestForm()
     if request.method == 'POST' and form.validate_on_submit():
@@ -938,7 +914,6 @@ def createcontest() -> 'html':
 def active_contests() -> 'html':
     group_id = session["group_id"]
     user_id = session["idUser"]
-    database = db()
     active_contests, not_active_contests = database.get_all_contests(group_id, user_id)
 
     groupDB = database.getGroupInfo(session['group_id'])
@@ -954,13 +929,11 @@ def get_dynamic_data():
     question_type = request.form.get('question_type', '', type=str)
     level = request.form.get('level', '', type=int)
     theme = request.form.get('theme', '', type=int)
-    database = db()
     questions = database.getQuestionsForContest(question_type, level,theme)
     return jsonify(questions)
 
 @app.route('/admin_group', methods=["GET", "POST"])
 def admin_group() -> 'html':
-    database = db()
     form = SearchForm(request.form)
     groupId = request.args.get('groupId')
     if groupId != None:
@@ -1036,7 +1009,6 @@ def admin_group() -> 'html':
 def member_group() -> 'html':
     #to get an overview of the selected group
     #user can invite people, see the contests, create new contest or leave the group
-    database = db()
     form = SearchForm(request.form)
 
     #check the groupId
@@ -1094,7 +1066,6 @@ def participate_contest() -> 'html':
     start = request.args.get('start')
     terminate = request.args.get('terminate')
     contestId = request.args.get('contestId')
-    database = db()
 
     #start contest and get the exercises list
     if start:
@@ -1131,7 +1102,6 @@ def participate_contest() -> 'html':
 def multiple_choice_contest():
     #Mulitple exercise for contest: show the exercise and check the answer
 
-    database = db()
     #get the exerciseId
     exerciseId = session['exerciseId']
 
@@ -1172,7 +1142,6 @@ def multiple_choice_contest():
 def dropdown_contest():
     #Dropdown exercise for contest: show the exercise and check the answer
 
-    database = db()
     #get the exerciseId
     exerciseId = session['exerciseId']
 
@@ -1231,7 +1200,6 @@ dragAndDropService = DragAndDropService()
 def drag_and_drop_contest():
     #Drag and drop exercise for contest: show the exercise and check the answer
 
-    database = db()
     #get the exerciseId
     exerciseId = session['exerciseId']
 

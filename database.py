@@ -10,30 +10,35 @@ class db:
         dbconfig = {'host': '34.30.103.41',
                     'user': 'luckypig2023',
                     'password': 'LuckypigProject#1',
-                    'database': 'Luckypig database', }
-        # dbconfig = {'host': os.environ.get('HOST'),
-        #             'user': 'luckypig2023',
-        #             'password': os.environ.get('PASSWORD'),
-        #             'database': 'Luckypig database', }
+                    'database': 'Luckypig database'}
         self.configuration = dbconfig
-
-    def __enter__(self):
         self.conn = mysql.connector.connect(**self.configuration)
         self.cursor = self.conn.cursor(prepared=True)
+
+    def __enter__(self):
         return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cursor.close()
+        self.conn.close()
+
+    def execute(self, query, params=None):
+        try:
+            self.cursor.execute(query, params)
+            self.conn.commit()
+            return self.cursor.lastrowid
+        except mysql.connector.Error as err:
+            print(err)
+            return None
 
 # New user functions:
 
     #Puts a new user into the database
     def newUser(self, user):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            sql1 = '''INSERT INTO user (first_name, last_name, username, email, password, role, verificationId)
+            sql = '''INSERT INTO user (first_name, last_name, username, email, password, role, verificationId)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)'''
-            cursor.execute(sql1, user)
-            conn.commit()
-            conn.close()
+            self.execute(sql, user)           
         except mysql.connector.Error as err:
             print(err)
 
@@ -41,11 +46,9 @@ class db:
     #If yes, the user is verified
     def verify(self, verificationId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT userId from user where verificationId=(%s)", (verificationId,))
-            result = cursor.fetchone()
+            sql = "SELECT userId from user where verificationId=(%s)"
+            self.cursor.execute(sql, (verificationId,))
+            result = self.cursor.fetchone()
         except mysql.connector.Error as err:
             print(err)
 
@@ -53,14 +56,9 @@ class db:
             return False
 
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            sql1 = '''UPDATE user
-            SET emailVerified = (%s) WHERE verificationId = (%s)'''
+            sql = '''UPDATE user SET emailVerified = (%s) WHERE verificationId = (%s)'''
             oppdater = (1, verificationId)
-            cursor.execute(sql1, oppdater)
-            conn.commit()
-            conn.close()
+            self.execute(sql, oppdater)
             return True
         except mysql.connector.Error as err:
             print(err)
@@ -68,12 +66,11 @@ class db:
     #Checks if the email exists
     def attemptedUser(self, email):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT email from user where email=(%s)", (email,))
-            result = cursor.fetchone()
-            if result == None:
+            sql = "SELECT email from user where email=(%s)"
+            self.cursor.execute(sql, (email,))
+            result = self.cursor.fetchone()
+
+            if result is None:
                 return False
             else:
                 return result[0]
@@ -82,11 +79,9 @@ class db:
 
     def usernameCheck(self, username):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
+            self.cursor.execute(
                 "SELECT username from user where username=(%s)", (username,))
-            result = cursor.fetchone()
+            result = self.cursor.fetchone()
             if result == None:
                 return False
             else:
@@ -94,14 +89,12 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
-    #Gets all information from user after verification. For logging in automatic after link pressed.
+    # Gets all information from user after verification. For logging in automatic after link pressed.
     def getUser2(self, kode):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
+            self.cursor.execute(
                 "SELECT * FROM bruker WHERE verifiseringskode=(%s)", (kode,))
-            result = cursor.fetchone()
+            result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
             print(err)
@@ -109,14 +102,11 @@ class db:
 
     def updateUuid(self, email, uuid):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET verificationId = (%s) WHERE email = (%s)'''
             oppdater = (uuid,email)
-            cursor.execute(sql1, oppdater)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, oppdater)
+            self.conn.commit()
             return True
         except mysql.connector.Error as err:
             print(err)
@@ -127,11 +117,10 @@ class db:
     #Gets all information about an user. For logging in.
     def getUser(self, email):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
+
+            self.cursor.execute(
                 "SELECT * FROM user WHERE email=(%s)", (email,))
-            result = cursor.fetchone()
+            result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
             print(err)
@@ -139,10 +128,8 @@ class db:
     #get all the user
     def getAllUser(self):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT userId, username FROM user ORDER BY userId")
-            result = cursor.fetchall()
+            self.cursor.execute("SELECT userId, username FROM user ORDER BY userId")
+            result = self.cursor.fetchall()
             if result == None:
                 return result
             else:
@@ -155,14 +142,10 @@ class db:
 
     def resetPassword(self, email, password):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET password = (%s) WHERE verificationId = (%s)'''
             oppdater = (password,email)
-            cursor.execute(sql1, oppdater)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, oppdater)
             return True
         except mysql.connector.Error as err:
             print(err)
@@ -170,14 +153,10 @@ class db:
 
     def update_user_role(self, new_role, userId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET role = (%s) WHERE userId = (%s)'''
             oppdater = (new_role, userId)
-            cursor.execute(sql1, oppdater)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, oppdater)
             print(f'User {userId} role updated to {new_role}')
             return True
         except mysql.connector.Error as err:
@@ -185,11 +164,9 @@ class db:
 
     def getUserByUUID(self, uuid):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
+            self.cursor.execute(
                 "SELECT * FROM user WHERE verificationId=(%s)", (uuid,))
-            result = cursor.fetchone()
+            result = self.cursor.fetchone()
             return result
         except mysql.connector.Error as err:
             print(err)
@@ -199,10 +176,8 @@ class db:
 
     def course_status(self, id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT courseId from active_course where userId=(%s) ORDER BY courseId DESC ", (id,))
-            result = cursor.fetchone()
+            self.cursor.execute("SELECT courseId from active_course where userId=(%s) ORDER BY courseId DESC ", (id,))
+            result = self.cursor.fetchone()
             if result == None:
                 return False
             else:
@@ -214,14 +189,12 @@ class db:
     #get the last courseId for a theme and a user (highest level)
     def getCourseIdByUserIdAndTheme(self, userId, themeId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(
+            self.cursor.execute(
             '''SELECT course_status.courseId FROM course_status 
                 INNER JOIN active_course ON course_status.courseId=active_course.courseId 
                 WHERE active_course.userId = (%s) AND course_status.themeId = (%s)
                 ORDER BY course_status.level DESC''', (userId, themeId))
-            result = cursor.fetchone()
+            result = self.cursor.fetchone()
             if result == None:
                 return result
             else:
@@ -231,37 +204,27 @@ class db:
 
     def initiate_course(self, id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''INSERT INTO active_course (userId)
                 VALUES (%s)'''
             insert = (id,)
-            cursor.execute(sql1, insert)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, insert)
         except mysql.connector.Error as err:
             print(err)
 
     def new_course_status(self, themeId, languageId, courseId, level):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''INSERT INTO course_status (themeId, languageId, courseId, level)
                 VALUES (%s, %s, %s, %s)'''
             insert = (themeId, languageId, courseId,level)
-            cursor.execute(sql1, insert)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, insert)
         except mysql.connector.Error as err:
             print(err)
 
     #check if the course is done or not
     def checkCourseDone(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT done FROM course_status WHERE courseId=(%s) ", (courseId,))
-            result = cursor.fetchone()
+            self.cursor.execute("SELECT done FROM course_status WHERE courseId=(%s) ", (courseId,))
+            result = self.cursor.fetchone()
             print(result[0])
             return result[0]
         except mysql.connector.Error as err:
@@ -270,13 +233,9 @@ class db:
     #Set the course as done
     def setCourseDone(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''UPDATE course_status SET done = (%s) WHERE courseId = (%s)'''
             update = (1,courseId)
-            cursor.execute(sql1, update)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, update)
             return True
         except mysql.connector.Error as err:
             print(err)
@@ -298,10 +257,8 @@ class db:
 
     def get_questions_done(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT exerciseId from question_done where courseId=(%s)", (courseId,))
-            result = cursor.fetchall()
+            self.cursor.execute("SELECT exerciseId from question_done where courseId=(%s)", (courseId,))
+            result = self.cursor.fetchall()
             if result == None:
                 return []
             else:
@@ -311,20 +268,16 @@ class db:
 
     def get_level_points(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT level_points from course_status where courseId=(%s)", (courseId,))
-            result = cursor.fetchone()
+            self.cursor.execute("SELECT level_points from course_status where courseId=(%s)", (courseId,))
+            result = self.cursor.fetchone()
             return result[0]
         except mysql.connector.Error as err:
             print(err)
 
     def success_rate(self, courseId ):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
-            result = cursor.fetchone()
+            self.cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
+            result = self.cursor.fetchone()
             print(f'result: {result}')
             if result[0] is None:
                 return False
@@ -338,68 +291,48 @@ class db:
         
     def update_level(self, level, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''UPDATE course_status
             SET level = (%s) WHERE courseId = (%s)'''
             update = (level, courseId)
-            cursor.execute(sql1, update)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, update)
             return True
         except mysql.connector.Error as err:
             print(err)
 
     def update_levelpoints(self, courseId, level_points):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''UPDATE course_status
             SET level_points = (%s) WHERE courseId = (%s)'''
             update = (level_points, courseId)
-            cursor.execute(sql1, update)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, update)
             return True
         except mysql.connector.Error as err:
             print(err)
 
     def delete_question_done(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = "DELETE FROM question_done where courseId = (%s)"
             delete = (courseId,)
-            cursor.execute(sql1, delete)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, delete)
             return True
         except mysql.connector.Error as err:
             print(err)
 
     def question_done(self, exerciseId, success, level, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''INSERT INTO question_done (exerciseId, success, courseId, level)
                 VALUES (%s, %s, %s, %s)'''
             insert = (exerciseId, success, courseId, level)
-            cursor.execute(sql1, insert)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, insert)
         except mysql.connector.Error as err:
             print(err)
 
     def question_history(self,exerciseId,success,level, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
             sql1 = '''INSERT INTO question_history (exerciseId, success, courseId, level)
                 VALUES (%s, %s, %s, %s)'''
             insert = (exerciseId, success, courseId, level)
-            cursor.execute(sql1, insert)
-            conn.commit()
-            conn.close()
+            self.cursor.execute(sql1, insert)
         except mysql.connector.Error as err:
             print(err)
 
