@@ -18,7 +18,7 @@
 {% endwith %}
 <div class="px-5 py-5">
 <div><h2>Konkurranser</h2></div>
-{% if active_contests == None and active_contests == None %}
+{% if active_contests == None and not_active_contests == None %}
 <p class="card-text">Ingen konkurranser</p>
 {% else %}
 {% if active_contests%}
