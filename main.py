@@ -33,6 +33,11 @@ app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
 bcrypt = Bcrypt(app)
+app.config['PERMANENT_SESSION_LIFETIME'] = 25200 #7 days
+app.config['SESSION_COOKIE_SECURE'] = False #set to true when app is live
+app.config['SESSION_COOKIE_SAMESITE'] = "Lax" 
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+
 
 mail_settings = {
     "MAIL_SERVER": 'smtp.gmail.com',
