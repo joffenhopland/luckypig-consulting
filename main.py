@@ -414,14 +414,18 @@ def drag_and_drop():
 
 @ app.route('/register', methods=["GET", "POST"])
 def register():
+    #New user joins the platform
     form = RegistrerForm(request.form)
     database = db()
+    #Checks forms and checks if the email exist in the system
     if form.validate_on_submit and database.attemptedUser(form.email.data):
         flash("Epost-adressen er allerede registrert. Vennligst bruk en annen epost-adresse.", "danger")
         return render_template('register.html', form=form)
+    #Checks forms and checks if the username exist in the system
     elif form.validate_on_submit and database.usernameCheck(form.username.data):
         flash("Brukernavnet er allerede registrert. Vennligst bruk et annet brukernavn", "danger")
         return render_template('register.html', form=form)
+    #Form is ok, email dont exist, password meets requirements and unique username. New user in database
     elif form.validate_on_submit() and database.attemptedUser(form.email.data) == False \
         and validate_password(form.password1.data) == 1 and database.usernameCheck(form.username.data) == False:
         firstname = form.firstname.data
@@ -433,7 +437,9 @@ def register():
         verificationId = str(uuid.uuid4())
 
         new_user = (firstname, lastname, username, email, password, role, verificationId)
+        #Insert new user into database
         database.newUser(new_user)
+        #Mail for verify user
         mail = Mail(app)
         msg = Message("Verifisere konto",
                       sender=app.config.get("MAIL_USERNAME"), recipients=[email])
@@ -448,12 +454,14 @@ def register():
 
 @ app.route('/register-landing-page', methods=["GET", "POST"])
 def register_landing_page():
+    #Simple landing page after registration is complete. Ask to verify acount.
     message = "Tusen takk for registreringen! Vennligst sjekk din epost-konto for å verifisere din konto."
     return render_template('message_landing_page.html', message=message)
 
 
 @ app.route('/verified/<code>')
 def verify(code):
+    #When user press link in mail for verify. We check that is exist and set verify = true in database.
     database = db()
     if database.verify(code) == True:
         flash(f"Vellykket! Din konto er verifisert. Vennligst logge inn.", "success")
@@ -1016,10 +1024,12 @@ def admin_group() -> 'html':
         return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members)
     
     elif delete_group:
+        #Delete the group
         database.delete_group(delete_group)
         return url_for('viewgroup')
     
     elif request.method == 'POST' and form.validate_on_submit():
+        #Search for user in database
         search = form.search.data
         members = database.get_group_members(groupId)
         invites = database.get_invite_request_group_member(groupId)
