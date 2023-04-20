@@ -882,25 +882,16 @@ def creategroup() -> 'html':
 def leaderboard():
     database = db()
     global_leaderboard = database.get_leaderboard()
+    print(global_leaderboard)
     return render_template('leaderboard.html', global_leaderboard=global_leaderboard)
 
 @app.route('/leaderboard-group')
 def leaderboard_group():
+    groupId = int(request.args.get('groupId'))
     database = db()
-    user_id = session["idUser"]
-    groups_for_user = database.get_groups_for_user(user_id)
-
-    group_leaderboards = []
-    for group in groups_for_user:
-        groupId, groupName = group
-        leaderboard = database.get_group_leaderboard(groupId)
-        print (leaderboard)
-        group_leaderboards.append({
-           'group_name': groupName,
-           'group_id': groupId,
-           'leaderboard': leaderboard })
-
-    return render_template('leaderboard_group.html', leaderboards=group_leaderboards)
+    group_leaderboard = database.get_group_leaderboard(groupId)
+    print(group_leaderboard)
+    return render_template('leaderboard_group.html', group_leaderboard=group_leaderboard)
 
 @app.route('/contest_result')
 def contest_result():
@@ -919,7 +910,7 @@ def contest_result():
     if group.adminId == session['idUser']:
         group.role = "Admin"
 
-    return render_template('contest_result.html', points=points, group=group)
+    return render_template('contest_result.html', points=points, group=group, groupId=session['group_id'])
 
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':

@@ -983,24 +983,22 @@ class db:
 
     
 
-    def get_group_leaderboard(self,group_id):
-        group_user_leaderboard = """
-            SELECT uv.username, sum(uv.points) as totalpoints, any_value(gt.name) AS group_name
-            FROM user_view AS uv, user_group, group_table AS gt
-            WHERE uv.user_id = user_group.userId
-            AND user_group.groupId = %s
-            AND user_group.groupId = gt.groupId
-             GROUP BY uv.user_id
-            ORDER BY totalpoints DESC
-        """
-
+    # get leaderboard for a particular group
+    def get_group_leaderboard(self, group_id):
+        print("get_group_leaderboard_new")
+        print(group_id)
         try:
             conn = mysql.connector.connect(**self.configuration)
-            cursor = conn.cursor()
-            cursor.execute(group_user_leaderboard, (group_id,))
+            cursor = conn.cursor(buffered=True)
+            cursor.execute('''SELECT group_table.name AS group_name, user.username, leaderboard.points
+                FROM leaderboard
+                JOIN user ON leaderboard.user_id = user.userId
+                JOIN group_table ON leaderboard.group_id = group_table.groupId
+                WHERE leaderboard.group_id = (%s)''', (group_id,))
+            conn.commit()
+            conn.close()
             result = cursor.fetchall()
-            leaderboard_data = [dict(username=row[0], points=row[1], group_name=row[2]) for row in result]
-            print(leaderboard_data)
+            leaderboard_data = [dict(username=row[1], points=row[2], group_name=row[0]) for row in result]
             return leaderboard_data
         except mysql.connector.Error as err:
             print(err)
