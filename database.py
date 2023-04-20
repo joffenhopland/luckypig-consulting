@@ -7,10 +7,14 @@ load_dotenv()  # load environment variables from .flaskenv file
 
 class db:
     def __init__(self) -> None:
-        dbconfig = {'host': os.environ.get('HOST'),
+        dbconfig = {'host': '34.30.103.41',
                     'user': 'luckypig2023',
-                    'password': os.environ.get('PASSWORD'),
+                    'password': 'LuckypigProject#1',
                     'database': 'Luckypig database', }
+        # dbconfig = {'host': os.environ.get('HOST'),
+        #             'user': 'luckypig2023',
+        #             'password': os.environ.get('PASSWORD'),
+        #             'database': 'Luckypig database', }
         self.configuration = dbconfig
 
     def __enter__(self):
