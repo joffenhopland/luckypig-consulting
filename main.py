@@ -880,6 +880,7 @@ def creategroup() -> 'html':
 
 @app.route('/leaderboard')
 def leaderboard():
+    # Global leaderboard: show a leaderboard of the total points of all users in the app
     database = db()
     global_leaderboard = database.get_leaderboard()
     print(global_leaderboard)
@@ -887,6 +888,7 @@ def leaderboard():
 
 @app.route('/leaderboard-group')
 def leaderboard_group():
+    # Group leaderboard: show a leaderboard for a particular group. The points are the total points for a user of all contests in the group 
     groupId = int(request.args.get('groupId'))
     database = db()
     group_leaderboard = database.get_group_leaderboard(groupId)
