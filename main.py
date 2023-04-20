@@ -931,12 +931,22 @@ def leaderboard_group():
 
 @app.route('/contest_result')
 def contest_result():
-
-    #points ="10"
+    #show the contest result and update the database
+    database = db()
     points = session["contest_points"]
-    #need to calculate the total points for the user and update in leaderboard
-    #you can also show total points on the result page
-    return render_template('contest_result.html', points=points)
+    leaderboardPoints = database.getLeaderboardPoints(session["idUser"], session['group_id'])
+    if leaderboardPoints == None:
+        database.createLeaderboardPoints(session["idUser"], session['group_id'], points)
+    else:
+        totalPoints = points + int(leaderboardPoints[0])
+        database.updateLeaderboardPoints(session["idUser"], session['group_id'], totalPoints)
+    groupDB = database.getGroupInfo(session['group_id'])
+    group = Group(*(groupDB))
+    # chek role (Admin/Medlem) in group
+    if group.adminId == session['idUser']:
+        group.role = "Admin"
+
+    return render_template('contest_result.html', points=points, group=group)
 
 @app.route('/createcontest', methods=["GET", "POST"])
 def createcontest() -> 'html':
@@ -964,7 +974,14 @@ def active_contests() -> 'html':
     user_id = session["idUser"]
     database = db()
     active_contests, not_active_contests = database.get_all_contests(group_id, user_id)
-    return render_template('active_contests.html', active_contests=active_contests, not_active_contests=not_active_contests)
+
+    groupDB = database.getGroupInfo(session['group_id'])
+    group = Group(*(groupDB))
+    # chek role (Admin/Medlem) in group
+    if group.adminId == session['idUser']:
+        group.role = "Admin"
+
+    return render_template('active_contests.html', active_contests=active_contests, not_active_contests=not_active_contests, group=group)
 
 @app.route('/get_dynamic_data', methods=['POST'])
 def get_dynamic_data():

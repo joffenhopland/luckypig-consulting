@@ -785,6 +785,15 @@ class db:
     
 
 #Group functions:
+    def getGroupInfo(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM group_table WHERE groupId= (%s)", (group_id,))
+            result = cursor.fetchone()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
 
     # Group-admin function: Returns a list of user_id that is not a member
     def get_not_member_users(self, group_id):
@@ -1109,8 +1118,6 @@ class db:
             cursor = conn.cursor()
             cursor.execute("SELECT exercise_id FROM contest_exercise WHERE contest_id=(%s)", (contestId,))
             results = cursor.fetchall()
-            print(results)
-            print("ici")
             if results == None:
                 return []
             else:
@@ -1132,6 +1139,46 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
+
+    # get all the exercises of a contest
+    def getLeaderboardPoints(self, user_id, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT points FROM leaderboard WHERE user_id=(%s) AND group_id=(%s)", (user_id, group_id))
+            result = cursor.fetchone()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
+
+    def createLeaderboardPoints(self, user_id, group_id, points):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''INSERT INTO leaderboard (points, user_id, group_id) VALUES (%s, %s, %s)'''
+            insert = (points, user_id, group_id)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+    def updateLeaderboardPoints(self, user_id, group_id, points):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            sql1 = '''UPDATE leaderboard
+                        SET points = (%s)
+                        WHERE user_id = (%s) AND group_id = (%s)'''
+            insert = (points, user_id, group_id)
+            cursor.execute(sql1, insert)
+            conn.commit()
+            conn.close()
+        except mysql.connector.Error as err:
+            print(err)
+
+
+
             
 # Leaderboard-global functionns:
 
