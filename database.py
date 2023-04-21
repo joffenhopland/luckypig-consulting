@@ -795,7 +795,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-    # Group-admin function: Returns a list of user_id that is not a member
+    # Returns a list of user_id that is not a member
     def get_not_member_users(self, group_id):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -948,7 +948,8 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
-            
+    
+    # Returns a list of users that have been invited to the group by group members
     def get_invite_request_group_member(self, group_id):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -958,7 +959,7 @@ class db:
             return result
         except mysql.connector.Error as err:
             print(err)
-            
+    
     def answer_invite_request_group_member(self, group_id, request_member_id, accept): #accept: boolean
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -969,6 +970,7 @@ class db:
         except mysql.connector.Error as err:
             print(err)
         
+        # Group admin accepted the invite request for this user
         try:   
             if accept == True:
                 conn = mysql.connector.connect(**self.configuration)
@@ -1043,7 +1045,8 @@ class db:
             return choices
         except mysql.connector.Error as err:
             print(err)
-            
+    
+    # Adds the contest and selected questions to the database      
     def add_contest(self, group_id, name, deadline_date, selected_questions):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -1067,7 +1070,9 @@ class db:
         except mysql.connector.Error as err:
             print(err)
             
-            
+    # Returns contest(s) within the deadline that the user has access to based on group_id 
+    # Active_contests is the contest(s) the user has not played
+    # Not_active_contests is the contest(s) the use has played  
     def get_all_contests(self, group_id, user_id):
         try:
             conn = mysql.connector.connect(**self.configuration)
@@ -1174,8 +1179,6 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
-
-
 
             
 # Leaderboard-global functionns:
