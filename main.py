@@ -814,7 +814,7 @@ def report():
     else:
         teacher_userID = None
 
-    headers = []
+    headers = [] #Colum names
     resultTable = []
     if report_type == "user_reports":
         headers, resultTable = database.user_view(role, teacher_userID, groupID, theme, userID, level)
@@ -922,10 +922,11 @@ def createcontest() -> 'html':
     form = CreateContestForm()
     if request.method == 'POST' and form.validate_on_submit():
         name = request.form.get('name')
-        time = request.form.get('time')
+        time = request.form.get('time') # Number of days for the contest
         selected_questions = request.form.get('selected_questions').split(",")
         
-        date = datetime.now().date() + timedelta(days=int(time))
+        # Get the deadline date based on time and change the date to the right format for the database
+        date = datetime.now().date() + timedelta(days=int(time)) 
         deadline_date = date.strftime("%Y-%m-%d")
         
         database.add_contest(group_id=group_id ,name=name, deadline_date=deadline_date, selected_questions = selected_questions)
@@ -939,6 +940,10 @@ def active_contests() -> 'html':
     group_id = session["group_id"]
     user_id = session["idUser"]
     database = db()
+    
+    # Get contest(s) within the deadline that the user has access to based on group_id 
+    # Active_contests is the contest(s) the user has not played
+    # Not_active_contests is the contest(s) the use has played
     active_contests, not_active_contests = database.get_all_contests(group_id, user_id)
 
     groupDB = database.getGroupInfo(session['group_id'])
