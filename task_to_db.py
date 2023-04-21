@@ -1,4 +1,4 @@
-1import mysql.connector
+import mysql.connector
 import pandas as pd
 
 
