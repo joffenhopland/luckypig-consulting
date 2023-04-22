@@ -45,6 +45,216 @@ app.secret_key = secrets.token_urlsafe(16)
 def home():
     return render_template("mainPage.html")
 
+#CHAPTER 1 - Log in, new user, forgot password, verify
+
+@ app.route('/register', methods=["GET", "POST"])
+def register():
+    #New user joins the platform
+    form = RegistrerForm(request.form)
+    database = db()
+    #Checks forms and checks if the email exist in the system
+    if form.validate_on_submit and database.attemptedUser(form.email.data):
+        flash("Epost-adressen er allerede registrert. Vennligst bruk en annen epost-adresse.", "danger")
+        return render_template('register.html', form=form)
+    #Checks forms and checks if the username exist in the system
+    elif form.validate_on_submit and database.usernameCheck(form.username.data):
+        flash("Brukernavnet er allerede registrert. Vennligst bruk et annet brukernavn", "danger")
+        return render_template('register.html', form=form)
+    #Form is ok, email dont exist, password meets requirements and unique username. New user in database
+    elif form.validate_on_submit() and database.attemptedUser(form.email.data) == False \
+        and validate_password(form.password1.data) == 1 and database.usernameCheck(form.username.data) == False:
+        firstname = form.firstname.data
+        lastname = form.lastname.data
+        username = form.username.data
+        email = form.email.data
+        password = bcrypt.generate_password_hash(form.password1.data)
+        role = 1
+        verificationId = str(uuid.uuid4())
+
+        new_user = (firstname, lastname, username, email, password, role, verificationId)
+        #Insert new user into database
+        database.newUser(new_user)
+        #Mail for verify user
+        mail = Mail(app)
+        msg = Message("Verifisere konto",
+                      sender=app.config.get("MAIL_USERNAME"), recipients=[email])
+        msg.body = "Velkommen som bruker til vår nettside. Vennligst verifisere din konto for å kunne tilgang til språkkurset."
+        verification_link = url_for('verify', code=verificationId, token=app.secret_key, _external=True)
+        msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(verification_link)
+        with app.app_context():
+            mail.send(msg)
+            return redirect(url_for('register_landing_page'))
+    return render_template('register.html', form=form)
+
+
+@ app.route('/register-landing-page', methods=["GET", "POST"])
+def register_landing_page():
+    #Simple landing page after registration is complete. Ask to verify acount.
+    message = "Tusen takk for registreringen! Vennligst sjekk din epost-konto for å verifisere din konto."
+    return render_template('message_landing_page.html', message=message)
+
+
+@ app.route('/verified/<code>')
+def verify(code):
+    #When user press link in mail for verify. We check that is exist and set verify = true in database.
+    database = db()
+    if database.verify(code) == True:
+        flash(f"Vellykket! Din konto er verifisert. Vennligst logge inn.", "success")
+        return redirect(url_for('login'))
+    else:
+        flash(f'Verifseringen feilet...', "danger")
+        return render_template('mainPage.html')
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login() -> 'html':
+    #login
+    database = db()
+    form = LoginForm()
+
+    #user sends login info
+    if form.validate_on_submit():
+        print()
+        session["email"] = form.email.data
+        email = session["email"]
+        userlogin = UserLogin()
+
+        #user gives wrong email or password
+        if not userlogin.isUser(email):
+            flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")
+            return render_template('login.html', title='Logge inn',
+                                   form=form)
+
+        emailconfirmed = userlogin.emailConfirmed(email)
+
+        #user has not confirmed by email
+        if not emailconfirmed:
+            return render_template('confirmemail.html')
+
+        #user gives the right info to login so session is initiated
+        if userlogin.canLogIn(email, form.password.data,bcrypt):
+            session["logged in"] = True
+            user = userlogin.getUser(email)
+
+            session["username"] = user.username
+            session["idUser"] = user.user_id
+            session["role"] = user.role
+            session["language"] = 1
+            session["courseId"] = -1
+            session["themeId"] = -1
+            session["level"] = 1
+            session["questions"] = []
+            session["exerciseId"] = 0
+            session["init_course"] = 1
+            session["new_level"] = 0
+            session["level_name"] = ""
+            checklevel()
+
+            # check last login and update last login and login streak
+            last_login_date = user.last_login
+            login_streak = user.login_streak
+            if last_login_date != None:
+                today = datetime.now().date()
+                yesterday = today - timedelta(days=1)
+                if last_login_date == yesterday:
+                    login_streak += 1
+                    new_login_date = today.strftime("%Y-%m-%d")
+                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+                else:
+                    login_streak = 1
+                    new_login_date = today.strftime("%Y-%m-%d")
+                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+            else:
+                login_streak = 1
+                today = datetime.now().date()
+                new_login_date = today.strftime("%Y-%m-%d")
+                database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
+
+            flash(f'Du er logget inn!', "success")
+            return redirect(url_for('theme', themeId = session["themeId"]))
+
+        else:
+            flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")
+            return render_template('login.html', title='Loggge inn', form=form)
+
+    else:
+        return render_template('login.html', title='Logge inn', form=form)
+
+
+@app.route('/forgetpassword', methods=["GET", "POST"])
+def forgetpassword() -> 'html':
+    form = forgetPasswordForm()
+    if request.method == "POST":
+        email: object = form.email.data
+        database = db()
+        usr = database.getUser(email)
+
+        if not usr:
+            flash(f'Det er ingen bruker som er registrert med denne eposten. Vennligst prøv igjen eller registrer ny bruker', "danger")
+            return render_template('mainPage.html')
+
+        elif usr and form.validate_on_submit():
+            verificationId = str(uuid.uuid4())
+            database.updateUuid(email,verificationId)
+            mail = Mail(app)
+            verification_link = url_for('verifyResetPassword', code=verificationId, token=app.secret_key, _external=True)
+
+            msg = Message("Verifiserings kode: ",
+                          sender=app.config.get("MAIL_USERNAME"), recipients=[email])
+            msg.body = "Vennligst trykk på linken for å tilbakestill passordet ditt."
+            msg.html = f'<b> Reset password </b>' + '<a href="{}"> RESET </a>'.format(verification_link)
+            with app.app_context():
+                mail.send(msg)
+                flash(f"Link for å tilbakestille passordet ditt er sendt til eposten din.", "info")
+                return render_template('mainPage.html')
+    if request.method == "GET":
+        return render_template('forgetpassword.html', form=form)
+    
+@ app.route('/verifyResetPassword/<code>')
+def verifyResetPassword(code):
+    database = db()
+    if database.verify(code) == True:
+        form = resetPasswordForm()
+        form.verificationId.data = code
+        return render_template('resetpassword.html',form=form)
+    else:
+        flash(f'Verifiseringen feilet...', "danger")
+        return render_template('mainPage.html')   
+
+
+@app.route('/resetpassword', methods=["GET", "POST"])
+def resetpassword() -> 'html':
+    form = resetPasswordForm()
+    uuid = form.verificationId.data
+    database = db()
+    user = database.getUserByUUID(uuid)
+    
+
+    if not user:
+        return render_template('message_landing_page.html', message="Ugyldig tilbakestilling passord")
+    if request.method == "GET":
+        message = "Vennligst tilbakestill ditt passord."
+        return render_template('resetpassword.html', form=form, message=message)
+    else:
+        password1 = form.password1.data
+        password2 = form.password2.data
+
+        if form.validate_on_submit() and validate_password(password1) == 1:
+            if password1 == password2:
+                userUpdatePW = db()
+                password = form.password1.data
+                password_hash = bcrypt.generate_password_hash(password)
+                userUpdatePW.resetPassword(uuid, password_hash)
+                flash(f"vellykket! Ditt passord har blitt tilbakestilt, vennligst logge inn", "success")
+                return redirect(url_for('login'))
+
+            elif password1 != password2:
+                flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
+                return render_template('resetpassword.html', form=form)
+            
+
+#CHAPTER 2 - Main sites for user in navigation
+
 @app.route("/theme")
 def theme():
     database = db()
@@ -79,6 +289,17 @@ def learn():
     themeId = session["themeId"]
     checklevel()
     return render_template("learn.html", total_points = totalPoints, themeId = themeId, login_streak=login_streak, level=session['level_name'])
+
+
+#CHAPTER 3 - Dashboard for user: My profile, my groups, global leaderboard
+#CHAPTER 4 - Language course: new course, active course. Get tasks and send them to right path. Save task. Check for stats.
+#CHAPTER 5 - Tasks in the language course: Dropdown, multiple choice, drag and drop
+#CHAPTER 6 - Generate reports for admin and teachers
+#CHAPTER 7 - Groups: Adminsites and membersites + leaderboard in the group.
+#CHAPTER 8 - Contest in the groups: new contest, contest tasks, points, active contest
+#CHAPTER 9 - Database.py - The connection to database
+#CHAPTER 10 - classes.py - 
+
 
 
 @app.route("/course", methods=['GET', 'POST'])
@@ -401,217 +622,6 @@ def drag_and_drop():
     for choice in choices:
         order.append(choice['id'])
     return render_template('drag_and_drop.html', dragdrop=choices, question=question, exerciseId=exerciseId, level_name=session["level_name"], level_points=session["level_points"],order=order)
-
-
-
-
-@ app.route('/register', methods=["GET", "POST"])
-def register():
-    #New user joins the platform
-    form = RegistrerForm(request.form)
-    database = db()
-    #Checks forms and checks if the email exist in the system
-    if form.validate_on_submit and database.attemptedUser(form.email.data):
-        flash("Epost-adressen er allerede registrert. Vennligst bruk en annen epost-adresse.", "danger")
-        return render_template('register.html', form=form)
-    #Checks forms and checks if the username exist in the system
-    elif form.validate_on_submit and database.usernameCheck(form.username.data):
-        flash("Brukernavnet er allerede registrert. Vennligst bruk et annet brukernavn", "danger")
-        return render_template('register.html', form=form)
-    #Form is ok, email dont exist, password meets requirements and unique username. New user in database
-    elif form.validate_on_submit() and database.attemptedUser(form.email.data) == False \
-        and validate_password(form.password1.data) == 1 and database.usernameCheck(form.username.data) == False:
-        firstname = form.firstname.data
-        lastname = form.lastname.data
-        username = form.username.data
-        email = form.email.data
-        password = bcrypt.generate_password_hash(form.password1.data)
-        role = 1
-        verificationId = str(uuid.uuid4())
-
-        new_user = (firstname, lastname, username, email, password, role, verificationId)
-        #Insert new user into database
-        database.newUser(new_user)
-        #Mail for verify user
-        mail = Mail(app)
-        msg = Message("Verifisere konto",
-                      sender=app.config.get("MAIL_USERNAME"), recipients=[email])
-        msg.body = "Velkommen som bruker til vår nettside. Vennligst verifisere din konto for å kunne tilgang til språkkurset."
-        verification_link = url_for('verify', code=verificationId, token=app.secret_key, _external=True)
-        msg.html = f'<b> Confirm email </b>' + '<a href="{}"> CONFIRM </a>'.format(verification_link)
-        with app.app_context():
-            mail.send(msg)
-            return redirect(url_for('register_landing_page'))
-    return render_template('register.html', form=form)
-
-
-@ app.route('/register-landing-page', methods=["GET", "POST"])
-def register_landing_page():
-    #Simple landing page after registration is complete. Ask to verify acount.
-    message = "Tusen takk for registreringen! Vennligst sjekk din epost-konto for å verifisere din konto."
-    return render_template('message_landing_page.html', message=message)
-
-
-@ app.route('/verified/<code>')
-def verify(code):
-    #When user press link in mail for verify. We check that is exist and set verify = true in database.
-    database = db()
-    if database.verify(code) == True:
-        flash(f"Vellykket! Din konto er verifisert. Vennligst logge inn.", "success")
-        return redirect(url_for('login'))
-    else:
-        flash(f'Verifseringen feilet...', "danger")
-        return render_template('mainPage.html')
-
-
-@app.route('/login', methods=["GET", "POST"])
-def login() -> 'html':
-    #login
-    database = db()
-    form = LoginForm()
-
-    #user sends login info
-    if form.validate_on_submit():
-        print()
-        session["email"] = form.email.data
-        email = session["email"]
-        userlogin = UserLogin()
-
-        #user gives wrong email or password
-        if not userlogin.isUser(email):
-            flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")
-            return render_template('login.html', title='Logge inn',
-                                   form=form)
-
-        emailconfirmed = userlogin.emailConfirmed(email)
-
-        #user has not confirmed by email
-        if not emailconfirmed:
-            return render_template('confirmemail.html')
-
-        #user gives the right info to login so session is initiated
-        if userlogin.canLogIn(email, form.password.data,bcrypt):
-            session["logged in"] = True
-            user = userlogin.getUser(email)
-
-            session["username"] = user.username
-            session["idUser"] = user.user_id
-            session["role"] = user.role
-            session["language"] = 1
-            session["courseId"] = -1
-            session["themeId"] = -1
-            session["level"] = 1
-            session["questions"] = []
-            session["exerciseId"] = 0
-            session["init_course"] = 1
-            session["new_level"] = 0
-            session["level_name"] = ""
-            checklevel()
-
-            # check last login and update last login and login streak
-            last_login_date = user.last_login
-            login_streak = user.login_streak
-            if last_login_date != None:
-                today = datetime.now().date()
-                yesterday = today - timedelta(days=1)
-                if last_login_date == yesterday:
-                    login_streak += 1
-                    new_login_date = today.strftime("%Y-%m-%d")
-                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
-                else:
-                    login_streak = 1
-                    new_login_date = today.strftime("%Y-%m-%d")
-                    database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
-            else:
-                login_streak = 1
-                today = datetime.now().date()
-                new_login_date = today.strftime("%Y-%m-%d")
-                database.update_user_last_login_login_streak(user.user_id, new_login_date, login_streak)
-
-            flash(f'Du er logget inn!', "success")
-            return redirect(url_for('theme', themeId = session["themeId"]))
-
-        else:
-            flash(f'Eposten og/eller passordet er feil. Prøv igjen!', "danger")
-            return render_template('login.html', title='Loggge inn', form=form)
-
-    else:
-        return render_template('login.html', title='Logge inn', form=form)
-
-
-@app.route('/forgetpassword', methods=["GET", "POST"])
-def forgetpassword() -> 'html':
-    form = forgetPasswordForm()
-    if request.method == "POST":
-        email: object = form.email.data
-        database = db()
-        usr = database.getUser(email)
-
-        if not usr:
-            flash(f'Det er ingen bruker som er registrert med denne eposten. Vennligst prøv igjen eller registrer ny bruker', "danger")
-            return render_template('mainPage.html')
-
-        elif usr and form.validate_on_submit():
-            verificationId = str(uuid.uuid4())
-            database.updateUuid(email,verificationId)
-            mail = Mail(app)
-            verification_link = url_for('verifyResetPassword', code=verificationId, token=app.secret_key, _external=True)
-
-            msg = Message("Verifiserings kode: ",
-                          sender=app.config.get("MAIL_USERNAME"), recipients=[email])
-            msg.body = "Vennligst trykk på linken for å tilbakestill passordet ditt."
-            msg.html = f'<b> Reset password </b>' + '<a href="{}"> RESET </a>'.format(verification_link)
-            with app.app_context():
-                mail.send(msg)
-                flash(f"Link for å tilbakestille passordet ditt er sendt til eposten din.", "info")
-                return render_template('mainPage.html')
-    if request.method == "GET":
-        return render_template('forgetpassword.html', form=form)
-    
-@ app.route('/verifyResetPassword/<code>')
-def verifyResetPassword(code):
-    database = db()
-    if database.verify(code) == True:
-        form = resetPasswordForm()
-        form.verificationId.data = code
-        return render_template('resetpassword.html',form=form)
-    else:
-        flash(f'Verifiseringen feilet...', "danger")
-        return render_template('mainPage.html')   
-
-
-
-@app.route('/resetpassword', methods=["GET", "POST"])
-def resetpassword() -> 'html':
-    form = resetPasswordForm()
-    uuid = form.verificationId.data
-    database = db()
-    user = database.getUserByUUID(uuid)
-    
-
-    if not user:
-        return render_template('message_landing_page.html', message="Ugyldig tilbakestilling passord")
-    if request.method == "GET":
-        message = "Vennligst tilbakestill ditt passord."
-        return render_template('resetpassword.html', form=form, message=message)
-    else:
-        password1 = form.password1.data
-        password2 = form.password2.data
-
-        if form.validate_on_submit() and validate_password(password1) == 1:
-            if password1 == password2:
-                userUpdatePW = db()
-                password = form.password1.data
-                password_hash = bcrypt.generate_password_hash(password)
-                userUpdatePW.resetPassword(uuid, password_hash)
-                flash(f"vellykket! Ditt passord har blitt tilbakestilt, vennligst logge inn", "success")
-                return redirect(url_for('login'))
-
-            elif password1 != password2:
-                flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
-                return render_template('resetpassword.html', form=form)
-
-
 
 
 @app.route('/updatepassword', methods=["GET", "POST"])    
@@ -965,6 +975,7 @@ def get_dynamic_data():
 
 @app.route('/admin_group', methods=["GET", "POST"])
 def admin_group() -> 'html':
+    #If you are admin of a group this is the site and functions you get
     database = db()
     form = SearchForm(request.form)
     groupId = request.args.get('groupId')
