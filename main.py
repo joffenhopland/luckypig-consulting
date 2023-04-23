@@ -1032,7 +1032,7 @@ def admin_group() -> 'html':
     elif delete_group:
         #Delete the group
         database.delete_group(delete_group)
-        redirect(url_for('viewgroup'))
+        return redirect(url_for('viewgroup'))
     
     elif request.method == 'POST' and form.validate_on_submit():
         #Search for user in database
