@@ -40,7 +40,7 @@
                     </tbody>
                 </table>
                 <div class="mt-2 d-flex justify-content-evenly">
-                    <a  class="btn btn-primary mr-2" href="{{url_for('leaderboard_group', groupId=groupId) }}">Leaderboard</a>
+                    <a  class="btn btn-primary mr-2" href="{{url_for('leaderboard_group', groupId=groupId) }}">Ledertavle</a>
                     <button class="btn btn-secondary" onclick="location.href='{{url_for('active_contests')}}'"> Konkurranser </button>
                     {% if group.role == "Admin" %}
                     <button class="btn btn-secondary" onclick="location.href='{{ url_for('admin_group') }}'">Se gruppen</button>
