@@ -1032,7 +1032,7 @@ def admin_group() -> 'html':
     elif delete_group:
         #Delete the group
         database.delete_group(delete_group)
-        return url_for('viewgroup')
+        redirect(url_for('viewgroup'))
     
     elif request.method == 'POST' and form.validate_on_submit():
         #Search for user in database
@@ -1083,6 +1083,7 @@ def member_group() -> 'html':
         database.invite_request_group_member(groupId,userId)
         members = database.get_group_members(groupId)
         all_users = database.all_user_name_memberinvitation(groupId)
+        #flash(f"Invitasjonen er sendt!", "success")
         return render_template('member_group.html', name=groupName, groupId=groupId, members=members, allusers=all_users, form=form)
 
     # leave the group

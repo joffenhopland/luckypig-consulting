@@ -4,6 +4,22 @@
 
 {% block content %}
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  <div class="alert" role="alert">
+    {% for category, message in messages %}
+      <div class="container fixed-bottom mb-3">
+        <div class="alert alert-{{ category }} alert-dismissible fade show border-question-alert justify-content-between align-items-center" role="alert">
+          <div class="d-flex justify-content-around">
+            <p>{{ message }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endwith %}
+
 <div class="container register-page">
   <div class="container text-center">
     <h1 style="padding-top: 1em; margin-bottom: 1em;">{{ name }}</h1>
