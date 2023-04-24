@@ -11,8 +11,8 @@ from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, \
     validate_password, ReportForm, CreateGroupForm, CreateContestForm, SearchForm, ChooseRoleForm
-from User import User
 import json
+from User import User
 from classes import Exercise, Dropdown, Group
 
 load_dotenv()  # load environment variables from .flaskenv file

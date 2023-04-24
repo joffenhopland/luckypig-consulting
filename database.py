@@ -2,12 +2,13 @@ import mysql.connector
 import itertools
 import os
 from dotenv import load_dotenv
+from User import User
 
 load_dotenv()  # load environment variables from .flaskenv file
 
 class db:
     def __init__(self) -> None:
-        dbconfig = {'host': '34.30.103.41',
+        self.dbconfig = {'host': '34.30.103.41',
                     'user': 'luckypig2023',
                     'password': 'LuckypigProject#1',
                     'database': 'Luckypig database', }
@@ -15,19 +16,47 @@ class db:
         #             'user': 'luckypig2023',
         #             'password': os.environ.get('PASSWORD'),
         #             'database': 'Luckypig database', }
-        self.configuration = dbconfig
+        # self.dbconfig = dbconfig
+        self.conn = mysql.connector.connect(**self.dbconfig)
+        self.cursor = self.conn.cursor(prepared=True)
+        self.users = []
+        self.loadUsers()
 
     def __enter__(self):
-        self.conn = mysql.connector.connect(**self.configuration)
+        self.conn = mysql.connector.connect(**self.dbconfig)
         self.cursor = self.conn.cursor(prepared=True)
         return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cursor.close()
+        self.conn.close()
+    
+    def loadUsers(self):
+        try:
+            self.cursor.execute("SELECT * from user")
+            result = self.cursor.fetchall()
+            for row in result:
+                (user_id,firstname, lastname, username, email, password_hash, emailVerified, role, verificationId, login_streak, last_login) = row
+                self.users.append(User(user_id,firstname, lastname, username, email, password_hash, emailVerified, role, verificationId, login_streak, last_login))
+        except mysql.connector.Error as err:
+            print("Error reading data from MySQL table:", err)
+
+    def usernameCheck(self, username):
+        try:
+            query = "SELECT COUNT(*) FROM user WHERE username = %s"
+            value = (username, )
+            self.cursor.execute(query, value)
+            result = self.cursor.fetchone()
+            return True if result[0] > 0 else False
+        except mysql.connector.Error as err:
+            print("Error reading data from MySQL table:", err)
 
 # New user functions:
 
     #Puts a new user into the database
     def newUser(self, user):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO user (first_name, last_name, username, email, password, role, verificationId)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)'''
@@ -41,7 +70,7 @@ class db:
     #If yes, the user is verified
     def verify(self, verificationId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT userId from user where verificationId=(%s)", (verificationId,))
@@ -53,7 +82,7 @@ class db:
             return False
 
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET emailVerified = (%s) WHERE verificationId = (%s)'''
@@ -68,7 +97,7 @@ class db:
     #Checks if the email exists
     def attemptedUser(self, email):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT email from user where email=(%s)", (email,))
@@ -82,7 +111,7 @@ class db:
 
     def usernameCheck(self, username):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT username from user where username=(%s)", (username,))
@@ -97,7 +126,7 @@ class db:
     #Gets all information from user after verification. For logging in automatic after link pressed.
     def getUser2(self, kode):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT * FROM bruker WHERE verifiseringskode=(%s)", (kode,))
@@ -109,7 +138,7 @@ class db:
 
     def updateUuid(self, email, uuid):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET verificationId = (%s) WHERE email = (%s)'''
@@ -127,7 +156,7 @@ class db:
     #Gets all information about an user. For logging in.
     def getUser(self, email):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT * FROM user WHERE email=(%s)", (email,))
@@ -139,7 +168,7 @@ class db:
     #get all the user
     def getAllUser(self):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT userId, username FROM user ORDER BY userId")
             result = cursor.fetchall()
@@ -155,7 +184,7 @@ class db:
 
     def resetPassword(self, email, password):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET password = (%s) WHERE verificationId = (%s)'''
@@ -170,7 +199,7 @@ class db:
 
     def update_user_role(self, new_role, userId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET role = (%s) WHERE userId = (%s)'''
@@ -185,7 +214,7 @@ class db:
 
     def getUserByUUID(self, uuid):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT * FROM user WHERE verificationId=(%s)", (uuid,))
@@ -199,7 +228,7 @@ class db:
 
     def course_status(self, id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT courseId from active_course where userId=(%s) ORDER BY courseId DESC ", (id,))
             result = cursor.fetchone()
@@ -214,7 +243,7 @@ class db:
     #get the last courseId for a theme and a user (highest level)
     def getCourseIdByUserIdAndTheme(self, userId, themeId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
             '''SELECT course_status.courseId FROM course_status 
@@ -231,7 +260,7 @@ class db:
 
     def initiate_course(self, id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO active_course (userId)
                 VALUES (%s)'''
@@ -244,7 +273,7 @@ class db:
 
     def new_course_status(self, themeId, languageId, courseId, level):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO course_status (themeId, languageId, courseId, level)
                 VALUES (%s, %s, %s, %s)'''
@@ -258,7 +287,7 @@ class db:
     #check if the course is done or not
     def checkCourseDone(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT done FROM course_status WHERE courseId=(%s) ", (courseId,))
             result = cursor.fetchone()
@@ -270,7 +299,7 @@ class db:
     #Set the course as done
     def setCourseDone(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE course_status SET done = (%s) WHERE courseId = (%s)'''
             update = (1,courseId)
@@ -283,7 +312,7 @@ class db:
 
     def get_new_questions(self, level, theme):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT exerciseId from multiple_choice where level=(%s) and themeId=(%s) \
                            UNION \
@@ -298,7 +327,7 @@ class db:
 
     def get_questions_done(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT exerciseId from question_done where courseId=(%s)", (courseId,))
             result = cursor.fetchall()
@@ -311,7 +340,7 @@ class db:
 
     def get_level_points(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT level_points from course_status where courseId=(%s)", (courseId,))
             result = cursor.fetchone()
@@ -321,7 +350,7 @@ class db:
 
     def success_rate(self, courseId ):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT SUM(case success when 1 then 1 else null end)/COUNT(exerciseId) from question_done where courseId=(%s)", (courseId,))
             result = cursor.fetchone()
@@ -338,7 +367,7 @@ class db:
         
     def update_level(self, level, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE course_status
             SET level = (%s) WHERE courseId = (%s)'''
@@ -352,7 +381,7 @@ class db:
 
     def update_levelpoints(self, courseId, level_points):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE course_status
             SET level_points = (%s) WHERE courseId = (%s)'''
@@ -366,7 +395,7 @@ class db:
 
     def delete_question_done(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = "DELETE FROM question_done where courseId = (%s)"
             delete = (courseId,)
@@ -379,7 +408,7 @@ class db:
 
     def question_done(self, exerciseId, success, level, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO question_done (exerciseId, success, courseId, level)
                 VALUES (%s, %s, %s, %s)'''
@@ -392,7 +421,7 @@ class db:
 
     def question_history(self,exerciseId,success,level, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO question_history (exerciseId, success, courseId, level)
                 VALUES (%s, %s, %s, %s)'''
@@ -406,7 +435,7 @@ class db:
     #check if the user has completed the gold level in a selected theme
     def checkGoldLevelCompleted(self, userId, themeId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute('''SELECT course_status.courseId FROM course_status 
                 INNER JOIN active_course ON course_status.courseId=active_course.courseId 
@@ -423,7 +452,7 @@ class db:
     #get the exercise by type and by Id
     def getExerciseByIdandType(self, exerciseID, type):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             if type == 1:
                 cursor.execute(
@@ -443,7 +472,7 @@ class db:
     #get exercise options by exercise type and Id
     def getOptionsByExerciseIdandType(self, exerciseID, type):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             if type == 1:
                 cursor.execute(
@@ -472,7 +501,7 @@ class db:
     #update the number of times the exercise was asked and the number of times the exercise was answered correctly
     def updateExerciseByExerciseIdandType(self, exerciseID, type, number_asked,number_succeed):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             if type == 1:
                 sql1 = '''UPDATE drop_down 
@@ -494,7 +523,7 @@ class db:
     #get the course status using the courseId
     def getCourseStatusByCourseId(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT * FROM course_status WHERE courseId=(%s)", (courseId,))
@@ -505,7 +534,7 @@ class db:
             
     def get_level_theme(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT level, themeId from course_status where courseId=(%s)", (courseId,))
             result = cursor.fetchone()
@@ -516,7 +545,7 @@ class db:
     #calculate the total number of points for a user (based on the course points)
     def getTotalPoints(self, userId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 '''SELECT SUM(level_points) FROM course_status
@@ -530,7 +559,7 @@ class db:
 
     def get_total_points(self, userId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute('''select sum(scores.score) as total
                     from active_course ac
@@ -559,7 +588,7 @@ class db:
     #get all the themes where the user has started a course
     def getUserThemes(self, userId):
             try:
-                conn = mysql.connector.connect(**self.configuration)
+                conn = mysql.connector.connect(**self.dbconfig)
                 cursor = conn.cursor()
                 cursor.execute(
                 '''SELECT distinct(course_status.themeId), theme.theme FROM course_status 
@@ -578,7 +607,7 @@ class db:
     #get all the themes
     def getThemes(self):
             try:
-                conn = mysql.connector.connect(**self.configuration)
+                conn = mysql.connector.connect(**self.dbconfig)
                 cursor = conn.cursor()
                 cursor.execute("SELECT * FROM theme")
                 result = cursor.fetchall()
@@ -592,7 +621,7 @@ class db:
     #get the level of a course using the courseId
     def get_level(self, courseId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT level from course_status where courseId=(%s)", (courseId,))
             result = cursor.fetchone()
@@ -610,7 +639,7 @@ class db:
     def user_view(self, role, teacher_user_id=None, group_id=None, theme_id=None, user_id=None, level=None):
         headers, query, values_sql = self.get_sql_query_for_user_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, user_id=user_id, level=level)
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(query, (values_sql))
             result = cursor.fetchall()
@@ -712,7 +741,7 @@ class db:
     def all_tasks_report_view(self,role, n_rows=10, teacher_user_id=None, group_id=None, theme_id=None, level=None):
         headers, query, values_sql = self.get_sql_query_for_all_tasks_report_view(role, teacher_user_id=teacher_user_id, group_id=group_id, theme_id=theme_id, level=level)
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(query, (values_sql))
             result = cursor.fetchall()
@@ -787,7 +816,7 @@ class db:
 #Group functions:
     def getGroupInfo(self, group_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM group_table WHERE groupId= (%s)", (group_id,))
             result = cursor.fetchone()
@@ -798,7 +827,7 @@ class db:
     # Returns a list of user_id that is not a member
     def get_not_member_users(self, group_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT u.userId, u.username FROM user AS u, user_group AS ug WHERE u.userId = ug.userId AND ug.groupId not like (%s)", (group_id,))
             result = cursor.fetchall()
@@ -808,7 +837,7 @@ class db:
     
     def add_group_member(self,group_id, group_member_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO user_group (groupId, userId)
                 VALUES (%s, %s)'''
@@ -820,7 +849,7 @@ class db:
     
     def remove_group_member(self,group_id, group_member_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM user_group WHERE groupId = (%s) AND userId = (%s)", (group_id, group_member_id,))
             conn.commit()
@@ -831,7 +860,7 @@ class db:
     #get all the groups that the user belongs to
     def getGroups(self, userId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute('''SELECT * FROM group_table WHERE userId=(%s)
                             UNION
@@ -846,7 +875,7 @@ class db:
     #create a new group
     def createGroup(self, name, userId, group_typeId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO group_table (name, userId, group_typeId)
                 VALUES (%s, %s, %s)'''
@@ -859,7 +888,7 @@ class db:
             
     def get_group_name(self, group_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM group_table WHERE groupId = (%s)", (group_id,))
             result = cursor.fetchone()
@@ -870,7 +899,7 @@ class db:
     #get all the group names
     def getAllGroupName(self):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM group_table")
             results = cursor.fetchall()
@@ -883,7 +912,7 @@ class db:
     
     def get_group_members(self, groupId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT user.username, user.userId from user, group_table, user_group \
                         where group_table.groupId = user_group.groupId \
@@ -896,7 +925,7 @@ class db:
 
     def delete_group(self, group_id): 
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM group_table WHERE groupId = (%s)", (group_id, ))
             conn.commit()
@@ -907,7 +936,7 @@ class db:
             
     def get_groups_for_user(self, user_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT group_table.groupId, group_table.name from group_table, user_group \
                             where group_table.groupId = user_group.groupId \
@@ -921,7 +950,7 @@ class db:
     #create an invitation for a group member in a selected group
     def invite_request_group_member(self, groupId, userId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO group_invitation (groupId, userId, confirmed)
                             VALUES (%s, %s, %s)'''
@@ -935,7 +964,7 @@ class db:
     #get all invitations related to a selected group
     def all_user_name_memberinvitation(self, groupId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 '''SELECT username, userId FROM user 
@@ -952,7 +981,7 @@ class db:
     # Returns a list of users that have been invited to the group by group members
     def get_invite_request_group_member(self, group_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT g.userId, u.username FROM group_invitation AS g, user AS u WHERE u.userId = g.userId AND g.groupId = (%s)", (group_id,))
             result = cursor.fetchall()
@@ -962,7 +991,7 @@ class db:
     
     def answer_invite_request_group_member(self, group_id, request_member_id, accept): #accept: boolean
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("DELETE FROM group_invitation WHERE groupId = (%s) AND userId = (%s)", (group_id, request_member_id,))
             conn.commit()
@@ -973,7 +1002,7 @@ class db:
         # Group admin accepted the invite request for this user
         try:   
             if accept == True:
-                conn = mysql.connector.connect(**self.configuration)
+                conn = mysql.connector.connect(**self.dbconfig)
                 cursor = conn.cursor()
                 sql1 = '''INSERT INTO user_group (groupId, userId)
                 VALUES (%s, %s)'''
@@ -990,7 +1019,7 @@ class db:
         print("get_group_leaderboard_new")
         print(group_id)
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor(buffered=True)
             cursor.execute('''SELECT group_table.name AS group_name, user.username, leaderboard.points
                 FROM leaderboard
@@ -1011,13 +1040,13 @@ class db:
             return None
         try:
             if admin_user_id != None:
-                conn = mysql.connector.connect(**self.configuration)
+                conn = mysql.connector.connect(**self.dbconfig)
                 cursor = conn.cursor()
                 cursor.execute("SELECT groupId FROM group_table WHERE userId = (%s)",(admin_user_id,))
                 result = cursor.fetchall()
                 
             else:
-                conn = mysql.connector.connect(**self.configuration)
+                conn = mysql.connector.connect(**self.dbconfig)
                 cursor = conn.cursor()
                 cursor.execute("SELECT groupId FROM user_group WHERE userId = (%s)",(member_user_id,))
                 result = cursor.fetchall()
@@ -1036,7 +1065,7 @@ class db:
          
     def getQuestionsForContest(self, question_type, level, theme):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             query = "SELECT exerciseID, question FROM `{}` WHERE level = %s AND themeID = %s".format(question_type)
             cursor.execute(query, (level,theme,))
@@ -1049,7 +1078,7 @@ class db:
     # Adds the contest and selected questions to the database      
     def add_contest(self, group_id, name, deadline_date, selected_questions):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO contest (deadline_date, contest_name, group_id)
                             VALUES (%s, %s, %s)'''
@@ -1059,7 +1088,7 @@ class db:
             conn.commit()
             
             for selected_question in selected_questions:
-                conn = mysql.connector.connect(**self.configuration)
+                conn = mysql.connector.connect(**self.dbconfig)
                 cursor = conn.cursor()
                 sql1 = '''INSERT INTO contest_exercise (exercise_id, contest_id)
                             VALUES (%s, %s)'''
@@ -1075,7 +1104,7 @@ class db:
     # Not_active_contests is the contest(s) the use has played  
     def get_all_contests(self, group_id, user_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''
             SELECT contest_id, contest_name, deadline_date 
@@ -1117,7 +1146,7 @@ class db:
     #get all the exercises of a contest
     def getAllContestExercises(self, contestId):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT exercise_id FROM contest_exercise WHERE contest_id=(%s)", (contestId,))
             results = cursor.fetchall()
@@ -1132,7 +1161,7 @@ class db:
     #set the contest as done when finished
     def setContestDone(self, user_id, contest_id, group_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO contest_user_done (user_id, contest_id, group_id)
                               VALUES (%s, %s, %s)'''
@@ -1146,7 +1175,7 @@ class db:
     # get all the exercises of a contest
     def getLeaderboardPoints(self, user_id, group_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT points FROM leaderboard WHERE user_id=(%s) AND group_id=(%s)", (user_id, group_id))
             result = cursor.fetchone()
@@ -1156,7 +1185,7 @@ class db:
 
     def createLeaderboardPoints(self, user_id, group_id, points):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''INSERT INTO leaderboard (points, user_id, group_id) VALUES (%s, %s, %s)'''
             insert = (points, user_id, group_id)
@@ -1168,7 +1197,7 @@ class db:
 
     def updateLeaderboardPoints(self, user_id, group_id, points):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE leaderboard
                         SET points = (%s)
@@ -1192,7 +1221,7 @@ class db:
         order by total_points DESC"""
 
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(all_user_leaderboard)
             result = cursor.fetchall()
@@ -1206,7 +1235,7 @@ class db:
 
     def update_user_last_login_login_streak(self, user_id, new_login_date, login_streak):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             sql1 = '''UPDATE user
             SET last_login = (%s), login_streak = (%s) WHERE userId = (%s)'''
@@ -1220,7 +1249,7 @@ class db:
     
     def get_login_streak(self, user_id):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT login_streak from user where userId=(%s)", (user_id,))
             result = cursor.fetchone()
@@ -1230,7 +1259,7 @@ class db:
             
     def get_group(self, teacher_userID = None):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             if teacher_userID is None:
                 cursor.execute("SELECT * FROM group_table")
@@ -1243,7 +1272,7 @@ class db:
             
     def get_users_teacher(self, teacher_userID):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM group_user_view WHERE teacher_id=(%s)", (teacher_userID,))
             result = cursor.fetchall()
@@ -1253,7 +1282,7 @@ class db:
             
     def all_user_name(self):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                 "SELECT username, userId from user")
@@ -1264,7 +1293,7 @@ class db:
 
     def search_user(self, search):
         try:
-            conn = mysql.connector.connect(**self.configuration)
+            conn = mysql.connector.connect(**self.dbconfig)
             cursor = conn.cursor()
             cursor.execute(
                     "select username, userId from user where username = (%s)  \

@@ -151,3 +151,4 @@ class Group:
         self.adminId = adminId
         self.groupTypeId = groupTypeId
         self.role = "Medlem"
+
