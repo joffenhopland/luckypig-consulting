@@ -1,5 +1,4 @@
 import mysql.connector
-import itertools
 import os
 from dotenv import load_dotenv
 
