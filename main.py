@@ -1109,6 +1109,43 @@ def get_dynamic_data():
     questions = database.getQuestionsForContest(question_type, level,theme)
     return jsonify(questions)
 
+@app.route('/participate_contest', methods=["GET", "POST"])
+def participate_contest() -> 'html':
+    #participate to contest
+    start = request.args.get('start')
+    terminate = request.args.get('terminate')
+    contestId = request.args.get('contestId')
+    database = db()
+
+    #start contest and get the exercises list
+    if start:
+        #get the list of exercises from the database
+        session["contest_exercises"] = database.getAllContestExercises(contestId)
+        session["contest_points"] = 0
+        #set contest as done
+        database.setContestDone(session['idUser'], contestId,session["group_id"])
+
+        if len(session["contest_exercises"]) == 0:
+            flash("Konkurransen har ingen oppgave", "danger")
+            return redirect(url_for('participate_contest', terminate=1))
+        return redirect(url_for('participate_contest'))
+
+    # start contest and get the exercises list
+    if terminate:
+        print(f'Total result: {session["contest_points"]}')
+        return redirect(url_for('contest_result'))
+
+    #go to the next exercise
+    elif len(session["contest_exercises"]) > 0:
+        session["exerciseId"] = session["contest_exercises"].pop(0)
+        first = int(str(session["exerciseId"])[0])
+        view = checknumber(first) + "_contest"
+        return redirect(url_for(view))
+
+    #contest is done and go to the result side
+    else:
+        return redirect(url_for('contest_result'))
+
 
 @app.route("/multiple-choice_contest", methods=['GET', 'POST'])
 def multiple_choice_contest():
