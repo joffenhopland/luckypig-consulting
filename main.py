@@ -5,15 +5,13 @@ from flask_mail import Mail, Message
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 
-from classes import DragAndDropService
+from classes import DragAndDropService, User, Exercise, Dropdown, Group
 from datetime import datetime, timedelta
 from database import db
 from UserLogin import UserLogin
 from forms import RegistrerForm, LoginForm, forgetPasswordForm, UpdatePasswordForm, UpdateUserForm, resetPasswordForm, \
     validate_password, ReportForm, CreateGroupForm, CreateContestForm, SearchForm, ChooseRoleForm
-from User import User
-import json
-from classes import Exercise, Dropdown, Group
+
 
 load_dotenv()  # load environment variables from .flaskenv file
 

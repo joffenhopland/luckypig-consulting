@@ -1,7 +1,7 @@
 from hashlib import new
 import mysql.connector
 from mysql.connector import errorcode
-from User import User
+from classes import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
 
