@@ -290,15 +290,10 @@ def learn():
 
 
 #CHAPTER 3 - Dashboard for user: My profile, my groups, global leaderboard
+
+
+
 #CHAPTER 4 - Language course: new course, active course. Get tasks and send them to right path. Save task. Check for stats.
-#CHAPTER 5 - Tasks in the language course: Dropdown, multiple choice, drag and drop
-#CHAPTER 6 - Generate reports for admin and teachers
-#CHAPTER 7 - Groups: Adminsites and membersites + leaderboard in the group.
-#CHAPTER 8 - Contest in the groups: new contest, contest tasks, points, active contest
-#CHAPTER 9 - Database.py - The connection to database
-#CHAPTER 10 - classes.py - 
-
-
 
 @app.route("/course", methods=['GET', 'POST'])
 def course():
@@ -445,6 +440,14 @@ def checklevel():
         session["level_name"] = "Sølv"
     elif session["level"] >= 3:
         session["level_name"] = "Gull"
+
+#CHAPTER 5 - Tasks in the language course: Dropdown, multiple choice, drag and drop
+#CHAPTER 6 - Generate reports for admin and teachers
+#CHAPTER 7 - Groups: Adminsites and membersites + leaderboard in the group.
+#CHAPTER 8 - Contest in the groups: new contest, contest tasks, points, active contest
+#CHAPTER 9 - Database.py - The connection to database
+#CHAPTER 10 - classes.py - 
+
 
 
 @app.route("/skipExercise", methods=['GET'])
