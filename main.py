@@ -1069,6 +1069,7 @@ def member_group() -> 'html':
     groupName = database.get_group_name(groupId)
     invite = request.args.get('invite')
     userId = request.args.get('userId')
+    username = request.args.get('username')
     leave = request.args.get("leave")
 
     # Member invite another member from user list
@@ -1083,7 +1084,7 @@ def member_group() -> 'html':
         database.invite_request_group_member(groupId,userId)
         members = database.get_group_members(groupId)
         all_users = database.all_user_name_memberinvitation(groupId)
-        #flash(f"Invitasjonen er sendt!", "success")
+        flash(f'Invitasjonen til {username} er sendt!', "info")
         return render_template('member_group.html', name=groupName, groupId=groupId, members=members, allusers=all_users, form=form)
 
     # leave the group

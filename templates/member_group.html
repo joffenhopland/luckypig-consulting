@@ -54,7 +54,7 @@
               {% for user in allusers %}
               <tr class="table-light">
                 <td>{{ user[0] }}</td>
-                <td><a href="{{ url_for('member_group', groupId=groupId, name=name, userId=user[1]) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
+                <td><a href="{{ url_for('member_group', groupId=groupId, name=name, userId=user[1], username=user[0]) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
               </tr>
             </tbody>
             {% endfor %}
