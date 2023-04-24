@@ -924,7 +924,7 @@ def admin_group() -> 'html':
         
     groupName = database.get_group_name(groupId)
     memberId = request.args.get("id")
-    accept = bool(request.args.get("accept"))
+    accept = (request.args.get("accept"))
     add = request.args.get('add')
     userId = request.args.get('userId')
     delete = request.args.get("delete")
