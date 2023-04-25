@@ -1008,7 +1008,7 @@ def member_group() -> 'html':
         if int(groupId) in access: 
             session["group_id"] = groupId
         else:
-            print("User does not have access to this group")
+            print("User does not have access to this site")
             return url_for('viewgroup')
     else:
         groupId = session["group_id"]
