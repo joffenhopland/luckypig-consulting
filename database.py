@@ -166,11 +166,28 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
-
-    def update_user_role(self, new_role, userId):
+    def change_role_or_not(self,new_role, userId):
         try:
             conn = mysql.connector.connect(**self.configuration)
             cursor = conn.cursor()
+            cursor.execute(
+                "SELECT role from user where userId=(%s)", (userId,))
+            result = cursor.fetchone()
+        except mysql.connector.Error as err:
+            print(err)
+
+        if result[0] >= int(new_role):
+            return False
+        else:
+            self.update_user_role( new_role, userId)
+            return True
+
+    def update_user_role(self, new_role, userId):
+
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+
             sql1 = '''UPDATE user
             SET role = (%s) WHERE userId = (%s)'''
             oppdater = (new_role, userId)

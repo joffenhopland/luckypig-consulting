@@ -13,15 +13,20 @@
         </thead>
     </div>
 
+
+
     <div class="col">
         <table class="table table-bordered table-striped mb-0">
             <tbody>
             <tr class="table-light">
-                <form class="search-form" method="POST" action="{{ url_for('change_role') }}">
-                    {{ form.csrf_token }}
-                    <td> {{ form.search(class="form-control", placeholder="Søk etter bruker") }} </td>
-                    <td> {{ form.submit(class="button-control") }} </td>
+                <td>
+                    <form class="search-form" method="POST" action="{{ url_for('change_role') }}">
+                        {{ form.csrf_token }}
+                <td> {{ form.search(class="form-control", placeholder="Søk etter bruker") }} </td>
+                <td> {{ form.submit(class="button-control") }} </td>
                 </form>
+                </td>
+
                 <form class="role-form" method="POST" action="{{ url_for('change_role') }}">
                     {{ role_form.csrf_token }}
                     <td>{{ role_form.user(class="form-control") }}</td>
@@ -29,7 +34,39 @@
                     <td>{{ role_form.submit(class="button-control") }}</td>
                 </form>
             </tr>
+
+            <tr>
+                <td colspan="6">
+                    <div class="mt-2 d-flex justify-content-center">
+                        <a href="{{ url_for('viewuser') }}" class="btn btn-primary mr-2">Tilbake</a>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6" style="position:relative;">
+                    <div class="message-div" style="position:absolute; top:0; left:0; height:100%; width:100%;">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <div class="alert" role="alert">
+                                    {% for category, message in messages %}
+                                        <div class="container fixed-bottom mb-3">
+                                            <div class="alert alert-{{ category }} alert-dismissible fade show border-question-alert justify-content-between align-items-center" role="alert">
+                                                <div class="d-flex justify-content-around">
+                                                    <p>{{ message }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </td>
+            </tr>
+
             </tbody>
+
+
         </table>
     </div>
 {% endblock %}

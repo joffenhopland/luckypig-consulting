@@ -717,16 +717,20 @@ def change_role() -> 'html':
             if form.validate_on_submit():
                 database = db()
                 search = form.search.data
-                all_users = database.search_user(search)
-                role_form = ChooseRoleForm([(user[1], user[0]) for user in all_users])
+                all_users = database.search_user(search) #searches for users that match the search term in either their username or email.
+                role_form = ChooseRoleForm([(user[1], user[0]) for user in all_users]) # All users-> will be displayed with a list of all users in "allusers".
                 return render_template('change_role.html', form=form, role_form=role_form, allusers=all_users)
 
         elif 'role_form-submit' in request.form:  # role-form submission
             new_role = role_form.role.data
             database = db()
             userId = request.form.get('user')
-            print(f'Changing role for user {userId} to {new_role}')
-            database.update_user_role(new_role, userId)
+            if database.change_role_or_not(new_role,userId):
+                database.update_user_role(new_role, userId)
+                flash(f'Rollen er updatert!',"success")
+            else:
+                flash(f'Rollen kan ikke endres!',"danger")
+
             return redirect(url_for('change_role'))
 
     return render_template("change_role.html", allusers=[], form=form, role_form=role_form)
