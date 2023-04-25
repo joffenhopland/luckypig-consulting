@@ -91,8 +91,8 @@
             {% for invite in invites %}
             <tr class="table-light">
               <td>{{ invite[1] }}</td>
-              <td><a href="{{ url_for('admin_group', id=invite[0], accept=True, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
-              <td><a href="{{ url_for('admin_group', id=invite[0], accept=False, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/cancel.png') }}"></a></td>
+              <td><a href="{{ url_for('admin_group', id=invite[0], accept=1, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/accept.png') }}"></a></td>
+              <td><a href="{{ url_for('admin_group', id=invite[0], accept=0, groupId=groupId, name=name) }}"><img src="{{ url_for('static', filename='assets/cancel.png') }}"></a></td>
             </tr>
             {% endfor %}
           </tbody>

@@ -59,6 +59,8 @@
                                     <button class="btn btn-secondary" type="submit">Rapportgenerering</button>
                                 </form>
                             </div>
+                        {% endif %}
+                        {% if role == 3 %}
                             <div>
                                 <form action="{{ url_for('change_role') }}" method="GET">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -117,7 +119,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <!-- <div class="col-md-6">
                             <div class="card shadow-lg">
                                 <div class="card-body">
                                     <h5 class="card-title"><img
@@ -128,7 +130,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <h5>Prestasjoner</h5>
