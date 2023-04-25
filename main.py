@@ -407,6 +407,10 @@ def change_role() -> 'html':
 
 @app.route('/change_role_submit', methods=['POST'])
 def change_role_submit():
+    #User that is not admin has not access to change role
+    if session['role'] != 3:
+        return render_template("learn.html")
+    
     if request.method == 'POST':
         return jsonify({'status': 'success'})
     
