@@ -907,7 +907,7 @@ def report():
 @app.route('/leaderboard-group')
 def leaderboard_group():
     # Group leaderboard: show a leaderboard for a particular group. The points are the total points for a user of all contests in the group 
-    groupId = int(request.args.get('groupId'))
+    groupId = session['group_id']
     database = db()
     group_leaderboard = database.get_group_leaderboard(groupId)
     print(group_leaderboard)
@@ -925,10 +925,15 @@ def admin_group() -> 'html':
         if int(groupId) in access: 
             session["group_id"] = groupId
         else:
-            print("User does not have access to this group")
+            print("User does not have access to this site")
             return url_for('viewgroup')
     else:
         groupId = session["group_id"]
+        #Memebers can't access this site and functions
+        access = database.check_group_id_access(admin_user_id=session["idUser"])
+        if int(groupId) not in access: 
+            print("User does not have access to this site")
+            return url_for('viewgroup')
         
     groupName = database.get_group_name(groupId)
     memberId = request.args.get("id")
