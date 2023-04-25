@@ -378,6 +378,10 @@ def logout() -> 'html':
 
 @app.route('/change_role', methods=["GET", "POST"])
 def change_role() -> 'html':
+    #User that is not admin has not access to change role
+    if session['role'] != 3:
+        return render_template("learn.html")
+         
     form = SearchForm(request.form)
     role_form = ChooseRoleForm([])
 
