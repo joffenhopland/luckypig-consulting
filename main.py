@@ -1010,9 +1010,10 @@ def admin_group() -> 'html':
     
     elif add:
         #Admin added a member from user list
-        all_users = database.all_user_name_memberinvitation(groupId)
+        #all_users = database.all_user_name_memberinvitation(groupId)
         invites = database.get_invite_request_group_member(groupId)
         members = database.get_group_members(groupId)
+        all_users = database.all_user_name_memberadd(groupId)
         return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users, form=form)
     
     elif userId:
@@ -1020,7 +1021,8 @@ def admin_group() -> 'html':
         database.add_group_member(groupId, userId)
         members = database.get_group_members(groupId)
         invites = database.get_invite_request_group_member(groupId)
-        all_users = database.all_user_name_memberinvitation(groupId)
+        all_users = database.all_user_name_memberadd(groupId)
+
         return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, allusers = all_users, form=form)
     
     elif delete:
@@ -1042,7 +1044,11 @@ def admin_group() -> 'html':
         members = database.get_group_members(groupId)
         invites = database.get_invite_request_group_member(groupId)
         all_users = database.search_user(search)
-        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, form=form, allusers = all_users)
+        not_members = database.all_user_name_memberadd(groupId)
+        found_users = [user for user in all_users if user in not_members]
+        if len(found_users) == 0:
+            found_users = 1
+        return render_template('admin_group.html', name=groupName, invites=invites, groupId=groupId, members = members, form=form, allusers = found_users)
 
     else:
         invites = database.get_invite_request_group_member(groupId)
@@ -1095,14 +1101,17 @@ def member_group() -> 'html':
         database.remove_group_member(groupId, session["idUser"])
         return redirect(url_for('viewgroup'))
 
-    #finish with invite members
+    #Search for user in database
     elif request.method == 'POST' and form.validate_on_submit():
         search = form.search.data
         members = database.get_group_members(groupId)
+        all_invitable_users = database.all_user_name_memberinvitation(groupId)
         all_users = database.search_user(search)
-        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=all_users)
+        found_users = [user for user in all_users if user in all_invitable_users]
+        if len(found_users) == 0:
+            found_users = 1
+        return render_template('member_group.html', name=groupName, groupId=groupId, members=members, form=form, allusers=found_users)
 
-    #create or see contests
     else:
         members = database.get_group_members(groupId)
         return render_template('member_group.html', name=groupName, groupId=groupId, members=members)

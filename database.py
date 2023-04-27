@@ -947,8 +947,24 @@ class db:
             conn.close()
         except mysql.connector.Error as err:
             print(err)
+
+    #get all addable users related to a selected group
+    def all_user_name_memberadd(self, groupId):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute(
+                '''SELECT username, userId FROM user 
+                    WHERE NOT (userId IN (SELECT userId from user_group WHERE user_group.groupId = (%s)))
+                        AND NOT (userId = (SELECT userId FROM group_table WHERE groupId = (%s)))
+                ''', (groupId, groupId))
+
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as err:
+            print(err)
             
-    #get all invitations related to a selected group
+    #get all invitable users related to a selected group
     def all_user_name_memberinvitation(self, groupId):
         try:
             conn = mysql.connector.connect(**self.configuration)
