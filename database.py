@@ -749,8 +749,8 @@ class db:
         
         #Role=Admin
         if role == 3:
-            headers = ["Exercice id", "Number of attempts", "Number of success", "Succes in %", "Level", "Theme id"]
-            select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig) as number_asked, sum(g.antall_utført) as number_success, (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, a.level, a.themeId as theme_id "
+            headers = ["Exercice id", "Number of success", "Number of attempts", "Succes in %", "Level", "Theme id"]
+            select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig), sum(g.antall_utført), (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, a.level, a.themeId as theme_id "
             from_sql += "group_questions as g left join all_tasks_view as a ON a.exerciseId = g.exerciseId "
         
             if group_id != None or theme_id !=None or level != None:
@@ -776,8 +776,8 @@ class db:
                 
         #Role=Lærer
         elif role == 2:
-            headers = ["Exercice id", "Number of attempts", "Number of success", "Succes in %", "Group id", "Teacher user id"]
-            select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig) as number_asked, sum(g.antall_utført) as number_success, (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, gv.groupId as group_id, gv.userID as teacher_user_id "
+            headers = ["Exercice id", "Number of success", "Number of attempts", "Succes in %", "Group id", "Teacher user id"]
+            select_sql += "g.exerciseId as exercise_id, sum(g.antall_riktig), sum(g.antall_utført), (100 / sum(g.antall_utført) * sum(g.antall_riktig)) as percent, gv.groupId as group_id, gv.userID as teacher_user_id "
             from_sql += "group_questions as g, gruppe_view as gv "
             where_sql += "WHERE g.groupId = gv.groupId AND gv.userId = (%s) "
             
