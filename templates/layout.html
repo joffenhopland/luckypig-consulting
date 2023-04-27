@@ -80,7 +80,7 @@
                     <div class="nav-item p-2 flex-fill">
 
                         <div class="nav-link">
-                          {% if gold_level_completed %}
+                          {% if gold_level_completed or completedLevel == 1 %}
                           <img src="{{ url_for('static', filename = 'assets/trophy.svg') }}" class="d-inline-block">
                           Fullført språkkurs</div>
                           {% else %}

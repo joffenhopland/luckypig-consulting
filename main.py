@@ -319,7 +319,13 @@ def updatepassword() -> 'html':
                     flash(f"Passordet er oppdatert!", "success")
                     database = db()
                     total_points = database.getTotalPoints(session["idUser"])
-                    return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
+                    login_streak = database.get_login_streak(session["idUser"])
+                    checklevel()
+                    if database.checkGoldLevelCompleted(session['idUser'], session['themeId']):
+                        completedLevel = 1
+                    else:
+                        completedLevel = 0
+                    return render_template('viewuser.html', user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'], login_streak=login_streak,themeId = session['themeId'], completedLevel = completedLevel)
 
                 else:
                     flash(f'Passordene du skrev stemmer ikke overens. Prøv igjen!', "danger")
@@ -376,7 +382,14 @@ def updateuser() -> 'html':
             user = User(*userUpdate.getUserByEmail(email))
             database = db()
             total_points = database.getTotalPoints(session["idUser"])
-            return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'])
+            login_streak = database.get_login_streak(session["idUser"])
+            checklevel()
+            if database.checkGoldLevelCompleted(session['idUser'], session['themeId']):
+                completedLevel = 1
+            else:
+                completedLevel = 0
+
+            return render_template('viewuser.html',user=user, title="Brukerinformasjon",total_points=total_points, level=session['level_name'], role=session['role'], login_streak=login_streak, themeId = session['themeId'], completedLevel=completedLevel)
 
         return render_template('updateuser.html',firstname=firstname, lastname=lastname, title="Brukerinformasjon", form=form, message=message)
     else:
