@@ -1181,6 +1181,7 @@ def active_contests() -> 'html':
 
 @app.route('/get_dynamic_data', methods=['POST'])
 def get_dynamic_data():
+    #This function delivers dynamically generated questions to create contest through javascript in create_contest.html
     if session["idUser"]:
         question_type = request.form.get('question_type', '', type=str)
         level = request.form.get('level', '', type=int)

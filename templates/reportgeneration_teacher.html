@@ -50,19 +50,19 @@
             </div>
             <div class="form-group" id="userID" style="display:none;">
               {{ form.userID.label }}
-              {{ form.userID(class_="form-select") }}
+              {{ form.userID(class_="form-select", data_reset=True) }}
             </div>
             <div class="form-group" id="groupID" style="display:none;">
               {{ form.groupID.label }}
-              {{ form.groupID(class_="form-select") }}
+              {{ form.groupID(class_="form-select", data_reset=True) }}
             </div>
             <div class="form-group" id="theme_select" style="display:none;">
               {{ form.theme.label }}
-              {{ form.theme(class_="form-select")  }}
+              {{ form.theme(class_="form-select", data_reset=True)  }}
             </div>
             <div class="form-group" id="level_select" style="display:none;">
               {{ form.level.label }}
-              {{ form.level(class_="form-select") }}
+              {{ form.level(class_="form-select", data_reset=True) }}
             </div>
             <br>
             <div class="form-group">
@@ -104,6 +104,10 @@ $(document).ready(function() {
       $("#level_select").hide();
       $('#report-submit').show();
     }
+    $("#theme_select [data-reset]").val($("#theme_select [data-reset] option:first").val());
+    $("#level_select [data-reset]").val($("#level_select [data-reset] option:first").val());
+    $("#groupID [data-reset]").val($("#groupID [data-reset] option:first").val());
+    $("#userID [data-reset]").val($("#userID [data-reset] option:first").val());
   });
 
   $("input[name='user_reports_sort_teacher']").change(function() {
@@ -126,6 +130,10 @@ $(document).ready(function() {
      $("#theme_select").hide();
      $("#level_select").hide();
     }
+    $("#theme_select [data-reset]").val($("#theme_select [data-reset] option:first").val());
+    $("#level_select [data-reset]").val($("#level_select [data-reset] option:first").val());
+    $("#groupID [data-reset]").val($("#groupID [data-reset] option:first").val());
+    $("#userID [data-reset]").val($("#userID [data-reset] option:first").val());
   });
 });
 
