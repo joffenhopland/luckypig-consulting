@@ -51,6 +51,9 @@
                   <td> {{ form.submit(class="button-control")}} </td>
                 </form>
               </tr>
+              {% if allusers == 1 %}
+                <td>Fant ingen</td>
+              {% else %}
               {% for user in allusers %}
               <tr class="table-light">
                 <td>{{ user[0] }}</td>
@@ -58,6 +61,7 @@
               </tr>
             </tbody>
             {% endfor %}
+            {% endif %}
           </table>
           <div class="d-block gap-2">
             <a href="{{ url_for('member_group', groupId=groupId, name=name) }}" class="d-block w-100">
