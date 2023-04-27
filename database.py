@@ -1004,7 +1004,7 @@ class db:
         
         # Group admin accepted the invite request for this user
         try:   
-            if accept == 1:
+            if accept == "1":
                 conn = mysql.connector.connect(**self.configuration)
                 cursor = conn.cursor()
                 sql1 = '''INSERT INTO user_group (groupId, userId)
