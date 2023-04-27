@@ -103,7 +103,12 @@
                         <div class="col-md-6">
                             <div class="card shadow-lg">
                                 <div class="card-body">
-                                    <h5 class="card-title">{% if level == "Bronse" %}
+                                    <h5 class="card-title">
+                                        {% if completedLevel == 1 %}
+                                        <img src="{{ url_for('static', filename = 'assets/trophy.svg') }}" class="d-inline-block">
+                                        Fullført språkkurs</h5>
+                                        {% else %}
+                                        {% if level == "Bronse" %}
                                         <img src="{{ url_for('static', filename = 'assets/vecteezy_bronze_medal.svg') }}"
                                              class="d-inline-block">
                                     {% elif level == "Sølv" %}
@@ -113,6 +118,7 @@
                                         <img src="{{ url_for('static', filename = 'assets/vecteezy_gold_medal.svg') }}"
                                              class="d-inline-block">
                                     {% endif %}{{ level }}</h5>
+                                    {% endif %}
                                     <div class="card-text text-secondary px-2">
                                         Nåværende nivå
                                     </div>

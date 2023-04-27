@@ -288,9 +288,9 @@ def learn():
         database = db()
         totalPoints = database.getTotalPoints(session["idUser"])
         login_streak = database.get_login_streak(session["idUser"])
-        themeId = session["themeId"]
+        gold_level_completed = database.checkGoldLevelCompleted(session['idUser'], session['themeId'])
         checklevel()
-        return render_template("learn.html", total_points = totalPoints, themeId = themeId, login_streak=login_streak, level=session['level_name'])
+        return render_template("learn.html", total_points = totalPoints, themeId = session["themeId"], login_streak=login_streak, level=session['level_name'], gold_level_completed = gold_level_completed)
     else:
         return render_template("mainPage.html")
 
@@ -608,10 +608,10 @@ def course():
                 session["init_course"] = 1
                 session["new_level"] = 1
                 if session["level"] < 4:
-                    flash(f'Gratulerer, du har oppnådd nok poeng til å nå neste level', "success")
+                    flash(f'Gratulerer, du har fullført nok poeng til å nå neste level', "success")
                     return redirect(url_for("learn"))
                 else:
-                    flash(f'Gratulerer, du har oppnådd gull og dermed fullført språkkurset!', "success")
+                    flash(f'Gratulerer, du har fullført gull og dermed fullført språkkurset!', "success")
                     return redirect(url_for("learn"))
 
         # user has done alle questions in one level and successrate is NOT good

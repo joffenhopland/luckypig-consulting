@@ -24,7 +24,14 @@
         <div class="row">
           <div class="col-8">
             <h5 class="card-title">Bronse</h5>
-            <p class="card-text">Svar 80% riktig for å oppnå bronse og gå videre til neste nivå.</p>
+            {% if session['level'] == 1 %}
+             <p class="card-text">Svar 80% riktig for å fullføre bronse og gå videre til neste nivå.</p>
+             {% elif session['level'] > 1 %}
+             <p class="card-text">Bra jobbet, du har fullført bronse! 🤩 </p>
+             {% else %}
+             <p class="card-text">Svar 80% riktig for å fullføre bronse og gå videre til neste nivå.</p>
+             {% endif %}
+
             </div>
              {% if session['level'] == 1 %}
             <div class="col-4 d-flex justify-content-end">
@@ -32,7 +39,7 @@
             </div>
             {% else %}
             <div class="col-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary">Ferdig</button>
+              <button type="button" class="btn btn-secondary" disabled>Ferdig</button>
             </div>
             {% endif %}
         </div>
@@ -43,7 +50,14 @@
         <div class="row">
           <div class="col-8">
             <h5 class="card-title">Sølv</h5>
-            <p class="card-text">Du må oppnå bronse for å gå videre til sølv.</p>
+            {% if session['level'] == 2 %}
+            <p class="card-text">Du må fullføre bronse for å gå videre til sølv.</p>
+            {% elif session['level'] > 2 %}
+            <p class="card-text">Bra jobbet, du har fullført sølv! 🤩 </p>
+            {% else %}
+            <p class="card-text">Du må fullføre bronse for å gå videre til sølv.</p>
+            {% endif %}
+
           </div>
              {% if session['level'] == 2 %}
             <div class="col-4 d-flex justify-content-end">
@@ -55,7 +69,7 @@
             </div>
             {% else %}
             <div class="col-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary">Ferdig</button>
+              <button type="button" class="btn btn-secondary" disabled>Ferdig</button>
             </div>
             {% endif %}
         </div>
@@ -66,7 +80,12 @@
         <div class="row">
           <div class="col-8">
             <h5 class="card-title">Gull</h5>
-            <p class="card-text">Du må oppnå sølv for å gå videre til gull.</p>
+            {% if gold_level_completed %}
+            <p class="card-text">Bra jobbet, du har fullført gull! 🤩 </p>
+            {% else %}
+            <p class="card-text">Du må fullføre sølv for å gå videre til gull.</p>
+            {% endif %}
+
           </div>
              {% if session['level'] == 3 %}
             <div class="col-4 d-flex justify-content-end">
@@ -74,11 +93,11 @@
             </div>
             {% elif session['level'] < 3 %}
             <div class="col-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary" style="background-color:red">Låst</button>
+              <button type="button" class="btn btn-primary" disabled style="background-color:red">Låst</button>
             </div>
             {% else %}
             <div class="col-4 d-flex justify-content-end">
-              <button type="button" class="btn btn-primary">Ferdig</button>
+              <button type="button" class="btn btn-secondary" disabled>Ferdig</button>
             </div>
             {% endif %}
         </div>
