@@ -80,6 +80,10 @@
                     <div class="nav-item p-2 flex-fill">
 
                         <div class="nav-link">
+                          {% if gold_level_completed %}
+                          <img src="{{ url_for('static', filename = 'assets/trophy.svg') }}" class="d-inline-block">
+                          Fullført språkkurs</div>
+                          {% else %}
                           {% if level == "Bronse" %}
                           <img src="{{ url_for('static', filename = 'assets/vecteezy_bronze_medal.svg') }}" class="d-inline-block">
                           {% elif level == "Sølv" %}
@@ -88,6 +92,8 @@
                           <img src="{{ url_for('static', filename = 'assets/vecteezy_gold_medal.svg') }}" class="d-inline-block">
                           {% endif %}
                           {{ level }}</div>
+                          {% endif %}
+
 
                     </div>
                     {% if total_points %}
