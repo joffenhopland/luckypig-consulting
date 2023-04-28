@@ -1214,9 +1214,10 @@ class db:
     def get_leaderboard(self):
         #Implementerer grupper her senere
         all_user_leaderboard = """
-        select username, SUM(points) as total_points
-        from user_view
-        group by user_id
+        select u.username, SUM(uv.points) as total_points
+        from user_view uv, user u
+        WHERE uv.user_id = u.userId
+        group by uv.user_id
         order by total_points DESC"""
 
         try:
