@@ -2,14 +2,18 @@ import mysql.connector
 from classes import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # load environment variables from .flaskenv file
 
 class UserLogin:
     
     def __init__(self):
-        self.dbconfig = {'host': '34.30.103.41',
-                        'user': 'luckypig2023',
-                        'password': 'LuckypigProject#1',
-                        'database': 'Luckypig database',}
+        self.dbconfig = {'host': os.environ.get('HOST'),
+                     'user': 'luckypig2023',
+                     'password': os.environ.get('PASSWORD'),
+                     'database': 'Luckypig database', }
         self.conn = mysql.connector.connect(**self.dbconfig)
         self.cursor = self.conn.cursor(prepared=True)
         self.users = []
