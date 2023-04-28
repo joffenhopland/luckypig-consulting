@@ -879,6 +879,16 @@ class db:
         except mysql.connector.Error as err:
             print(err)
 
+    def get_group_admin(self, group_id):
+        try:
+            conn = mysql.connector.connect(**self.configuration)
+            cursor = conn.cursor()
+            cursor.execute("SELECT userId FROM group_table WHERE groupId = (%s)", (group_id,))
+            result = cursor.fetchone()
+            return result[0]
+        except mysql.connector.Error as err:
+            print(err)
+
     #get all the group names
     def getAllGroupName(self):
         try:

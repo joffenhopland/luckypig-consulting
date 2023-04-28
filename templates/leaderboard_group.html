@@ -29,7 +29,11 @@
           </tbody>
         </table>
         <div class="mt-2 d-flex justify-content-left">
-              <a href="{{ url_for('admin_group') }}" class="btn btn-primary mr-2">Tilbake</a>
+            {% if userId ==  admin %}
+              <a href="{{ url_for('admin_group',groupId=groupId) }}" class="btn btn-primary mr-2">Tilbake</a>
+            {% else %}
+              <a href="{{ url_for('member_group',groupId=groupId) }}" class="btn btn-primary mr-2">Tilbake</a>
+            {% endif %}
       </div>
       </div>
     </div>

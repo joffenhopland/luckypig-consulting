@@ -964,8 +964,9 @@ def leaderboard_group():
         groupId = session['group_id']
         database = db()
         group_leaderboard = database.get_group_leaderboard(groupId)
+        admin = database.get_group_admin(groupId)
         print(group_leaderboard)
-        return render_template('leaderboard_group.html', group_leaderboard=group_leaderboard)
+        return render_template('leaderboard_group.html', group_leaderboard=group_leaderboard, admin= admin, userId= session["idUser"], groupId=groupId)
     else:
         return render_template("mainPage.html")
 
@@ -982,14 +983,14 @@ def admin_group() -> 'html':
             session["group_id"] = groupId
         else:
             print("User does not have access to this site")
-            return url_for('viewgroup')
+            return redirect(url_for('viewgroup'))
     else:
         groupId = session["group_id"]
         #Memebers can't access this site and functions
         access = database.check_group_id_access(admin_user_id=session["idUser"])
         if int(groupId) not in access:
             print("User does not have access to this site")
-            return url_for('viewgroup')
+            return redirect(url_for('viewgroup'))
 
     groupName = database.get_group_name(groupId)
     memberId = request.args.get("id")
@@ -1071,7 +1072,7 @@ def member_group() -> 'html':
             session["group_id"] = groupId
         else:
             print("User does not have access to this site")
-            return url_for('viewgroup')
+            return redirect(url_for('viewgroup'))
     else:
         groupId = session["group_id"]
     groupName = database.get_group_name(groupId)
