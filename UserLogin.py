@@ -10,9 +10,9 @@ load_dotenv()  # load environment variables from .flaskenv file
 class UserLogin:
     
     def __init__(self):
-        self.dbconfig = {'host': os.environ.get('HOST'),
+        self.dbconfig = {'host': '34.30.103.41',
                      'user': 'luckypig2023',
-                     'password': os.environ.get('PASSWORD'),
+                     'password': 'LuckypigProject#1',
                      'database': 'Luckypig database', }
         self.conn = mysql.connector.connect(**self.dbconfig)
         self.cursor = self.conn.cursor(prepared=True)
