@@ -1034,7 +1034,8 @@ class db:
                 FROM leaderboard
                 JOIN user ON leaderboard.user_id = user.userId
                 JOIN group_table ON leaderboard.group_id = group_table.groupId
-                WHERE leaderboard.group_id = (%s)''', (group_id,))
+                WHERE leaderboard.group_id = (%s) 
+                ORDER BY leaderboard.points DESC''', (group_id,))
             conn.commit()
             conn.close()
             result = cursor.fetchall()
